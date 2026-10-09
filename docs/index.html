@@ -126,6 +126,17 @@ tr.clic{cursor:pointer} tr.clic:hover td{background:#F8FBFD}
 label.ck{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}label.ck input{width:18px;height:18px;flex:none;accent-color:var(--verde)}
 tr.info td{color:var(--tx2)}tr.info b{font-weight:600}
 .lista .num{font-variant-numeric:tabular-nums}
+.ruta{border-left:4px solid var(--verde)}
+.ruta-cab{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.ruta-cab h3{margin:0}
+.pasos{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.paso{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--borde);background:var(--sup);color:var(--tx2);border-radius:999px;padding:4px 12px 4px 4px;font-size:12.5px;font-weight:600;cursor:pointer}
+.paso .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#EEF2F5;color:var(--tx2);font-size:11.5px}
+.paso.ok{color:var(--verde-o);border-color:#BFE6DC}.paso.ok .n{background:var(--verde);color:#fff}
+.paso.act{color:var(--azul);border-color:var(--azul)}.paso.act .n{background:var(--azul);color:#fff}
+.paso.sel{box-shadow:0 0 0 3px var(--suave-a)}
+.sig{background:var(--suave-a);border-radius:var(--r);padding:14px 16px}.sig.hecho{background:var(--suave-v)}
+.sig h4{margin:0;font-family:var(--f-tit,inherit);font-size:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:600px){.pasos{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}.pasos li{flex:none;scroll-snap-align:start}.paso{font-size:12px;white-space:nowrap}.sig{padding:12px}}
 body.sin-ia .btn.ia{display:none!important}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:#1C2B39;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:50;max-width:calc(100% - 32px)}
 .pie{font-size:12px;color:var(--tx2);text-align:center;padding-top:8px;border-top:1px solid var(--borde)}
@@ -427,7 +438,7 @@ function vTablero(){
   <section class="panel"><h3>Próximos plazos</h3>${pend.length?`<div class="lista">${[...pend].sort((a,b)=>M.estado(b,H).nivel-M.estado(a,H).nivel||(a.vence||"9").localeCompare(b.vence||"9")).slice(0,6).map(t=>`<div class="it"><div><div class="t">${esc(t.tipo)}</div><div class="d">${esc(proy(t.proyectoId)?.titulo||"Sin proyecto")} · ${fFecha(t.vence)}</div></div>${chipEv(t)}</div>`).join("")}</div>`:`<div class="vacio">No hay plazos pendientes. Al escribir la fecha de radicación de un proyecto, PatentIA calcula sus plazos legales.</div>`}</section>
  </div>
  <div class="grid g2">
-  <section class="panel"><h3>Trabajados recientemente</h3>${recientes.length?`<div class="lista">${recientes.map(p=>`<div class="it"><div><div class="t"><a href="#" data-abrir="${p.id}">${esc(p.titulo||"Sin título")}</a></div><div class="d"><span class="cod">${esc(p.codigo)}</span> · ${esc(p.modalidad||"")}</div></div>${chipEtapa(p.etapa)}</div>`).join("")}</div>`:`<div class="vacio">Sus proyectos aparecerán aquí.</div>`}</section>
+  <section class="panel"><h3>Trabajados recientemente</h3>${recientes.length?`<div class="lista">${recientes.map(p=>`<div class="it"><div><div class="t"><a href="#" data-abrir="${p.id}">${esc(p.titulo||"Sin título")}</a></div><div class="d"><span class="cod">${esc(p.codigo)}</span> · ${esc(p.modalidad||"")}${(()=>{const c=ruta(p).cur;return c?` · Sigue: <b>${esc(c.t)}</b>`:""})()}</div></div>${chipEtapa(p.etapa)}</div>`).join("")}</div>`:`<div class="vacio">Sus proyectos aparecerán aquí.</div>`}</section>
   <section class="panel"><h3>Licencias</h3><div class="lista">${ETAPAS_LIC.map(([k,l])=>`<div class="it"><span>${l}</span><b>${S.licencias.filter(x=>x.etapa===k).length}</b></div>`).join("")}</div><p class="ayuda">${neg} negociaciones abiertas.</p></section>
  </div>`;
 }
@@ -437,8 +448,131 @@ function vProyectos(){
  const l=S.proyectos.filter(p=>(!ui.filtroEtapa||p.etapa===ui.filtroEtapa)&&(!q||[p.titulo,p.codigo,p.problema,p.sector].join(" ").toLowerCase().includes(q))).sort((a,b)=>(b.codigo||"").localeCompare(a.codigo||""));
  return`<div class="cab"><div><h1>Banco de proyectos</h1><p>Cada invento, diseño o desarrollo con su etapa, su modalidad de protección y su avance.</p></div><button class="btn pri" data-acc="nuevo">+ Nuevo proyecto</button></div>
  <div class="fila"><input type="search" id="busca" placeholder="Buscar por título, código o sector" value="${esc(ui.busca)}" style="max-width:340px"><select id="filtroEtapa" style="max-width:220px"><option value="">Todas las etapas</option>${ETAPAS.map(([k,v])=>`<option value="${k}" ${ui.filtroEtapa===k?"selected":""}>${v}</option>`).join("")}</select></div>
- ${l.length?`<div class="tabla-w"><table><thead><tr><th>Código</th><th>Proyecto</th><th>Modalidad</th><th>Sector</th><th>Etapa</th><th>Actualizado</th></tr></thead><tbody>${l.map(p=>`<tr class="clic" data-abrir="${p.id}" tabindex="0"><td class="cod">${esc(p.codigo)}</td><td><b>${esc(p.titulo||"Sin título")}</b><div class="ayuda">${esc((p.problema||"").slice(0,110))}</div></td><td>${esc(p.modalidad||"")}</td><td>${esc(p.sector||"")}</td><td>${chipEtapa(p.etapa)}</td><td>${p.actualizado?fFecha(p.actualizado.slice(0,10)):"—"}</td></tr>`).join("")}</tbody></table></div>`:`<div class="vacio">${S.proyectos.length?"Ningún proyecto coincide con la búsqueda.":"Aún no hay proyectos. Cree el primero o use el Taller de ideas para que Claude le proponga inventos a partir de un problema."}</div>`}`;
+ ${l.length?`<div class="tabla-w"><table><thead><tr><th>Código</th><th>Proyecto</th><th>Modalidad</th><th>Sector</th><th>Etapa</th><th>Siguiente paso</th></tr></thead><tbody>${l.map(p=>`<tr class="clic" data-abrir="${p.id}" tabindex="0"><td class="cod">${esc(p.codigo)}</td><td><b>${esc(p.titulo||"Sin título")}</b><div class="ayuda">${esc((p.problema||"").slice(0,110))}</div></td><td>${esc(p.modalidad||"")}</td><td>${esc(p.sector||"")}</td><td>${chipEtapa(p.etapa)}</td><td>${(()=>{const c=ruta(p).cur;return c?esc(c.t):"—"})()}</td></tr>`).join("")}</tbody></table></div>`:`<div class="vacio">${S.proyectos.length?"Ningún proyecto coincide con la búsqueda.":"Aún no hay proyectos. Cree el primero o use el Taller de ideas para que Claude le proponga inventos a partir de un problema."}</div>`}`;
 }
+
+/* ===== Ruta guiada del proyecto: qué sigue y botones para hacerlo ===== */
+const lleno=s=>String(s||"").trim().length>=15;
+function docDe(pid,tipo){return S.documentos.some(d=>d.proyectoId===pid&&d.tipo===tipo)}
+function tareaRuta(pid,k){return S.tramites.find(t=>t.proyectoId===pid&&t.origen==="ruta:"+k&&t.estado!=="hecho")}
+function linksBusqueda(p,k){const e=p.evaluacion;const q=encodeURIComponent(aLista(e&&e.palabrasClave_en).slice(0,4).join(" ")||p.titulo||"");
+ if(k==="ma")return[{e:"Buscar marcas parecidas (OMPI)",href:"https://branddb.wipo.int/es/"},{e:"Consultar en la SIC",href:"https://sipi.sic.gov.co/"}];
+ if(k==="di")return[{e:"Buscar diseños (OMPI)",href:"https://designdb.wipo.int/designdb/es/"},{e:"Consultar en la SIC",href:"https://sipi.sic.gov.co/"}];
+ return[{e:"Google Patents",href:`https://patents.google.com/?q=${q}`},{e:"Espacenet",href:`https://worldwide.espacenet.com/patent/search?q=${q}`}]}
+function proximoTramite(p){const neg=["anualidad-","renovacion-"];return M.eventos(p).filter(e=>!e.hecho&&!e.info&&!e.opcional&&!neg.some(n=>e.clave.startsWith(n))&&!["explotacion","uso","fin","divulgacion"].includes(e.clave)).sort((a,b)=>a.vence.localeCompare(b.vence))[0]}
+function proximoMant(p){return eventosProy(p).filter(e=>!e.hecho&&(e.clave.startsWith("anualidad-")||e.clave.startsWith("renovacion-")||e.clave==="explotacion"||e.clave==="uso")).sort((a,b)=>a.vence.localeCompare(b.vence))[0]}
+
+function ruta(p){
+ const k=M.clase(p.modalidad);const man=p.ruta||{};const b=p.borrador||{};
+ const pat=k==="pi"||k==="mu",reg=pat||k==="di"||k==="ma";
+ const R=M.valida(p.fechaRadicacion),conc=M.valida(p.fechaConcesion),neg=M.valida(p.fechaNegacion);
+ const firmada=S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado");
+ const PRE=new Set(["evaluar","antecedentes","redactar","dibujos","requisitos","proteger"]);const L=[];const add=o=>{o.auto=!!o.auto;o.salto=!o.auto&&!man[o.k]&&R&&reg&&PRE.has(o.k);o.hecho=o.auto||!!man[o.k]||o.salto;L.push(o)};
+ const lic={k:"licenciar",t:"Licenciar o vender",auto:firmada,
+  que:"Prepare la ficha comercial, identifique empresas que lo puedan fabricar o vender y negocie una licencia o la venta.",
+  por:"Es donde el desarrollo genera ingresos."+(reg?" Puede ofrecerlo desde que está radicado (“en trámite”), siempre con acuerdo de confidencialidad.":""),
+  acc:[{e:"Generar ficha comercial",a:"rutaDoc",tipo:"ficha",cls:"pri"},{e:"Sugerir empresas con Claude",a:"sugLic",ia:1},{e:"Agregar una empresa",a:"rutaIr",sub:"licencias",foco:"l-empresa"}]};
+
+ add({k:"describir",t:"Describir el invento",auto:p.titulo&&p.titulo!=="Nuevo proyecto"&&lleno(p.problema)&&(k==="ma"||(lleno(p.solucion)&&String(p.inventores||"").trim())),sinMarcar:1,
+  que:k==="ma"?"Escriba el nombre de la marca y qué productos o servicios va a identificar.":"Escriba el título, el problema que resuelve, cómo funciona y quiénes son los inventores.",
+  por:"Todo lo demás (evaluación, redacción y contratos) sale de esta ficha.",
+  acc:[{e:"Completar la ficha",a:"rutaIr",sub:"ficha",foco:"f-problema",cls:"pri"}]});
+ if(pat||k==="di")add({k:"evaluar",t:"Evaluar si se puede proteger",auto:!!p.evaluacion,
+  que:k==="di"?"Revise si el diseño es nuevo (distinto de los que ya se conocen) y si tiene mercado.":"Califique la novedad, el nivel inventivo, la aplicación industrial y el mercado, y confirme la modalidad (patente, modelo de utilidad o diseño).",
+  por:"Evita gastar en tasas y redacción de algo que no se podría proteger o no se vendería.",
+  acc:[{e:"Evaluar con Claude",a:"evaluar",ia:1,cls:"pri"},{e:"Ver la evaluación",a:"rutaIr",sub:"evaluacion"}]});
+ if(reg)add({k:"antecedentes",t:k==="ma"?"Buscar marcas parecidas":"Buscar antecedentes",auto:lleno(p.antecedentesHallados)||!!(p.checklist||{}).busqueda,
+  que:k==="ma"?"Busque marcas iguales o parecidas en la misma clase de productos o servicios.":"Busque patentes y productos parecidos y anote en qué se diferencia el suyo.",
+  por:k==="ma"?"Si ya existe una marca parecida, la SIC la niega y se pierde la tasa.":"La novedad es requisito; además, lo encontrado le ayuda a redactar mejor las reivindicaciones.",
+  acc:[...linksBusqueda(p,k),{e:"Anotar lo encontrado",a:"rutaIr",sub:"evaluacion",foco:"f-antec",cls:"pri"},{e:"Generar tarea: búsqueda formal",a:"rutaTarea",tipo:"Búsqueda de antecedentes",dias:10,nota:"Búsqueda formal de antecedentes (bases de datos y SIC)."}]});
+ if(pat){const n=SECCIONES.filter(([s])=>String(b[s]||"").trim()).length;
+  add({k:"redactar",t:"Redactar la solicitud",auto:n===SECCIONES.length,prog:`${n} de ${SECCIONES.length} partes escritas`,
+  que:"Escriba la descripción, las reivindicaciones, el resumen y las demás partes que pide la SIC.",
+  por:"Las reivindicaciones definen exactamente lo que queda protegido.",
+  acc:[{e:"Redactar lo que falta con Claude",a:"redactarTodo",ia:1,cls:"pri"},{e:"Abrir la redacción",a:"rutaIr",sub:"redaccion"},{e:"Descargar borrador",a:"exportar"}]})}
+ if(pat||k==="di"){const nd=dibujosDe(p).length+S.archivos.filter(a=>a.proyectoId===p.id&&a.categoria==="Plano o modelo").length;
+  add({k:"dibujos",t:k==="di"?"Preparar las vistas del diseño":"Preparar las figuras",auto:nd>0,prog:nd?`${nd} figura(s)`:"",
+  que:k==="di"?"Prepare todas las vistas del diseño (frente, lados, arriba, perspectiva) en líneas continuas.":"Prepare los dibujos con números de referencia que coincidan con la descripción.",
+  por:k==="di"?"La SIC exige la representación gráfica del diseño con todas sus vistas.":"Se exigen cuando son necesarios para entender el invento, y casi siempre ayudan a definir lo que se protege.",
+  acc:[REMOTO&&!sample?{e:"Agregar enlace del plano (Drive)",a:"rutaIr",sub:"bitacora",foco:"a-url",cls:"pri"}:{e:"Abrir dibujos",a:"rutaIr",sub:"dibujos",foco:"dib-pedido",cls:"pri"},{e:"Generar tarea: planos definitivos",a:"rutaTarea",tipo:"Prototipo",dias:15,nota:"Planos o vistas definitivas para la solicitud."}]})}
+ const reqCes=M.requisitos(p).some(r=>r[0]==="cesion");
+ if(k!=="ma")add({k:"proteger",t:"Proteger la confidencialidad",auto:docDe(p.id,"nda")&&(!reqCes||docDe(p.id,"cesion")),
+  que:"Antes de mostrarlo a fabricantes, inversionistas o compradores, haga firmar un acuerdo de confidencialidad."+(reqCes?" Como el solicitante no es el inventor, firme también la cesión de derechos.":""),
+  por:"Mostrarlo sin acuerdo puede destruir la novedad o facilitar la copia.",
+  acc:[{e:"Generar acuerdo de confidencialidad",a:"rutaDoc",tipo:"nda",cls:"pri"},...(reqCes?[{e:"Generar cesión del inventor",a:"rutaDoc",tipo:"cesion"}]:[])]});
+ if(k==="da")add({k:"registro",t:"Registrar en Derecho de Autor",
+  que:"Registre el software en la Dirección Nacional de Derecho de Autor (en línea y gratis).",
+  por:"No es obligatorio, pero es la mejor prueba de autoría y fecha.",
+  acc:[{e:"Abrir el registro en línea",href:"https://www.derechodeautor.gov.co/"},{e:"Generar tarea: registrar",a:"rutaTarea",tipo:"Otro",dias:15,nota:"Registro del software en la DNDA."}]});
+ if(reg){const req=M.requisitos(p).filter(r=>r[0]!=="busqueda");const ch=p.checklist||{};const n=req.filter(r=>ch[r[0]]).length;
+  add({k:"requisitos",t:"Reunir los requisitos para radicar",auto:req.length>0&&n===req.length,prog:`${n} de ${req.length} listos`,
+  que:`Marque en el Expediente cada requisito a medida que lo tenga: ${req.map(r=>r[1].charAt(0).toLowerCase()+r[1].slice(1)).join("; ")}.`,
+  por:"Si falta algo, la SIC le hará un requerimiento y el trámite se demora.",
+  acc:[{e:"Ver la lista de requisitos",a:"rutaIr",sub:"expediente",cls:"pri"},{e:"Ver tasas y trámites de la SIC",href:"https://www.sic.gov.co/propiedad-industrial"},{e:"Generar tarea: pagar la tasa",a:"rutaTarea",tipo:"Pago de tasa",dias:7,nota:"Pagar la tasa de solicitud en la SIC y guardar el comprobante."}]});
+  const div=pat&&M.valida(p.fechaDivulgacion)?M.eventos(p).find(e=>e.clave==="divulgacion"):null;
+  add({k:"radicar",t:"Radicar en la SIC",auto:R,sinMarcar:1,plazo:div&&!div.hecho?div:null,
+  que:"Radique la solicitud en línea en la SIC y escriba aquí la fecha de radicación y el número de expediente.",
+  por:"Desde esa fecha corre su protección y PatentIA calcula todos los plazos legales.",
+  acc:[{e:"Abrir la SIC en línea",href:"https://sipi.sic.gov.co/"},{e:"Ya radiqué: escribir la fecha",a:"rutaIr",sub:"expediente",foco:"x-fechaRadicacion",cls:"pri"},{e:"Generar tarea: radicar",a:"rutaTarea",tipo:"Radicación de la solicitud",dias:div&&!div.hecho?Math.max(0,Math.min(15,diasA(div.vence)??15)):15,nota:"Radicar la solicitud en la SIC."}]});
+  if(R){const nx=proximoTramite(p);const rec=neg?M.eventos(p).find(e=>e.clave.startsWith("recurso-")):null;
+   add({k:"tramite",t:neg?"Responder la negación":"Acompañar el trámite en la SIC",auto:conc||!!(rec&&(rec.hecho||diasA(rec.vence)<0)),sinMarcar:!neg,ev:nx,
+   que:nx?`Lo próximo: ${nx.tipo}.`:neg?"La SIC negó la solicitud. Revise con su agente si vale la pena insistir.":"Espere la decisión de la SIC. Cuando le notifiquen algo (publicación, requerimiento, concesión o negación), escriba la fecha en el Expediente.",
+   por:nx?(nx.nota||nx.norma||""):"Cada notificación abre un plazo; PatentIA lo calcula cuando escribe la fecha.",
+   acc:[{e:"Abrir el expediente",a:"rutaIr",sub:"expediente",cls:nx?"sec":"pri"}]})}}
+ add(lic);
+ if(conc&&(pat||k==="ma")){const nm=proximoMant(p);
+  add({k:"mantener",t:k==="ma"?"Mantener la marca":"Mantener la patente vigente",continuo:1,sinMarcar:1,ev:nm,
+  que:nm?`Lo próximo: ${nm.tipo}.`:"No hay pagos pendientes por ahora.",
+  por:k==="ma"?"La marca se renueva cada 10 años y debe usarse en el mercado.":"Si no se paga una anualidad (ni en el período de gracia), la patente caduca.",
+  acc:[{e:"Ver el calendario legal",a:"rutaIr",sub:"expediente"},{e:"Registrar el pago en Costos",a:"rutaIr",sub:"costos"}]})}
+ const fin=M.eventos(p).find(e=>e.clave==="fin"&&!e.estimado);
+ const tr=L.find(s=>s.k==="tramite");
+ const cerrado=["descartada","vencida"].includes(p.etapa)||(fin&&diasA(fin.vence)<0)||(p.etapa==="negada"&&(!neg||(tr&&tr.hecho)));
+ if(cerrado)return{pasos:L,cur:null,k,R,cerrado:true};
+ const mt=L.find(s=>s.k==="mantener");const urg=mt&&mt.ev&&M.estado(mt.ev,hoyISO()).nivel>=3;
+ const cur=urg?mt:(L.find(s=>!s.hecho&&!s.continuo)||L.find(s=>s.continuo)||null);
+ return{pasos:L,cur,k,R}}
+
+function etapaRuta(p,r){if(["descartada","negada","vencida"].includes(p.etapa))return null;
+ const H=hoyISO();let sug=M.etapaSugerida(p,H);
+ if(sug==="concedida"&&S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado"))sug="licenciada";
+ if(!sug&&["da","si"].includes(r.k)&&S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado"))sug="licenciada";
+ if(!sug&&!r.R&&r.cur&&!["da","si"].includes(r.k)){const c=r.cur.k;sug=c==="describir"?"idea":["evaluar","antecedentes"].includes(c)?"evaluacion":["redactar","dibujos","proteger","requisitos","radicar"].includes(c)?"redaccion":null;
+  if(sug==="redaccion"&&p.etapa==="prototipo")sug=null}
+ if(!sug||sug===p.etapa)return null;
+ const ord=ETAPAS.map(e=>e[0]);if(!["negada","vencida"].includes(sug)&&ord.indexOf(sug)<ord.indexOf(p.etapa))return null;
+ return sug}
+
+function btnRuta(pid,b){if(b.href)return`<a class="btn sec peq" target="_blank" rel="noopener" href="${esc(b.href)}">${esc(b.e)} ↗</a>`;
+ const d=Object.entries({ir:b.sub,foco:b.foco,tipo:b.tipo,dias:b.dias,nota:b.nota,k:b.k,clave:b.clave}).filter(([,v])=>v!=null).map(([x,v])=>` data-${x}="${esc(v)}"`).join("");
+ const oc=b.ia&&(ui.ocupado[(b.a==="evaluar"?"eval":b.a==="redactarTodo"?"todo":b.a==="sugLic"?"lic":"")+pid]);
+ return`<button class="btn ${b.cls||"sec"} ${b.ia?"ia":""} peq" data-acc="${b.a}" data-id="${pid}"${d} ${oc?"disabled":""}>${oc?"Trabajando…":esc(b.e)}</button>`}
+
+function vRuta(p){const r=ruta(p);if(!r.pasos.length)return"";
+ if(r.cerrado)return`<section class="panel ruta" aria-label="Ruta del proyecto"><div class="ruta-cab"><h3>Ruta del proyecto</h3>${chipEtapa(p.etapa)}</div><p class="ayuda" style="margin:0">Este proyecto está cerrado (${esc(ETQ[p.etapa]||"vigencia terminada")}). Si lo retoma, cambie la etapa y la ruta volverá a mostrar el siguiente paso.</p></section>`;
+ const s0=(ui.rutaSel||{})[p.id];let sel=s0&&r.pasos.find(s=>s.k===s0.k);if(sel&&sel.hecho&&!s0.hecho){delete ui.rutaSel[p.id];sel=null}sel=sel||r.cur||r.pasos[0];
+ const hechos=r.pasos.filter(s=>s.hecho).length,tot=r.pasos.filter(s=>!s.continuo).length;
+ const t=tareaRuta(p.id,sel.k);
+ const acc=sel.acc.map(b=>b.a==="rutaTarea"?(t||(sel.hecho&&!sel.continuo)?"":{...b,k:sel.k}):b).filter(Boolean);
+ const ev=sel.ev;
+ const etq=sel===r.cur&&!sel.hecho?"Siguiente paso":sel.hecho?(sel.continuo?"En curso":"Paso hecho"):sel.continuo?"En curso":"Paso pendiente";
+ const sug=etapaRuta(p,r);
+ const mientras=sel.k==="tramite"&&!sel.hecho&&!r.pasos.find(s=>s.k==="licenciar").hecho?`<p class="ayuda" style="margin:8px 0 0">Mientras la SIC decide, puede avanzar en <a href="#" data-acc="rutaSel" data-id="${p.id}" data-k="licenciar">licenciar o vender</a>.</p>`:"";
+ return`<section class="panel ruta" aria-label="Ruta del proyecto">
+ <div class="ruta-cab"><h3>Ruta del proyecto</h3><span class="chip ${hechos>=tot?"v":""}">${Math.min(hechos,tot)} de ${tot} pasos</span></div>
+ <ol class="pasos">${r.pasos.map((s,i)=>`<li><button type="button" class="paso${s.hecho&&!s.continuo?" ok":""}${s===r.cur?" act":""}${s===sel?" sel":""}" data-acc="rutaSel" data-id="${p.id}" data-k="${s.k}" aria-current="${s===sel}"><span class="n">${s.hecho&&!s.continuo?"✓":i+1}</span>${esc(s.t)}</button></li>`).join("")}</ol>
+ <div class="sig ${sel.hecho&&!sel.continuo?"hecho":""}">
+  <div class="fila" style="justify-content:space-between;align-items:baseline"><h4><span class="chip ${sel.hecho&&!sel.continuo?"v":sel===r.cur?"":"g"}">${etq}</span> ${esc(sel.t)}</h4>${sel.prog?`<span class="ayuda">${esc(sel.prog)}</span>`:""}</div>
+  <p style="margin:6px 0 2px">${esc(sel.que)}</p>${sel.por?`<p class="ayuda" style="margin:0">Por qué: ${esc(sel.por)}</p>`:""}
+  ${ev?`<p style="margin:8px 0 0"><b>Vence: ${fFecha(ev.vence)}</b> ${chipEv(ev)}${ev.norma?` <span class="chip g">${esc(ev.norma)}</span>`:""}</p>`:""}
+  ${sel.plazo?`<p class="ayuda" style="margin:8px 0 0;color:var(--rojo)"><b>Radique antes del ${fFecha(sel.plazo.vence)}</b> para no perder la novedad (ya mostró el invento).</p>`:""}
+  <div class="fila" style="margin-top:12px">${acc.map(b=>btnRuta(p.id,b)).join("")}${ev?btnRuta(p.id,{e:"Ya lo hice",a:"rutaEv",clave:ev.clave,cls:"acc"}):""}</div>
+  ${t?`<p class="ayuda" style="margin:8px 0 0"><span class="chip a">Tarea creada · vence ${fFecha(t.vence)}</span> La verá en Trámites y plazos.</p>`:""}
+  ${sel.salto?`<p class="ayuda" style="margin:8px 0 0">Se da por superado porque la solicitud ya está radicada.</p>`:sel.auto?`<p class="ayuda" style="margin:8px 0 0">✓ PatentIA lo detectó por lo que ya registró.</p>`:sel.sinMarcar?"":`<div style="margin-top:10px"><button class="btn ${sel.hecho?"sec":"acc"} peq" data-acc="rutaHecho" data-id="${p.id}" data-k="${sel.k}">${sel.hecho?"Desmarcar este paso":"Marcar este paso como hecho"}</button></div>`}
+  ${mientras}
+ </div>
+ ${sug?`<div class="aviso fila" style="justify-content:space-between;margin-top:12px"><span>Con lo que lleva, la etapa debería ser <b>${esc(ETQ[sug])}</b>.</span><button class="btn sec peq" data-acc="etapaSug" data-id="${p.id}" data-etapa="${sug}">Actualizar etapa</button></div>`:""}
+</section>`}
 
 function vProyecto(){
  const p=proy(proyActual);if(!p)return`<div class="vacio">Este proyecto ya no existe. <a href="#" data-vista-l="proyectos">Volver al banco</a></div>`;
@@ -447,6 +581,7 @@ function vProyecto(){
  return`<div><a href="#" data-vista-l="proyectos" class="ayuda">← Banco de proyectos</a></div>
  <div class="cab"><div><span class="cod">${esc(p.codigo)}</span><h1>${esc(p.titulo||"Sin título")}</h1><p>${esc(p.modalidad||"")}${p.sector?" · "+esc(p.sector):""}</p></div>
  <label class="c" style="min-width:200px">Etapa<select id="f-etapa" data-campo="etapa" data-id="${p.id}">${ETAPAS.map(([k,v])=>`<option value="${k}" ${p.etapa===k?"selected":""}>${v}</option>`).join("")}</select></label></div>
+ ${vRuta(p)}
  ${REMOTO&&!sample&&["evaluacion","redaccion","dibujos","licencias"].includes(subtab)?`<div class="aviso">Esta versión no usa inteligencia artificial. Para evaluar, redactar o dibujar con Claude, use PatentIA dentro de Claude o el chat; luego pegue aquí el resultado.</div>`:""}
  <div class="subtabs" role="tablist">${st.map(([k,l])=>`<button data-sub="${k}" aria-current="${subtab===k}">${l}</button>`).join("")}</div>${body}`;
 }
@@ -510,7 +645,7 @@ function pExp(p){const k=M.clase(p.modalidad);const H=hoyISO();
  const ev=[...eventosProy(p),...eventosLic().filter(e=>e.proyectoId===p.id),...manuales(p.id)].sort((a,b)=>(a.vence||"9").localeCompare(b.vence||"9"));
  const pat=k==="pi"||k==="mu";
  return`${A.length?`<div class="alerta" role="alert"><b>Revise esto</b><ul>${A.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
- ${sug&&sug!==p.etapa&&p.etapa!=="descartada"?`<div class="aviso fila" style="justify-content:space-between"><span>Según el expediente, la etapa debería ser <b>${esc(ETQ[sug])}</b>.</span><button class="btn sec peq" data-acc="etapaSug" data-id="${p.id}" data-etapa="${sug}">Actualizar etapa</button></div>`:""}
+
  <section class="panel"><h3>Fechas del expediente</h3><p class="ayuda" style="margin-top:-6px">Escriba cada fecha cuando ocurra. Los plazos se recalculan solos.</p><div class="campos">
  ${pat?campoFecha(p,"fechaDivulgacion","Primera divulgación pública (si la hubo)","Feria, red social, artículo, venta…"):""}
  ${campoFecha(p,"fechaPrioridad","Prioridad extranjera (si la invoca)","Fecha de la primera solicitud en otro país")}
@@ -874,6 +1009,12 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
   case"salir":try{localStorage.removeItem("patentia_token")}catch(e){}location.reload();break;
   case"respaldo":bajar(`PatentIA_respaldo_${hoyISO()}.json`,JSON.stringify({exportado:new Date().toISOString(),app:"PatentIA — SkyNet Genesis",...S},null,1));break;
   case"borrarProy":confirmar(`¿Eliminar el proyecto “${proy(id)?.titulo}” con todo lo suyo (trámites, licencias, bitácora, archivos, documentos, bocetos, gastos e ingresos)? No se puede deshacer.`,async()=>{for(const x of S.tramites.filter(x=>x.proyectoId===id))await borrar("tramites",x.id);for(const x of S.licencias.filter(x=>x.proyectoId===id))await borrar("licencias",x.id);for(const x of S.bitacora.filter(x=>x.proyectoId===id))await borrar("bitacora",x.id);for(const x of S.dibujos.filter(x=>x.proyectoId===id))await borrar("dibujos",x.id);for(const x of S.movimientos.filter(x=>x.proyectoId===id))await borrar("movimientos",x.id);for(const x of S.documentos.filter(x=>x.proyectoId===id))await borrar("documentos",x.id);for(const x of S.archivos.filter(x=>x.proyectoId===id)){try{if(x.assetId)await assets?.delete(x.assetId)}catch(e){}await borrar("archivos",x.id)}await borrar("proyectos",id);ir("proyectos");toast("Proyecto eliminado")});break;
+  case"rutaSel":{ev.preventDefault();ui.rutaSel=ui.rutaSel||{};const st=ruta(proy(id)).pasos.find(x=>x.k===t.dataset.k);ui.rutaSel[id]={k:t.dataset.k,hecho:!!(st&&st.hecho)};render();break}
+  case"rutaIr":{subtab=t.dataset.ir;render();const f=t.dataset.foco;if(f)setTimeout(()=>{if(f==="l-empresa"&&$("#det-lic"))$("#det-lic").open=true;const el=$("#"+f);if(el){el.scrollIntoView({block:"center"});el.focus()}},60);else $(".subtabs")?.scrollIntoView({block:"start"});break}
+  case"rutaHecho":{const p=proy(id);if(!p)break;const k=t.dataset.k;const v=!(p.ruta||{})[k];await parchear("proyectos",id,{ruta:{[k]:v?hoyISO():false}});if(ui.rutaSel)delete ui.rutaSel[id];render();toast(v?"Paso marcado como hecho":"Paso desmarcado");break}
+  case"rutaTarea":{const k=t.dataset.k;if(tareaRuta(id,k)){toast("Esa tarea ya existe.");break}const tid=uid();const x={proyectoId:id,tipo:t.dataset.tipo||"Otro",vence:sumar(hoyISO(),0,+t.dataset.dias||7),valor:0,notas:t.dataset.nota||"",estado:"pendiente",origen:"ruta:"+k,creado:new Date().toISOString()};local("tramites",tid,x);if(await guardar("tramites",tid,x))toast(`Tarea creada para el ${fFecha(x.vence)}. La verá en Trámites y plazos.`);render();break}
+  case"rutaDoc":{const p=proy(id);if(!p)break;const tp=t.dataset.tipo;ui.docTipo=tp;ui.docTexto=tp==="ficha"?plantillaFicha(p):plantilla(tp,p,{});ui.docTitulo=(TIPOS_DOC.find(x=>x[0]===tp)||[,"Documento"])[1];subtab="documentos";render();setTimeout(()=>$("#d-texto")?.scrollIntoView({block:"center"}),60);toast("Documento generado. Complete los espacios en blanco y pulse Guardar.");break}
+  case"rutaEv":{const cl=t.dataset.clave;const pt={hechos:{[cl]:hoyISO()}};const pp=proy(id);if(cl==="pedir-fondo"&&pp&&!pp.fechaPeticionFondo)pt.fechaPeticionFondo=hoyISO();await parchear("proyectos",id,pt);if(ui.rutaSel)delete ui.rutaSel[id];render();toast("Marcado como hecho");break}
   case"evaluar":evaluar(id);break;
   case"redactar":conIA(t.dataset.sec+id,()=>redactar(id,t.dataset.sec));break;
   case"redactarTodo":redactarTodo(id);break;
@@ -930,7 +1071,7 @@ document.addEventListener("focusout",ev=>{const el=ev.target;if(!el||!el.dataset
  if(!(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&(el.type==="text"||el.type==="date"))))return;
  if(el.type==="date"&&el.value&&!M.valida(el.value))return;
  const key=id+k;clearTimeout(tCampo[key]);delete pendCampo[key];const p=proy(id);if(!p)return;
- if(el.dataset.campo){if((p[k]??"")!==el.value)parchear("proyectos",id,{[k]:el.value})}else if(((p.borrador||{})[k]??"")!==el.value)parchear("proyectos",id,{borrador:{[k]:el.value}})},true);
+ const v=el.value,esCampo=!!el.dataset.campo;setTimeout(()=>{const q=proy(id);if(!q)return;if(esCampo){if((q[k]??"")!==v)parchear("proyectos",id,{[k]:v})}else if(((q.borrador||{})[k]??"")!==v)parchear("proyectos",id,{borrador:{[k]:v}})},0)},true);
 
 function confirmar(msg,fn,etq="Eliminar"){$("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true"><h2>Confirmar</h2><p style="margin:0">${esc(msg)}</p><div class="fila" style="justify-content:flex-end"><button class="btn sec" id="c-no">Cancelar</button><button class="btn pri" id="c-si" style="background:var(--rojo)">${esc(etq)}</button></div></div></div>`;
  $("#c-no").onclick=()=>$("#capa").innerHTML="";$("#c-si").onclick=()=>{$("#capa").innerHTML="";fn()};$("#c-no").focus()}
