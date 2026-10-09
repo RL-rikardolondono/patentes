@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: patentes-api
+    runtime: node
+    plan: free
+    region: ohio
+    rootDir: server
+    buildCommand: npm install --omit=dev
+    startCommand: node index.js
+    healthCheckPath: /api/ping
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: CLAVE_RECUPERACION
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ORIGEN
+        value: https://patentes.skynetgenesis.com
+      - key: NODE_VERSION
+        value: "22"
