@@ -1,0 +1,14 @@
+{
+  "name": "patentes-api",
+  "version": "1.0.0",
+  "description": "Servidor de PatentIA (SkyNet Genesis)",
+  "main": "index.js",
+  "type": "commonjs",
+  "engines": { "node": ">=20" },
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "express": "4.21.2",
+    "pg": "8.13.1"
+  }
+}
