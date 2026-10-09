@@ -1099,7 +1099,7 @@ function crearDbRemota(){const subs={};let ver="",cache={},tPoll=null,enCurso=nu
  const entregar=()=>{for(const c in subs){const docs=(cache[c]||[]).map(d=>{const{id,...data}=d;return{id,exists:true,data:()=>data}});for(const f of subs[c])f.next({docs,size:docs.length,empty:!docs.length})}};
  async function sondear(){if(enCurso)return enCurso;enCurso=(async()=>{try{const j=await api("GET","/api/datos?v="+encodeURIComponent(ver));estado("ok","Guardado en el servidor");if(!j.sinCambios){ver=String(j.version);cache=j.datos||{};entregar()}}
   catch(e){if(e.code!=="revoked"){estado("loc","Sin conexión con el servidor");for(const c in subs)for(const f of subs[c])f.err&&f.err(e)}}finally{enCurso=null}})();return enCurso}
- const programar=(ms)=>{clearTimeout(tPoll);tPoll=setTimeout(async()=>{if(document.visibilityState==="visible")await sondear();programar(20000)},ms)};
+ const programar=(ms)=>{clearTimeout(tPoll);tPoll=setTimeout(async()=>{if(document.visibilityState==="visible"||!ver)await sondear();programar(20000)},ms)};
  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")programar(0)});
  const escribir=async(m,col,id,d)=>{const j=await api(m,`/api/doc/${encodeURIComponent(col)}/${encodeURIComponent(id)}`,d);programar(400);return j};
  return{collection(col){return{onSnapshot(next,err){(subs[col]=subs[col]||[]).push({next,err});programar(0);return()=>{}},
