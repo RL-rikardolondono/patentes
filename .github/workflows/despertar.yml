@@ -1,0 +1,36 @@
+# Despertador de los servidores gratuitos de Render (SkyNet Genesis)
+# Render deja dormir los servidores gratis tras 15 min sin uso. cron-job.org
+# aborta la página de "Application loading" y el servidor no termina de
+# despertar. Este trabajo espera hasta que cada servidor responda de verdad.
+# Horario: cada 30 min de 5:00 a. m. a 10:59 p. m. (hora de Bogotá).
+name: Despertar servidores
+on:
+  schedule:
+    - cron: "*/30 0-3,10-23 * * *"
+  workflow_dispatch: {}
+jobs:
+  despertar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Despertar cada servidor
+        run: |
+          URLS="
+          https://centinela-sst-api.onrender.com/api/ping
+          https://diligencia-api.onrender.com/api/ping
+          https://enfermeria-api-2ksu.onrender.com/health
+          https://gestion-comercial-mj1h.onrender.com/salud
+          https://patentes-api-1e30.onrender.com/api/ping
+          "
+          for u in $URLS; do ( f=$(mktemp)
+            for i in $(seq 1 30); do
+              code=$(curl -s -m 60 -o "$f" -w "%{http_code}" -H "Accept: application/json" -A "SkyNetGenesis-despertador/1.0" "$u" || echo 000)
+              tam=$(wc -c < "$f" 2>/dev/null || echo 0)
+              if [ "$code" = "200" ] && [ "$tam" -lt 5000 ]; then echo "DESPIERTO $u (intento $i)"; exit 0; fi
+              sleep 15
+            done
+            echo "NO RESPONDIO $u"; exit 1
+          ) & done
+          fallos=0; for j in $(jobs -p); do wait $j || fallos=$((fallos+1)); done
+          echo "Servidores sin responder: $fallos"
+          exit $fallos
