@@ -3,7 +3,7 @@
 <meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%22192%22%20height%3D%22192%22%20rx%3D%2246%22%20fill%3D%22%231E3A4C%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%2220%22%20fill%3D%22%23E0A21A%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%2242%22%20r%3D%2213%22%20fill%3D%22%23E0A21A%22/%3E%3C/svg%3E"><meta name="theme-color" content="#0B4F8A">
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <script>window.PATENTIA_API="https://patentes-api-1e30.onrender.com";</script></head><body>
-<title>PatentIA</title>
+<title>Patent-IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap">
 <style>
@@ -137,6 +137,10 @@ tr.info td{color:var(--tx2)}tr.info b{font-weight:600}
 .sig{background:var(--suave-a);border-radius:var(--r);padding:14px 16px}.sig.hecho{background:var(--suave-v)}
 .sig h4{margin:0;font-family:var(--f-tit,inherit);font-size:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 @media (max-width:600px){.pasos{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}.pasos li{flex:none;scroll-snap-align:start}.paso{font-size:12px;white-space:nowrap}.sig{padding:12px}}
+.seguir{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding:12px 16px;border:1px dashed var(--verde);border-radius:var(--r);background:var(--suave-v)}
+.tab-ayuda{margin:8px 0 10px}
+.puente ol.pc-pasos{padding-left:20px;margin:12px 0;display:grid;gap:12px}.puente textarea{width:100%;margin-top:6px;font-size:13px}
+.modal.puente{max-width:640px;width:calc(100% - 24px)}
 body.sin-ia .btn.ia{display:none!important}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:#1C2B39;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:50;max-width:calc(100% - 32px)}
 .pie{font-size:12px;color:var(--tx2);text-align:center;padding-top:8px;border-top:1px solid var(--borde)}
@@ -150,13 +154,13 @@ body.sin-ia .btn.ia{display:none!important}
   <div class="top-in">
     <div class="marca">
       <svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>
-      <div><div class="nom">PatentIA</div><div class="por">por <b>SKYNET <i>GENESIS</i></b></div></div>
+      <div><div class="nom">Patent-IA</div><div class="por">por <b>SKYNET <i>GENESIS</i></b></div></div>
       <div class="estado" id="estado"><i class="pt"></i><span>Conectando…</span></div>
     </div>
     <nav class="tabs" id="nav" aria-label="Módulos"></nav>
   </div>
 </header>
-<main id="main"><div class="vacio">Cargando PatentIA…</div></main>
+<main id="main"><div class="vacio">Cargando Patent-IA…</div></main>
 <div id="capa"></div>
 
 <script>
@@ -387,7 +391,7 @@ function contextoProy(p){const b=p.borrador||{};return `PROYECTO ${p.codigo||""}
 
 /* ---------- Navegación ---------- */
 const VISTAS=[["tablero","Tablero"],["proyectos","Proyectos"],["ideas","Taller de ideas"],["tramites","Trámites y plazos"],["licencias","Licencias y ventas"]];
-function nav(){document.body.classList.toggle("sin-ia",REMOTO&&!sample);$("#nav").innerHTML=VISTAS.filter(([k])=>!(k==="ideas"&&REMOTO&&!sample)).map(([k,l])=>`<button data-vista="${k}" aria-current="${vista===k||(vista==="proyecto"&&k==="proyectos")}">${l}</button>`).join("")}
+function nav(){document.body.classList.toggle("sin-ia",REMOTO&&!sample);$("#nav").innerHTML=VISTAS.map(([k,l])=>`<button data-vista="${k}" aria-current="${vista===k||(vista==="proyecto"&&k==="proyectos")}">${l}</button>`).join("")}
 function ir(v,id){vista=v;if(id!==undefined&&id!==proyActual){ui.docTexto=""}if(id!==undefined)proyActual=id;if(v==="proyecto"&&id!==undefined)subtab="ficha";render();window.scrollTo({top:0})}
 
 /* ---------- Render ---------- */
@@ -403,11 +407,12 @@ function render(){enRender=true;try{vaciarPendientes()}finally{enRender=false}ca
  if(!cargado)h=`<div class="vacio">Cargando sus proyectos…</div>`;
  else h=({tablero:vTablero,proyectos:vProyectos,proyecto:vProyecto,ideas:vIdeas,tramites:vTramites,licencias:vLicencias}[vista]||vTablero)();
  if(!db&&cargado)h=`<div class="aviso">Modo de prueba: los cambios no se guardarán al cerrar. Abra la app desde su enlace en Claude para guardar sus proyectos.</div>`+h;
- m.innerHTML=h+`<div class="pie">PatentIA — herramienta interna de SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758</div>`;
+ m.innerHTML=h+`<div class="pie">Patent-IA — herramienta interna de SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758</div>`;
  restaurarTmp();ui.ctxPrev=ctxActual();
  if(fid){const n=document.getElementById(fid);if(n&&n!==document.activeElement){n.focus({preventScroll:true});try{if(ss!==null)n.setSelectionRange(ss,se)}catch(e){}}}
 }
 
+{const r0=render;render=function(){r0();try{puentesClaude()}catch(e){}}}
 function chipEtapa(e){return`<span class="chip ${CHIP_ETAPA[e]||""}">${esc(ETQ[e]||e)}</span>`}
 const M=window.MotorPI;
 function chipEv(e){const x=M.estado(e,hoyISO());return`<span class="chip ${x.cls}">${esc(x.txt)}</span>`}
@@ -435,7 +440,7 @@ function vTablero(){
  </div>
  <div class="grid g2">
   <section class="panel"><h3>Proyectos por etapa</h3>${S.proyectos.length?`<div class="embudo">${ETAPAS.map(([k,l])=>{const n=S.proyectos.filter(p=>p.etapa===k).length;return`<div class="r"><span>${l}</span><span class="b"><i style="width:${n/max*100}%"></i></span><span class="n">${n}</span></div>`}).join("")}</div>`:`<div class="vacio">Aún no hay proyectos. Empiece en el Taller de ideas o cree uno nuevo.</div>`}</section>
-  <section class="panel"><h3>Próximos plazos</h3>${pend.length?`<div class="lista">${[...pend].sort((a,b)=>M.estado(b,H).nivel-M.estado(a,H).nivel||(a.vence||"9").localeCompare(b.vence||"9")).slice(0,6).map(t=>`<div class="it"><div><div class="t">${esc(t.tipo)}</div><div class="d">${esc(proy(t.proyectoId)?.titulo||"Sin proyecto")} · ${fFecha(t.vence)}</div></div>${chipEv(t)}</div>`).join("")}</div>`:`<div class="vacio">No hay plazos pendientes. Al escribir la fecha de radicación de un proyecto, PatentIA calcula sus plazos legales.</div>`}</section>
+  <section class="panel"><h3>Próximos plazos</h3>${pend.length?`<div class="lista">${[...pend].sort((a,b)=>M.estado(b,H).nivel-M.estado(a,H).nivel||(a.vence||"9").localeCompare(b.vence||"9")).slice(0,6).map(t=>`<div class="it"><div><div class="t">${esc(t.tipo)}</div><div class="d">${esc(proy(t.proyectoId)?.titulo||"Sin proyecto")} · ${fFecha(t.vence)}</div></div>${chipEv(t)}</div>`).join("")}</div>`:`<div class="vacio">No hay plazos pendientes. Al escribir la fecha de radicación de un proyecto, Patent-IA calcula sus plazos legales.</div>`}</section>
  </div>
  <div class="grid g2">
   <section class="panel"><h3>Trabajados recientemente</h3>${recientes.length?`<div class="lista">${recientes.map(p=>`<div class="it"><div><div class="t"><a href="#" data-abrir="${p.id}">${esc(p.titulo||"Sin título")}</a></div><div class="d"><span class="cod">${esc(p.codigo)}</span> · ${esc(p.modalidad||"")}${(()=>{const c=ruta(p).cur;return c?` · Sigue: <b>${esc(c.t)}</b>`:""})()}</div></div>${chipEtapa(p.etapa)}</div>`).join("")}</div>`:`<div class="vacio">Sus proyectos aparecerán aquí.</div>`}</section>
@@ -450,6 +455,78 @@ function vProyectos(){
  <div class="fila"><input type="search" id="busca" placeholder="Buscar por título, código o sector" value="${esc(ui.busca)}" style="max-width:340px"><select id="filtroEtapa" style="max-width:220px"><option value="">Todas las etapas</option>${ETAPAS.map(([k,v])=>`<option value="${k}" ${ui.filtroEtapa===k?"selected":""}>${v}</option>`).join("")}</select></div>
  ${l.length?`<div class="tabla-w"><table><thead><tr><th>Código</th><th>Proyecto</th><th>Modalidad</th><th>Sector</th><th>Etapa</th><th>Siguiente paso</th></tr></thead><tbody>${l.map(p=>`<tr class="clic" data-abrir="${p.id}" tabindex="0"><td class="cod">${esc(p.codigo)}</td><td><b>${esc(p.titulo||"Sin título")}</b><div class="ayuda">${esc((p.problema||"").slice(0,110))}</div></td><td>${esc(p.modalidad||"")}</td><td>${esc(p.sector||"")}</td><td>${chipEtapa(p.etapa)}</td><td>${(()=>{const c=ruta(p).cur;return c?esc(c.t):"—"})()}</td></tr>`).join("")}</tbody></table></div>`:`<div class="vacio">${S.proyectos.length?"Ningún proyecto coincide con la búsqueda.":"Aún no hay proyectos. Cree el primero o use el Taller de ideas para que Claude le proponga inventos a partir de un problema."}</div>`}`;
 }
+
+
+/* ===== Puente con Claude (versión sin IA en el servidor): copiar el pedido, pegarlo en Claude y pegar aquí la respuesta ===== */
+const PUENTE_ACC={evaluar:"evaluar",redactarTodo:"redactar",redactar:"redactar",dibujar:"dibujos",sugLic:"lic",ideas:"ideas"};
+const PIDE_JSON="\n\nIMPORTANTE: entrega la respuesta completa dentro de UN solo bloque de código ```json``` y nada más, para pegarla en Patent-IA.";
+function pedidoClaude(tarea,id,sec){const p=id?proy(id):null;const cab=p?`[Pedido de Patent-IA · ${p.codigo} · ${p.titulo||""}]\n`:"[Pedido de Patent-IA]\n";
+ if(tarea==="evaluar")return cab+`${BASE}\n\nEvalúa la patentabilidad y el potencial comercial de este desarrollo.\n\n${contextoProy(p)}${p.antecedentesHallados?`\nAntecedentes encontrados:\n${String(p.antecedentesHallados).slice(0,3000)}\n`:""}\nResponde con un objeto JSON con estas claves: "novedad","nivelInventivo","aplicacionIndustrial","mercado","fabricacion" (enteros 1 a 5), "modalidadRecomendada" (una de: ${MODALIDADES.join(", ")}), "resumen" (3-4 frases), "mejoras" (lista de 3-5 cambios concretos que harían el invento más fuerte o más difícil de copiar), "riesgos" (lista de 2-4), "palabrasClave_es" (5 términos), "palabrasClave_en" (5 términos técnicos en inglés para buscar patentes), "cpc" (1-3 códigos CPC probables).`+PIDE_JSON;
+ if(tarea==="redactar"){const L=seccionesPedidas(p,sec);
+  return cab+`${BASE}\n\nRedacta ${L.length>1?"estas secciones":"esta sección"} de una solicitud de ${p.modalidad||"modelo de utilidad"} ante la SIC:\n${L.map(([k,l,a])=>`- "${k}": ${l}. ${a}`).join("\n")}\n${L.some(s=>s[0]==="reivindicaciones")?"Reivindicaciones: numéralas; la 1 independiente con la fórmula \"caracterizado porque\"; las demás dependientes (\"según la reivindicación N\"). Usa los mismos números de referencia de la descripción.\n":""}${L.some(s=>s[0]==="resumen")?"Resumen: máximo 150 palabras.\n":""}Texto plano, sin markdown dentro de cada sección.\n\n${contextoProy(p)}${p.antecedentesHallados?`\nAntecedentes encontrados por el inventor:\n${String(p.antecedentesHallados).slice(0,3000)}\n`:""}\nResponde con un objeto JSON cuyas claves sean exactamente: ${L.map(s=>`"${s[0]}"`).join(", ")}, y cuyo valor sea el texto de cada sección.`+PIDE_JSON}
+ if(tarea==="dibujos"){const ped=($("#dib-pedido")?.value||"").trim();
+  return cab+`${BASE}\n\nDibuja ${ped?`esta figura: "${ped}"`:"las figuras necesarias para la solicitud (vista general, vistas de detalle y corte si aplica; máximo 4)"}.\nReglas de cada figura: un elemento <svg> válido (xmlns="http://www.w3.org/2000/svg", viewBox definido, máximo 600x600), estilo de dibujo de patente: solo líneas negras sobre fondo blanco (fill="none" o "#fff"), stroke="#000", sin colores, sin texto salvo los números de referencia (font-family Arial, font-size 14) con líneas guía finas. Usa los mismos números de referencia de la descripción si existen. Sin <script>, sin imágenes externas, sin estilos CSS.\n\n${contextoProy(p)}\n\nIMPORTANTE: entrega cada figura así: una línea "FIG. n — título corto" y debajo su bloque de código \`\`\`svg\`\`\`. No agregues otras explicaciones, para pegarlas en Patent-IA.`}
+ if(tarea==="lic")return cab+`${BASE}\n\nSugiere a quién licenciar o vender este desarrollo en Colombia y Latinoamérica. NO nombres empresas reales: describe TIPOS de empresa.\n\n${contextoProy(p)}\nResponde con un arreglo JSON de 5 objetos {"tipoEmpresa": string, "sector": string, "modelo": string (tipo de acuerdo y forma de cobro sugerida), "porQue": string (una frase)}.`+PIDE_JSON;
+ if(tarea==="ideas"){const f=ideasForm;return cab+`${BASE}\n\nUn inventor observó este problema y quiere soluciones técnicas protegibles (patente de invención, modelo de utilidad o diseño industrial).\nProblema: ${f.problema}\nSector: ${f.sector}\nCondiciones: ${f.contexto||"ninguna"}\n\nPropón 4 soluciones distintas entre sí, concretas y fabricables, que no sean productos obvios ya en el mercado. Responde con un arreglo JSON de 4 objetos {"titulo": string, "solucion": string (4-6 frases: partes y funcionamiento), "modalidad": una de "${MODALIDADES.slice(0,3).join('", "')}", "novedad": string (qué la diferencia de lo existente), "fabricacion": string (materiales y proceso probable)}.`+PIDE_JSON}
+ if(tarea==="consulta"){const r=ruta(p);const c=r.cur;return cab+`Hola Claude. Trabajo en Patent-IA (la fábrica de patentes de SkyNet Genesis) con este proyecto y necesito tu ayuda.\n\n${contextoProy(p)}\nEtapa actual: ${ETQ[p.etapa]||p.etapa}\nPaso de la ruta en el que voy: ${c?c.t:"ninguno pendiente"}\nPasos hechos: ${r.pasos.filter(s=>s.hecho).map(s=>s.t).join(", ")||"ninguno"}\n${M.valida(p.fechaRadicacion)?`Radicado en la SIC el ${p.fechaRadicacion}${p.expediente?` (expediente ${p.expediente})`:""}.\n`:""}\nMi pregunta: (escríbala aquí)`}
+ return""}
+
+function seccionesPedidas(p,sec){const b=p.borrador||{};let L=sec?SECCIONES.filter(s=>s[0]===sec):SECCIONES.filter(([k])=>!String(b[k]||"").trim());if(!L.length)L=SECCIONES;return L}
+function confirmarArriba(msg,res){const c=document.createElement("div");c.className="modal-f";c.style.zIndex="80";c.innerHTML=`<div class="modal" role="dialog" aria-modal="true"><h2>Confirmar</h2><p style="margin:0">${esc(msg)}</p><div class="fila" style="justify-content:flex-end"><button class="btn sec">Cancelar</button><button class="btn pri">Reemplazar</button></div></div>`;document.body.appendChild(c);const[no,si]=c.querySelectorAll("button");no.onclick=()=>{c.remove();res(false)};si.onclick=()=>{c.remove();res(true)};si.focus()}
+function sacarJSON(t){t=String(t);const cands=[];const re=/```([a-zA-Z]*)[ \t]*\r?\n?([\s\S]*?)```/g;let m;const fj=[],fo=[];while((m=re.exec(t)))(/^json/i.test(m[1])?fj:fo).push(m[2]);cands.push(...fj,...fo,t);
+ const rep=x=>{let o="",en=false,es=false;for(const c of x){if(en){if(es){es=false;o+=c;continue}if(c==="\\"){es=true;o+=c;continue}if(c==='"'){en=false;o+=c;continue}if(c==="\n"){o+="\\n";continue}if(c==="\r")continue;if(c==="\t"){o+="\\t";continue}o+=c}else{if(c==='"')en=true;o+=c}}return o};
+ const prueba=x=>{try{return{ok:true,v:JSON.parse(x)}}catch(e){try{return{ok:true,v:JSON.parse(rep(x))}}catch(_){return{ok:false}}}};
+ const balance=(x,a)=>{const ab=x[a],ci=ab==="{"?"}":"]";let d=0,en=false,es=false;for(let k=a;k<x.length;k++){const c=x[k];if(en){if(es)es=false;else if(c==="\\")es=true;else if(c==='"')en=false;continue}if(c==='"')en=true;else if(c==="{"||c==="[")d++;else if(c==="}"||c==="]"){d--;if(d===0)return x.slice(a,k+1)}}return null};
+ for(const c of cands){const tr=c.trim();if(/^[\[{]/.test(tr)){const r=prueba(tr);if(r.ok&&r.v&&typeof r.v==="object")return r.v}
+  for(let k=0;k<c.length;k++){if(c[k]!=="{"&&c[k]!=="[")continue;const sub=balance(c,k);if(!sub)continue;const r=prueba(sub);if(r.ok&&r.v&&typeof r.v==="object"&&(Array.isArray(r.v)?r.v.length:Object.keys(r.v).length))return r.v}}
+ throw 0}
+
+async function aplicarPuente(tarea,id,texto,sec,claves){const p=id?proy(id):null;if(id&&!p){toast("El proyecto ya no existe.");return false}
+ if(tarea==="dibujos"){const fen=[...String(texto).matchAll(/```svg[^\n]*\n([\s\S]*?)```/gi)].map(m=>({svg:(m[1].match(/<svg[\s\S]*<\/svg>/i)||[""])[0],i:m.index})).filter(x=>x.svg);const bloques=fen.length?fen:[...String(texto).matchAll(/<svg[\s\S]*?<\/svg>/gi)].map(m=>({svg:m[0],i:m.index}));if(!bloques.length){toast("No encontré ningún dibujo (<svg>) en lo que pegó. Copie la respuesta completa de Claude.");return false}
+  let n=0;for(const bl of bloques){const svg=limpiarSvg(bl.svg);if(!svg||svg.length>200000)continue;const antes=String(texto).slice(Math.max(0,bl.i-300),bl.i);const tm=[...antes.matchAll(/FIG\.?\s*\d+\s*[—:-]\s*([^\n`]+)/gi)].pop();
+   const did=uid();const x={proyectoId:id,titulo:(tm?tm[1].trim():"")||(($("#dib-pedido")?.value||"").trim())||`Figura ${dibujosDe(p).length+n+1}`,svg,fecha:hoyISO(),creado:new Date().toISOString()};local("dibujos",did,x);if(await guardar("dibujos",did,x))n++}
+  toast(n?`${n} dibujo(s) agregado(s)`:"Los dibujos no son válidos. Pida a Claude que los repita.");return n>0}
+ let o;try{o=sacarJSON(texto)}catch(e){toast("No encontré la respuesta en el formato esperado. Copie TODA la respuesta de Claude, incluido el bloque de código.");return false}
+ if(tarea==="evaluar"){if(!o||typeof o!=="object"||Array.isArray(o)){toast("La respuesta no tiene la evaluación esperada.");return false}
+  const ev={novedad:a15(o.novedad),nivelInventivo:a15(o.nivelInventivo),aplicacionIndustrial:a15(o.aplicacionIndustrial),mercado:a15(o.mercado),fabricacion:a15(o.fabricacion),modalidadRecomendada:aTexto(o.modalidadRecomendada),resumen:aTexto(o.resumen),mejoras:aLista(o.mejoras),riesgos:aLista(o.riesgos),palabrasClave_es:aLista(o.palabrasClave_es),palabrasClave_en:aLista(o.palabrasClave_en),cpc:aLista(o.cpc),fecha:new Date().toISOString(),via:"chat"};
+  if(!ev.resumen&&!ev.novedad){toast("La respuesta no tiene la evaluación esperada.");return false}
+  const ok=await parchear("proyectos",id,{evaluacion:ev,etapa:p.etapa==="idea"?"evaluacion":p.etapa});if(ok)toast("Evaluación guardada");return ok}
+ if(tarea==="redactar"){if(!o||typeof o!=="object"||Array.isArray(o)){toast("La respuesta no tiene las secciones esperadas.");return false}
+  const txt=v=>Array.isArray(v)?v.map(x=>typeof x==="object"&&x?Object.values(x).join(" "):String(x)).join("\n"):v&&typeof v==="object"?Object.values(v).join("\n"):aTexto(v);
+  const bor={};for(const[k]of SECCIONES){if(claves&&!claves.includes(k))continue;const v=txt(o[k]).trim();if(v)bor[k]=k==="titulo"?v.replace(/^["“]|["”]$/g,""):v}
+  const pisa=Object.keys(bor).filter(k=>String((p.borrador||{})[k]||"").trim()&&(p.borrador||{})[k]!==bor[k]);
+  if(pisa.length&&!await new Promise(res=>confirmarArriba(`Esto reemplaza el texto que ya tiene en: ${pisa.map(k=>(SECCIONES.find(x=>x[0]===k)||[,k])[1]).join(", ")}. ¿Continuar?`,res)))return false;
+  if(!Object.keys(bor).length){toast("La respuesta no trae ninguna sección reconocible.");return false}
+  const pat={borrador:bor};if(p.etapa==="idea"||p.etapa==="evaluacion")pat.etapa="redaccion";const ok=await parchear("proyectos",id,pat);if(ok)toast(`${Object.keys(bor).length} sección(es) guardada(s). Revíselas en Redacción.`);return ok}
+ if(tarea==="lic"){const L=(Array.isArray(o)?o:[]).filter(x=>x&&typeof x==="object").slice(0,8).map(x=>({tipoEmpresa:aTexto(x.tipoEmpresa),sector:aTexto(x.sector),modelo:aTexto(x.modelo),porQue:aTexto(x.porQue)})).filter(x=>x.tipoEmpresa);
+  if(!L.length){toast("La respuesta no trae sugerencias.");return false}ui.sugLic[id]=L;if(vista==="proyecto")subtab="licencias";toast("Sugerencias cargadas en Licencias");return true}
+ if(tarea==="ideas"){const L=(Array.isArray(o)?o:[]).filter(x=>x&&typeof x==="object").map(x=>({titulo:aTexto(x.titulo),solucion:aTexto(x.solucion),modalidad:aTexto(x.modalidad),novedad:aTexto(x.novedad),fabricacion:aTexto(x.fabricacion)})).filter(x=>x.titulo);
+  if(!L.length){toast("La respuesta no trae ideas.");return false}ideasRes=L;toast("Ideas cargadas");return true}
+ return false}
+
+async function copiarTexto(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;left:-9999px;top:0";document.body.appendChild(ta);ta.select();let ok=false;try{ok=ta.selectionEnd-ta.selectionStart===t.length&&document.execCommand("copy")}catch(_){}ta.remove();return ok}}
+function abrirPuente(tarea,id,sec){if(tarea==="ideas"){ideasForm.problema=($("#i-problema")?.value||"").trim();ideasForm.contexto=($("#i-contexto")?.value||"").trim();ideasForm.sector=$("#i-sector")?.value||ideasForm.sector;if(!ideasForm.problema){toast("Escriba primero el problema que observó.");$("#i-problema")?.focus();return}}
+ const ped=pedidoClaude(tarea,id,sec);if(!ped)return;const consulta=tarea==="consulta";
+ const tit={evaluar:"Evaluar con Claude",redactar:sec?"Redactar esta sección con Claude":"Redactar la solicitud con Claude",dibujos:"Pedir los dibujos a Claude",lic:"Sugerir empresas con Claude",ideas:"Pedir ideas a Claude",consulta:"Consultar a Claude sobre este proyecto"}[tarea];
+ ui.puente={tarea,id,sec,claves:tarea==="redactar"?seccionesPedidas(proy(id),sec).map(x=>x[0]):null};
+ $("#capa").innerHTML=`<div class="modal-f"><div class="modal puente" role="dialog" aria-modal="true" aria-label="${esc(tit)}"><h2>${esc(tit)}</h2>
+ <p class="ayuda" style="margin:0">Se hace con su suscripción de Claude, sin costo adicional.</p>
+ <ol class="pc-pasos"><li><b>Copie el pedido.</b> <button class="btn pri peq" id="pc-copiar">Copiar pedido</button> <span id="pc-ok" class="chip v" hidden>Copiado</span>
+  <details><summary class="ayuda" style="cursor:pointer">Ver el pedido</summary><textarea id="pc-pedido" readonly rows="6">${esc(ped)}</textarea></details></li>
+ <li><b>Péguelo en Claude</b> (Ctrl+V; en el celular, mantenga presionado y elija Pegar)${consulta?" y escriba su pregunta al final":""}. Puede usar una conversación nueva o la que usa para Patent-IA. <a class="btn sec peq" href="https://claude.ai/new" target="_blank" rel="noopener">Abrir Claude ↗</a></li>
+ ${consulta?`<li>Siga la conversación con Claude allí. Cuando tenga un resultado que deba quedar en el proyecto, cópielo en la ficha, la redacción o la bitácora.</li>`:`<li><b>Copie toda la respuesta de Claude</b> (botón Copiar debajo de la respuesta; si Claude la muestra en un panel aparte, cópiela desde ese panel) <b>y péguela aquí:</b><textarea id="pc-resp" rows="5" placeholder="Pegue aquí la respuesta completa de Claude"></textarea></li>`}</ol>
+ <div class="fila" style="justify-content:flex-end"><button class="btn sec" id="pc-cerrar">${consulta?"Listo":"Cancelar"}</button>${consulta?"":`<button class="btn acc" id="pc-guardar">Guardar en Patent-IA</button>`}</div></div></div>`;
+ const copiar=async()=>{if(await copiarTexto(ped)){$("#pc-ok").hidden=false;toast("Pedido copiado. Ahora péguelo en Claude.")}else{$("#pc-pedido").closest("details").open=true;toast("Copie el pedido manualmente (Ctrl+C).")}};
+ $("#pc-copiar").onclick=copiar;$("#pc-cerrar").onclick=()=>{$("#capa").innerHTML="";ui.puente=null};
+ if(!consulta)$("#pc-guardar").onclick=async()=>{const t=$("#pc-resp").value.trim();if(!t){toast("Pegue primero la respuesta de Claude.");$("#pc-resp").focus();return}const b=$("#pc-guardar");b.disabled=true;
+  try{if(await aplicarPuente(tarea,id,t,sec,ui.puente&&ui.puente.claves)){$("#capa").innerHTML="";ui.puente=null;if(ui.rutaSel&&id)delete ui.rutaSel[id];render()}}finally{if(document.body.contains(b))b.disabled=false}};
+ copiar()}
+
+/* En la versión sin IA, cada botón de IA ofrece al lado "Hacer con Claude" */
+function puentesClaude(){if(!(REMOTO&&!sample))return;
+ for(const b of document.querySelectorAll("#main .btn.ia[data-acc]")){const t=PUENTE_ACC[b.dataset.acc];if(!t||b.nextElementSibling?.classList.contains("puente-btn"))continue;
+  const n=document.createElement("button");n.type="button";n.className="btn acc peq puente-btn";n.dataset.acc="claude";n.dataset.tarea=t;if(b.dataset.id)n.dataset.id=b.dataset.id;if(b.dataset.sec)n.dataset.sec=b.dataset.sec;
+  n.textContent=t==="redactar"&&b.dataset.sec?"Con Claude":({evaluar:"Evaluar con Claude (copiar y pegar)",redactar:"Redactar con Claude (copiar y pegar)",dibujos:"Pedir dibujos a Claude (copiar y pegar)",lic:"Sugerir empresas con Claude (copiar y pegar)",ideas:"Pedir ideas a Claude (copiar y pegar)"}[t]);b.after(n)}}
 
 /* ===== Ruta guiada del proyecto: qué sigue y botones para hacerlo ===== */
 const lleno=s=>String(s||"").trim().length>=15;
@@ -494,7 +571,7 @@ function ruta(p){
   add({k:"dibujos",t:k==="di"?"Preparar las vistas del diseño":"Preparar las figuras",auto:nd>0,prog:nd?`${nd} figura(s)`:"",
   que:k==="di"?"Prepare todas las vistas del diseño (frente, lados, arriba, perspectiva) en líneas continuas.":"Prepare los dibujos con números de referencia que coincidan con la descripción.",
   por:k==="di"?"La SIC exige la representación gráfica del diseño con todas sus vistas.":"Se exigen cuando son necesarios para entender el invento, y casi siempre ayudan a definir lo que se protege.",
-  acc:[REMOTO&&!sample?{e:"Agregar enlace del plano (Drive)",a:"rutaIr",sub:"bitacora",foco:"a-url",cls:"pri"}:{e:"Abrir dibujos",a:"rutaIr",sub:"dibujos",foco:"dib-pedido",cls:"pri"},{e:"Generar tarea: planos definitivos",a:"rutaTarea",tipo:"Prototipo",dias:15,nota:"Planos o vistas definitivas para la solicitud."}]})}
+  acc:[{e:"Dibujar con Claude",a:"dibujar",ia:1,cls:"pri"},{e:"Abrir dibujos",a:"rutaIr",sub:"dibujos",foco:"dib-pedido"},{e:"Agregar enlace de un plano (Drive)",a:"rutaIr",sub:"bitacora",foco:"a-url"},{e:"Generar tarea: planos definitivos",a:"rutaTarea",tipo:"Prototipo",dias:15,nota:"Planos o vistas definitivas para la solicitud."}]})}
  const reqCes=M.requisitos(p).some(r=>r[0]==="cesion");
  if(k!=="ma")add({k:"proteger",t:"Proteger la confidencialidad",auto:docDe(p.id,"nda")&&(!reqCes||docDe(p.id,"cesion")),
   que:"Antes de mostrarlo a fabricantes, inversionistas o compradores, haga firmar un acuerdo de confidencialidad."+(reqCes?" Como el solicitante no es el inventor, firme también la cesión de derechos.":""),
@@ -512,12 +589,12 @@ function ruta(p){
   const div=pat&&M.valida(p.fechaDivulgacion)?M.eventos(p).find(e=>e.clave==="divulgacion"):null;
   add({k:"radicar",t:"Radicar en la SIC",auto:R,sinMarcar:1,plazo:div&&!div.hecho?div:null,
   que:"Radique la solicitud en línea en la SIC y escriba aquí la fecha de radicación y el número de expediente.",
-  por:"Desde esa fecha corre su protección y PatentIA calcula todos los plazos legales.",
+  por:"Desde esa fecha corre su protección y Patent-IA calcula todos los plazos legales.",
   acc:[{e:"Abrir la SIC en línea",href:"https://sipi.sic.gov.co/"},{e:"Ya radiqué: escribir la fecha",a:"rutaIr",sub:"expediente",foco:"x-fechaRadicacion",cls:"pri"},{e:"Generar tarea: radicar",a:"rutaTarea",tipo:"Radicación de la solicitud",dias:div&&!div.hecho?Math.max(0,Math.min(15,diasA(div.vence)??15)):15,nota:"Radicar la solicitud en la SIC."}]});
   if(R){const nx=proximoTramite(p);const rec=neg?M.eventos(p).find(e=>e.clave.startsWith("recurso-")):null;
    add({k:"tramite",t:neg?"Responder la negación":"Acompañar el trámite en la SIC",auto:conc||!!(rec&&(rec.hecho||diasA(rec.vence)<0)),sinMarcar:!neg,ev:nx,
    que:nx?`Lo próximo: ${nx.tipo}.`:neg?"La SIC negó la solicitud. Revise con su agente si vale la pena insistir.":"Espere la decisión de la SIC. Cuando le notifiquen algo (publicación, requerimiento, concesión o negación), escriba la fecha en el Expediente.",
-   por:nx?(nx.nota||nx.norma||""):"Cada notificación abre un plazo; PatentIA lo calcula cuando escribe la fecha.",
+   por:nx?(nx.nota||nx.norma||""):"Cada notificación abre un plazo; Patent-IA lo calcula cuando escribe la fecha.",
    acc:[{e:"Abrir el expediente",a:"rutaIr",sub:"expediente",cls:nx?"sec":"pri"}]})}}
  add(lic);
  if(conc&&(pat||k==="ma")){const nm=proximoMant(p);
@@ -548,6 +625,11 @@ function btnRuta(pid,b){if(b.href)return`<a class="btn sec peq" target="_blank" 
  const oc=b.ia&&(ui.ocupado[(b.a==="evaluar"?"eval":b.a==="redactarTodo"?"todo":b.a==="sugLic"?"lic":"")+pid]);
  return`<button class="btn ${b.cls||"sec"} ${b.ia?"ia":""} peq" data-acc="${b.a}" data-id="${pid}"${d} ${oc?"disabled":""}>${oc?"Trabajando…":esc(b.e)}</button>`}
 
+const DONDE={describir:"Aquí en Patent-IA",evaluar:"Con Claude",antecedentes:"En internet y aquí",redactar:"Con Claude",dibujos:"Con Claude",proteger:"Aquí, y se firma en papel",registro:"En la DNDA (en línea)",requisitos:"Aquí y en la SIC",radicar:"En la SIC (en línea)",tramite:"En la SIC y aquí",licenciar:"Aquí y con Claude",mantener:"En la SIC"};
+const CHAT={evaluar:"Si quiere discutir cómo fortalecer el invento o cambiar la modalidad, consulte a Claude en la conversación.",antecedentes:"Si encuentra una patente muy parecida, consulte a Claude antes de seguir: puede ajustar el invento para diferenciarlo.",redactar:"Para afinar las reivindicaciones o el alcance de la protección, siga con Claude en la conversación.",dibujos:"Para planos de precisión, modelos 3D o cambios a los bocetos, pídalos a Claude en la conversación.",tramite:"Si la SIC le envía un requerimiento o una negación, consulte a Claude en la conversación y a su agente.",licenciar:"Para preparar la negociación, el precio o revisar un contrato, consulte a Claude en la conversación.",proteger:"Si la otra parte pide cambios al acuerdo, consulte a Claude en la conversación."};
+const TAB_AYUDA={ficha:"Aquí describe el invento: es el primer paso de la ruta.",evaluacion:"Aquí queda la evaluación de Claude y lo que usted encuentre al buscar antecedentes.",redaccion:"Aquí se arma el texto de la solicitud que se radica en la SIC.",dibujos:"Aquí se guardan los bocetos de las figuras de la solicitud.",bitacora:"Diario del inventor y enlaces a fotos, planos y oficios: prueba de autoría y de fechas.",expediente:"Fechas del trámite en la SIC, requisitos para radicar y calendario legal.",documentos:"Contratos y ficha comercial listos para revisar, guardar y descargar.",costos:"Tasas, gastos e ingresos del proyecto.",licencias:"Empresas interesadas y negociaciones de licencia o venta."};
+function vSeguir(p){const r=ruta(p);if(!r.cur)return"";const c=r.cur;const acc=c.acc.filter(b=>!b.href&&b.a!=="rutaTarea").slice(0,2);
+ return`<div class="seguir"><span>Siguiente paso de la ruta: <b>${esc(c.t)}</b> <span class="chip g">${esc(DONDE[c.k]||"")}</span></span><div class="fila">${acc.map(b=>btnRuta(p.id,b)).join("")}<a href="#" class="btn sec peq" data-acc="verRuta" data-id="${p.id}">Ver la ruta ↑</a></div></div>`}
 function vRuta(p){const r=ruta(p);if(!r.pasos.length)return"";
  if(r.cerrado)return`<section class="panel ruta" aria-label="Ruta del proyecto"><div class="ruta-cab"><h3>Ruta del proyecto</h3>${chipEtapa(p.etapa)}</div><p class="ayuda" style="margin:0">Este proyecto está cerrado (${esc(ETQ[p.etapa]||"vigencia terminada")}). Si lo retoma, cambie la etapa y la ruta volverá a mostrar el siguiente paso.</p></section>`;
  const s0=(ui.rutaSel||{})[p.id];let sel=s0&&r.pasos.find(s=>s.k===s0.k);if(sel&&sel.hecho&&!s0.hecho){delete ui.rutaSel[p.id];sel=null}sel=sel||r.cur||r.pasos[0];
@@ -559,16 +641,17 @@ function vRuta(p){const r=ruta(p);if(!r.pasos.length)return"";
  const sug=etapaRuta(p,r);
  const mientras=sel.k==="tramite"&&!sel.hecho&&!r.pasos.find(s=>s.k==="licenciar").hecho?`<p class="ayuda" style="margin:8px 0 0">Mientras la SIC decide, puede avanzar en <a href="#" data-acc="rutaSel" data-id="${p.id}" data-k="licenciar">licenciar o vender</a>.</p>`:"";
  return`<section class="panel ruta" aria-label="Ruta del proyecto">
- <div class="ruta-cab"><h3>Ruta del proyecto</h3><span class="chip ${hechos>=tot?"v":""}">${Math.min(hechos,tot)} de ${tot} pasos</span></div>
+ <div class="ruta-cab"><h3>Ruta del proyecto</h3><div class="fila"><span class="chip ${hechos>=tot?"v":""}">${Math.min(hechos,tot)} de ${tot} pasos</span><button class="btn sec peq" data-acc="claude" data-tarea="consulta" data-id="${p.id}">Consultar a Claude</button></div></div>
  <ol class="pasos">${r.pasos.map((s,i)=>`<li><button type="button" class="paso${s.hecho&&!s.continuo?" ok":""}${s===r.cur?" act":""}${s===sel?" sel":""}" data-acc="rutaSel" data-id="${p.id}" data-k="${s.k}" aria-current="${s===sel}"><span class="n">${s.hecho&&!s.continuo?"✓":i+1}</span>${esc(s.t)}</button></li>`).join("")}</ol>
  <div class="sig ${sel.hecho&&!sel.continuo?"hecho":""}">
-  <div class="fila" style="justify-content:space-between;align-items:baseline"><h4><span class="chip ${sel.hecho&&!sel.continuo?"v":sel===r.cur?"":"g"}">${etq}</span> ${esc(sel.t)}</h4>${sel.prog?`<span class="ayuda">${esc(sel.prog)}</span>`:""}</div>
+  <div class="fila" style="justify-content:space-between;align-items:baseline"><h4><span class="chip ${sel.hecho&&!sel.continuo?"v":sel===r.cur?"":"g"}">${etq}</span> ${esc(sel.t)} ${DONDE[sel.k]?`<span class="chip g">Se hace: ${esc(DONDE[sel.k])}</span>`:""}</h4>${sel.prog?`<span class="ayuda">${esc(sel.prog)}</span>`:""}</div>
   <p style="margin:6px 0 2px">${esc(sel.que)}</p>${sel.por?`<p class="ayuda" style="margin:0">Por qué: ${esc(sel.por)}</p>`:""}
   ${ev?`<p style="margin:8px 0 0"><b>Vence: ${fFecha(ev.vence)}</b> ${chipEv(ev)}${ev.norma?` <span class="chip g">${esc(ev.norma)}</span>`:""}</p>`:""}
   ${sel.plazo?`<p class="ayuda" style="margin:8px 0 0;color:var(--rojo)"><b>Radique antes del ${fFecha(sel.plazo.vence)}</b> para no perder la novedad (ya mostró el invento).</p>`:""}
   <div class="fila" style="margin-top:12px">${acc.map(b=>btnRuta(p.id,b)).join("")}${ev?btnRuta(p.id,{e:"Ya lo hice",a:"rutaEv",clave:ev.clave,cls:"acc"}):""}</div>
   ${t?`<p class="ayuda" style="margin:8px 0 0"><span class="chip a">Tarea creada · vence ${fFecha(t.vence)}</span> La verá en Trámites y plazos.</p>`:""}
-  ${sel.salto?`<p class="ayuda" style="margin:8px 0 0">Se da por superado porque la solicitud ya está radicada.</p>`:sel.auto?`<p class="ayuda" style="margin:8px 0 0">✓ PatentIA lo detectó por lo que ya registró.</p>`:sel.sinMarcar?"":`<div style="margin-top:10px"><button class="btn ${sel.hecho?"sec":"acc"} peq" data-acc="rutaHecho" data-id="${p.id}" data-k="${sel.k}">${sel.hecho?"Desmarcar este paso":"Marcar este paso como hecho"}</button></div>`}
+  ${sel.salto?`<p class="ayuda" style="margin:8px 0 0">Se da por superado porque la solicitud ya está radicada.</p>`:sel.auto?`<p class="ayuda" style="margin:8px 0 0">✓ Patent-IA lo detectó por lo que ya registró.</p>`:sel.sinMarcar?"":`<div style="margin-top:10px"><button class="btn ${sel.hecho?"sec":"acc"} peq" data-acc="rutaHecho" data-id="${p.id}" data-k="${sel.k}">${sel.hecho?"Desmarcar este paso":"Marcar este paso como hecho"}</button></div>`}
+  ${CHAT[sel.k]&&!(sel.hecho&&!sel.continuo)?`<p class="ayuda" style="margin:10px 0 0">💬 ${esc(CHAT[sel.k])} <a href="#" data-acc="claude" data-tarea="consulta" data-id="${p.id}">Consultar a Claude</a></p>`:""}
   ${mientras}
  </div>
  ${sug?`<div class="aviso fila" style="justify-content:space-between;margin-top:12px"><span>Con lo que lleva, la etapa debería ser <b>${esc(ETQ[sug])}</b>.</span><button class="btn sec peq" data-acc="etapaSug" data-id="${p.id}" data-etapa="${sug}">Actualizar etapa</button></div>`:""}
@@ -582,8 +665,8 @@ function vProyecto(){
  <div class="cab"><div><span class="cod">${esc(p.codigo)}</span><h1>${esc(p.titulo||"Sin título")}</h1><p>${esc(p.modalidad||"")}${p.sector?" · "+esc(p.sector):""}</p></div>
  <label class="c" style="min-width:200px">Etapa<select id="f-etapa" data-campo="etapa" data-id="${p.id}">${ETAPAS.map(([k,v])=>`<option value="${k}" ${p.etapa===k?"selected":""}>${v}</option>`).join("")}</select></label></div>
  ${vRuta(p)}
- ${REMOTO&&!sample&&["evaluacion","redaccion","dibujos","licencias"].includes(subtab)?`<div class="aviso">Esta versión no usa inteligencia artificial. Para evaluar, redactar o dibujar con Claude, use PatentIA dentro de Claude o el chat; luego pegue aquí el resultado.</div>`:""}
- <div class="subtabs" role="tablist">${st.map(([k,l])=>`<button data-sub="${k}" aria-current="${subtab===k}">${l}</button>`).join("")}</div>${body}`;
+ ${REMOTO&&!sample&&["evaluacion","redaccion","dibujos","licencias"].includes(subtab)?`<div class="aviso">Lo que hace la inteligencia artificial se hace con Claude, sin costo adicional: pulse un botón verde <b>“…con Claude (copiar y pegar)”</b>, pegue el pedido en Claude y luego pegue aquí la respuesta.</div>`:""}
+ <div class="subtabs" role="tablist">${st.map(([k,l])=>`<button data-sub="${k}" aria-current="${subtab===k}">${l}</button>`).join("")}</div>${TAB_AYUDA[subtab]?`<p class="ayuda tab-ayuda">${TAB_AYUDA[subtab]}</p>`:""}${body}${vSeguir(p)}`;
 }
 
 function pFicha(p){return`<section class="panel"><div class="campos">
@@ -659,7 +742,7 @@ function pExp(p){const k=M.clase(p.modalidad);const H=hoyISO();
  ${campoFecha(p,"fechaNegacion","Notificación de la negación","Desde aquí corren los 10 días hábiles del recurso")}
  </div><div class="fila" style="margin-top:10px;gap:18px">${campoCheck(p,"prorrogaForma","Pedí prórroga del requerimiento de forma")}${pat?campoCheck(p,"prorrogaFondo","Pedí prórroga del requerimiento de fondo"):""}${campoCheck(p,"agente","Actúo por medio de agente o abogado")}</div></section>
  <section class="panel"><div class="cab"><h3>Requisitos para radicar</h3><span class="chip ${hechosReq===req.length?"v":"a"}">${hechosReq} de ${req.length}</span></div><div class="lista">${req.map(([key,l,n])=>`<label class="it ck" style="justify-content:flex-start"><input type="checkbox" data-req="${p.id}|${key}" ${ch[key]?"checked":""}> <span>${esc(l)} <span class="ayuda">· ${esc(n)}</span></span></label>`).join("")}</div></section>
- <section class="panel"><h3>Calendario legal</h3>${ev.length?tablaEv(ev,false):`<div class="vacio">Escriba la fecha de radicación${pat?" (o la de divulgación, si ya mostró el invento)":""} y PatentIA calculará todos los plazos.</div>`}
+ <section class="panel"><h3>Calendario legal</h3>${ev.length?tablaEv(ev,false):`<div class="vacio">Escriba la fecha de radicación${pat?" (o la de divulgación, si ya mostró el invento)":""} y Patent-IA calculará todos los plazos.</div>`}
  <p class="ayuda">Plazos calculados con la Decisión 486 de la CAN: los meses en calendario y los días en días hábiles de Colombia (sin fines de semana ni festivos); si un plazo termina en día no hábil, pasa al siguiente. Los términos de un requerimiento corren desde su notificación. Confírmelos siempre con el oficio de la SIC o con su agente.</p></section>
  ${formTram(p.id)}`}
 function filaLic(l,conProy){return`<tr><td><b>${esc(l.empresa)}</b>${l.contacto?`<div class="ayuda">${esc(l.contacto)}</div>`:""}${l.notas?`<div class="ayuda">${esc(l.notas)}</div>`:""}</td>${conProy?`<td><a href="#" data-abrir="${l.proyectoId}">${esc(proy(l.proyectoId)?.titulo||"—")}</a></td>`:""}<td>${esc(l.tipo||"")}</td><td><select data-licetapa="${l.id}" aria-label="Etapa">${ETAPAS_LIC.map(([k,v])=>`<option value="${k}" ${l.etapa===k?"selected":""}>${v}</option>`).join("")}</select>${l.etapa==="firmado"?`<label class="c" style="margin-top:6px">Fecha de firma<input type="date" id="lf-${l.id}" data-licfirma="${l.id}" value="${esc(l.fechaFirma)}"></label>${l.registrada?`<span class="chip v" style="margin-top:4px">Inscrito en SIC</span>`:`<span class="chip a" style="margin-top:4px">Falta inscribir en SIC</span>`}`:""}</td><td class="num">${l.valor?cop(l.valor):""}${l.regalia?`<div class="ayuda">${esc(l.regalia)} % regalía</div>`:""}</td><td><button class="btn peligro peq" data-acc="borrarLic" data-id="${l.id}" aria-label="Eliminar">×</button></td></tr>`}
@@ -894,7 +977,7 @@ function textoAHtml(txt,p,ficha){const L=String(txt).split("\n");let h="",enList
  const fig=ficha&&dibujosDe(p)[0]?`<div class="fig"><img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(dibujosDe(p)[0].svg)}"></div>`:"";
  const css=ficha?`body{font-family:"Public Sans",Arial,sans-serif;max-width:760px;margin:24px auto;padding:0 22px;color:#1C2B39;line-height:1.5}h1{font-family:"Barlow Condensed",Arial Narrow,sans-serif;color:#0B4F8A;font-size:34px;margin:0 0 6px}h2{font-family:"Barlow Condensed",Arial Narrow,sans-serif;color:#0E8571;font-size:19px;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 4px;border-bottom:2px solid #E3F6F2}.fig{text-align:center;margin:10px 0}.fig img{max-height:260px}ul{margin:4px 0;padding-left:20px}.top{height:6px;background:linear-gradient(90deg,#0B4F8A,#14A38B);margin-bottom:18px}`
   :`body{font-family:Arial,sans-serif;max-width:760px;margin:30px auto;padding:0 22px;line-height:1.6;color:#000}h1{font-size:18px;text-align:center}h2{font-size:14px;margin:16px 0 4px}p{text-align:justify;white-space:pre-wrap;margin:0 0 8px}.c{border:1px solid #000;padding:6px;text-align:center;font-size:12px;font-weight:bold}`;
- return`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc((L.find(x=>x.startsWith("# "))||"#  Documento").slice(2))}</title><style>${css}.pie{margin-top:36px;border-top:1px solid #DCE5EE;font-size:11px;text-align:center;padding-top:6px;color:#5D6B78}</style></head><body>${ficha?`<div class="top"></div>`:`<div class="c">MODELO PARA REVISIÓN DE UN ABOGADO ANTES DE FIRMAR</div>`}${ficha?h.replace("</h1>","</h1>"+fig):h}<div class="pie">Generado con PatentIA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758 · ${new Date().toLocaleDateString("es-CO")}</div></body></html>`}
+ return`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc((L.find(x=>x.startsWith("# "))||"#  Documento").slice(2))}</title><style>${css}.pie{margin-top:36px;border-top:1px solid #DCE5EE;font-size:11px;text-align:center;padding-top:6px;color:#5D6B78}</style></head><body>${ficha?`<div class="top"></div>`:`<div class="c">MODELO PARA REVISIÓN DE UN ABOGADO ANTES DE FIRMAR</div>`}${ficha?h.replace("</h1>","</h1>"+fig):h}<div class="pie">Generado con Patent-IA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758 · ${new Date().toLocaleDateString("es-CO")}</div></body></html>`}
 async function genFicha(id){const p=proy(id);await conIA("ficha"+id,async()=>{
  const r=await sample.json(`${BASE}\n\nEscribe el contenido de una ficha comercial de UNA página para presentar este invento a gerentes de empresas que podrían licenciarlo o fabricarlo. Tono profesional y concreto, sin exagerar ni prometer cifras que no constan. No reveles detalles técnicos finos que permitan copiarlo (solo el principio general).\n\n${contextoProy(p)}\nResponde SOLO con un objeto JSON: {"titulo": string comercial corto, "gancho": string (una frase), "problema": string (2-3 frases), "solucion": string (2-3 frases), "ventajas": [4 strings cortos], "mercado": string (2 frases), "aplicaciones": [3 strings], "oferta": string (qué se ofrece: licencia, fabricación, etc.)}.`);
  ui.docTexto=plantillaFicha(p,r)})}
@@ -992,7 +1075,7 @@ function exportar(id){const p=proy(id);const b=p.borrador||{};
 <div class="c">BORRADOR CONFIDENCIAL — NO DIVULGAR ANTES DE RADICAR</div><h1>${esc(b.titulo||p.titulo)}</h1><div class="m">${esc(p.modalidad)} · ${esc(p.codigo)}<br>Inventor(es): ${esc(p.inventores)} · Solicitante: ${esc(p.solicitante)}${p.expediente?"<br>Expediente SIC: "+esc(p.expediente):""}</div>
 ${SECCIONES.filter(([k])=>k!=="titulo"&&b[k]).map(([k,l])=>`<h2>${l}</h2><pre>${esc(b[k])}</pre>`).join("")}
 ${dibujosDe(p).length?`<h2>Dibujos</h2>${dibujosDe(p).map((d,i)=>`<div class="fig"><img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(d.svg)}"><div><b>FIG. ${i+1}</b></div></div>`).join("")}`:""}
-<div class="pie">Generado con PatentIA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758 · ${new Date().toLocaleDateString("es-CO")}</div></body></html>`;
+<div class="pie">Generado con Patent-IA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758 · ${new Date().toLocaleDateString("es-CO")}</div></body></html>`;
  bajar(`${p.codigo}_borrador.html`,html)}
 async function bajar(nombre,data){if(!downloads){toast("Las descargas no están disponibles en esta vista.");return}try{await downloads.save({filename:nombre,data});toast("Archivo listo")}catch(e){if(e&&e.code==="declined")return;toast("No se pudo descargar el archivo.")}}
 
@@ -1007,7 +1090,7 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
   case"nuevo":crearProyecto();break;
   case"restaurar":restaurarRespaldo();break;
   case"salir":try{localStorage.removeItem("patentia_token")}catch(e){}location.reload();break;
-  case"respaldo":bajar(`PatentIA_respaldo_${hoyISO()}.json`,JSON.stringify({exportado:new Date().toISOString(),app:"PatentIA — SkyNet Genesis",...S},null,1));break;
+  case"respaldo":bajar(`Patent-IA_respaldo_${hoyISO()}.json`,JSON.stringify({exportado:new Date().toISOString(),app:"Patent-IA — SkyNet Genesis",...S},null,1));break;
   case"borrarProy":confirmar(`¿Eliminar el proyecto “${proy(id)?.titulo}” con todo lo suyo (trámites, licencias, bitácora, archivos, documentos, bocetos, gastos e ingresos)? No se puede deshacer.`,async()=>{for(const x of S.tramites.filter(x=>x.proyectoId===id))await borrar("tramites",x.id);for(const x of S.licencias.filter(x=>x.proyectoId===id))await borrar("licencias",x.id);for(const x of S.bitacora.filter(x=>x.proyectoId===id))await borrar("bitacora",x.id);for(const x of S.dibujos.filter(x=>x.proyectoId===id))await borrar("dibujos",x.id);for(const x of S.movimientos.filter(x=>x.proyectoId===id))await borrar("movimientos",x.id);for(const x of S.documentos.filter(x=>x.proyectoId===id))await borrar("documentos",x.id);for(const x of S.archivos.filter(x=>x.proyectoId===id)){try{if(x.assetId)await assets?.delete(x.assetId)}catch(e){}await borrar("archivos",x.id)}await borrar("proyectos",id);ir("proyectos");toast("Proyecto eliminado")});break;
   case"rutaSel":{ev.preventDefault();ui.rutaSel=ui.rutaSel||{};const st=ruta(proy(id)).pasos.find(x=>x.k===t.dataset.k);ui.rutaSel[id]={k:t.dataset.k,hecho:!!(st&&st.hecho)};render();break}
   case"rutaIr":{subtab=t.dataset.ir;render();const f=t.dataset.foco;if(f)setTimeout(()=>{if(f==="l-empresa"&&$("#det-lic"))$("#det-lic").open=true;const el=$("#"+f);if(el){el.scrollIntoView({block:"center"});el.focus()}},60);else $(".subtabs")?.scrollIntoView({block:"start"});break}
@@ -1015,6 +1098,8 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
   case"rutaTarea":{const k=t.dataset.k;if(tareaRuta(id,k)){toast("Esa tarea ya existe.");break}const tid=uid();const x={proyectoId:id,tipo:t.dataset.tipo||"Otro",vence:sumar(hoyISO(),0,+t.dataset.dias||7),valor:0,notas:t.dataset.nota||"",estado:"pendiente",origen:"ruta:"+k,creado:new Date().toISOString()};local("tramites",tid,x);if(await guardar("tramites",tid,x))toast(`Tarea creada para el ${fFecha(x.vence)}. La verá en Trámites y plazos.`);render();break}
   case"rutaDoc":{const p=proy(id);if(!p)break;const tp=t.dataset.tipo;ui.docTipo=tp;ui.docTexto=tp==="ficha"?plantillaFicha(p):plantilla(tp,p,{});ui.docTitulo=(TIPOS_DOC.find(x=>x[0]===tp)||[,"Documento"])[1];subtab="documentos";render();setTimeout(()=>$("#d-texto")?.scrollIntoView({block:"center"}),60);toast("Documento generado. Complete los espacios en blanco y pulse Guardar.");break}
   case"rutaEv":{const cl=t.dataset.clave;const pt={hechos:{[cl]:hoyISO()}};const pp=proy(id);if(cl==="pedir-fondo"&&pp&&!pp.fechaPeticionFondo)pt.fechaPeticionFondo=hoyISO();await parchear("proyectos",id,pt);if(ui.rutaSel)delete ui.rutaSel[id];render();toast("Marcado como hecho");break}
+  case"claude":ev.preventDefault();abrirPuente(t.dataset.tarea,id,t.dataset.sec);break;
+  case"verRuta":ev.preventDefault();$(".ruta")?.scrollIntoView({block:"start",behavior:"smooth"});break;
   case"evaluar":evaluar(id);break;
   case"redactar":conIA(t.dataset.sec+id,()=>redactar(id,t.dataset.sec));break;
   case"redactarTodo":redactarTodo(id);break;
@@ -1048,7 +1133,7 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
   case"borrarDoc":confirmar("¿Eliminar este documento guardado?",async()=>{await borrar("documentos",id)});break;
  }});
 document.addEventListener("toggle",ev=>{if(ev.target.id==="det-tarifas")ui.tarifasAbiertas=ev.target.open},true);
-document.addEventListener("keydown",ev=>{if(ev.key==="Escape"&&$("#capa").innerHTML){$("#capa").innerHTML="";return}const r=ev.target.closest&&ev.target.closest("tr.clic");if(r&&(ev.key==="Enter"||ev.key===" ")){ev.preventDefault();ir("proyecto",r.dataset.abrir)}});
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape"&&$("#pc-resp")&&$("#pc-resp").value.trim()){toast("Para cerrar sin guardar, pulse Cancelar.");return}if(ev.key==="Escape"&&$("#capa").innerHTML){ui.puente=null;$("#capa").innerHTML="";return}const r=ev.target.closest&&ev.target.closest("tr.clic");if(r&&(ev.key==="Enter"||ev.key===" ")){ev.preventDefault();ir("proyecto",r.dataset.abrir)}});
 document.addEventListener("input",ev=>{const el=ev.target;if(el.dataset.campo||el.dataset.bor){if(el.tagName!=="SELECT"&&el.type!=="date"&&el.type!=="checkbox")campoCambia(el)}else if(el.id==="busca"){ui.busca=el.value;const pos=el.selectionStart;render();const b=$("#busca");b.focus();b.setSelectionRange(pos,pos)}
  else if(el.id==="d-texto")ui.docTexto=el.value;
  else if(el.id==="i-problema")ideasForm.problema=el.value;else if(el.id==="i-contexto")ideasForm.contexto=el.value});
@@ -1113,7 +1198,7 @@ async function iniciarRemoto(){downloads=descargasLocales;sample=null;assets=nul
 async function pantallaAcceso(msg){let hay=true;try{hay=(await api("GET","/api/estado")).administrador}catch(e){$("#main").innerHTML=`<div class="aviso">No se pudo conectar con el servidor. Puede estar despertando: espere un minuto y recargue la página.</div>`;return}
  const modo=pantallaAcceso.modo||(hay?"entrar":"crear");
  $("#nav").innerHTML="";estado("","");
- $("#main").innerHTML=`<section class="panel" style="max-width:440px;margin:6vh auto;width:100%"><h2 style="margin-bottom:6px">${modo==="crear"?"Crear el administrador":modo==="recuperar"?"Recuperar la contraseña":"Entrar a PatentIA"}</h2>
+ $("#main").innerHTML=`<section class="panel" style="max-width:440px;margin:6vh auto;width:100%"><h2 style="margin-bottom:6px">${modo==="crear"?"Crear el administrador":modo==="recuperar"?"Recuperar la contraseña":"Entrar a Patent-IA"}</h2>
  ${msg?`<div class="aviso" style="margin:8px 0">${esc(msg)}</div>`:""}<form id="f-acceso" class="campos" style="grid-template-columns:1fr" novalidate>
  ${modo!=="recuperar"?`<label class="c">Correo<input type="text" id="acc-email" autocomplete="username" inputmode="email"></label>`:""}${modo!=="entrar"?`<label class="c">Clave de recuperación (la que guardó en Render)<input type="password" id="acc-codigo" autocomplete="off"></label>`:""}
  <label class="c">${modo==="entrar"?"Contraseña":"Contraseña nueva (mínimo 10 caracteres)"}<input type="password" id="acc-clave" autocomplete="${modo==="entrar"?"current-password":"new-password"}"></label>
@@ -1127,8 +1212,8 @@ async function pantallaAcceso(msg){let hay=true;try{hay=(await api("GET","/api/e
   try{const j=modo==="crear"?await api("POST","/api/crear-administrador",{email:$("#acc-email").value.trim(),clave,codigo:$("#acc-codigo").value}):modo==="recuperar"?await api("POST","/api/recuperar",{codigo:$("#acc-codigo").value,clave}):await api("POST","/api/entrar",{email:$("#acc-email").value.trim(),clave});
    TOKEN=j.token;try{localStorage.setItem("patentia_token",TOKEN)}catch(e){}pantallaAcceso.modo="";iniciarRemoto();render()}
   catch(er){toast(er.message||"No se pudo entrar.")}}}
-function restaurarRespaldo(){const inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";inp.onchange=async()=>{const f=inp.files[0];if(!f)return;let j;try{j=JSON.parse(await f.text())}catch(e){toast("Ese archivo no es un respaldo de PatentIA.");return}
- if(!Array.isArray(j.proyectos)){toast("Ese archivo no es un respaldo de PatentIA.");return}
+function restaurarRespaldo(){const inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";inp.onchange=async()=>{const f=inp.files[0];if(!f)return;let j;try{j=JSON.parse(await f.text())}catch(e){toast("Ese archivo no es un respaldo de Patent-IA.");return}
+ if(!Array.isArray(j.proyectos)){toast("Ese archivo no es un respaldo de Patent-IA.");return}
  confirmar(`Esto reemplaza TODOS los datos actuales por los del respaldo (${j.proyectos.length} proyectos). ¿Continuar?`,async()=>{try{const r=await api("POST","/api/importar",j);toast(`Respaldo restaurado: ${r.importados} registros.`);location.reload()}catch(e){toast(e.message||"No se pudo restaurar.")}},"Restaurar")};inp.click()}
 render();iniciar();
 })();
