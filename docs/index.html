@@ -192,7 +192,7 @@ function finMes(s){const[y,mo]=s.split("-").map(Number);return iso(new Date(y,mo
 const venceHabil=s=>siguienteHabil(s); // si el plazo termina en día no hábil, se corre al siguiente hábil
 function dias(s,hoy){return Math.round((fecha(s)-fecha(hoy))/864e5)}
 
-const TIPO={pi:"Patente de invención",mu:"Modelo de utilidad",di:"Diseño industrial",ma:"Marca",da:"Derecho de autor (software)",si:"Secreto industrial"};
+const TIPO={pi:"Patente de invención",mu:"Modelo de utilidad",di:"Diseño industrial",ma:"Marca",da:"Derecho de autor (software)",si:"Secreto industrial",ob:"Derecho de autor (obra escrita)"};
 function clase(mod){for(const k in TIPO)if(TIPO[k]===mod)return k;return"mu"}
 
 /* Eventos legales derivados de las fechas del expediente */
@@ -316,7 +316,7 @@ const API=(window.PATENTIA_API||"").replace(/\/$/,"");const REMOTO=!!API;
 const ETAPAS=[["idea","Idea"],["evaluacion","En evaluación"],["redaccion","En redacción"],["prototipo","Prototipo"],["radicada","Radicada SIC"],["examen","En examen"],["concedida","Concedida"],["licenciada","Licenciada"],["negada","Negada"],["vencida","Vencida (dominio público)"],["descartada","Descartada"]];
 const ETQ=Object.fromEntries(ETAPAS);
 const CHIP_ETAPA={idea:"g",evaluacion:"",redaccion:"",prototipo:"a",radicada:"v",examen:"v",concedida:"v",licenciada:"v",negada:"r",vencida:"g",descartada:"r"};
-const MODALIDADES=["Patente de invención","Modelo de utilidad","Diseño industrial","Derecho de autor (software)","Secreto industrial","Marca"];
+const MODALIDADES=["Patente de invención","Modelo de utilidad","Diseño industrial","Derecho de autor (software)","Secreto industrial","Marca","Derecho de autor (obra escrita)"];
 const SECTORES=["Salud y dispositivos médicos","Educación","Seguridad y salud en el trabajo","Veterinaria y agro","Hogar e infancia","Industria y manufactura","Software y tecnología","Construcción","Energía y ambiente","Alimentos","Transporte","Otro"];
 const TIPOS_TRAMITE=["Búsqueda de antecedentes","Prototipo","Revisión por agente/abogado","Radicación de la solicitud","Pago de tasa","Examen de forma","Requerimiento SIC (responder)","Publicación en Gaceta","Petición de examen de fondo","Oposición","Plazo de prioridad internacional","Anualidad / mantenimiento","Otro"];
 const ETAPAS_LIC=[["prospecto","Prospecto"],["contactado","Contactado"],["negociacion","En negociación"],["firmado","Firmado"],["perdido","Perdido"]];
@@ -390,13 +390,13 @@ const BASE="Eres un agente de propiedad industrial y un ingeniero de producto qu
 function contextoProy(p){const b=p.borrador||{};return `PROYECTO ${p.codigo||""}\nTítulo: ${p.titulo||""}\nModalidad: ${p.modalidad||""}\nSector: ${p.sector||""}\nProblema que resuelve: ${p.problema||""}\nSolución propuesta: ${p.solucion||""}\nNotas del inventor: ${p.notas||""}\n`+(b.descripcion?`\nDescripción ya redactada:\n${String(b.descripcion).slice(0,6000)}\n`:"")+(b.reivindicaciones?`\nReivindicaciones actuales:\n${String(b.reivindicaciones).slice(0,4000)}\n`:"")}
 
 /* ---------- Navegación ---------- */
-const VISTAS=[["tablero","Tablero"],["proyectos","Proyectos"],["ideas","Taller de ideas"],["tramites","Trámites y plazos"],["licencias","Licencias y ventas"]];
+const VISTAS=[["tablero","Tablero"],["proyectos","Proyectos"],["grupos","Grupos de investigación"],["ideas","Taller de ideas"],["tramites","Trámites y plazos"],["licencias","Licencias y ventas"]];
 function nav(){document.body.classList.toggle("sin-ia",REMOTO&&!sample);$("#nav").innerHTML=VISTAS.map(([k,l])=>`<button data-vista="${k}" aria-current="${vista===k||(vista==="proyecto"&&k==="proyectos")}">${l}</button>`).join("")}
 function ir(v,id){vista=v;if(id!==undefined&&id!==proyActual){ui.docTexto=""}if(id!==undefined)proyActual=id;if(v==="proyecto"&&id!==undefined)subtab="ficha";render();window.scrollTo({top:0})}
 
 /* ---------- Render ---------- */
-const TMP=/^(b|m|t|l|d|a|dib)-/,NO_TMP=new Set(["d-texto","d-tipo","a-file"]);
-function ctxActual(){return vista+"|"+(vista==="proyecto"?proyActual+"|"+subtab:"")}
+const TMP=/^(b|m|t|l|d|a|dib|ge|gp)-/,NO_TMP=new Set(["d-texto","d-tipo","a-file"]);
+function ctxActual(){return vista+"|"+(vista==="proyecto"?proyActual+"|"+subtab:vista==="grupos"?(ui.editG||""):"")}
 function capturarTmp(){if(ui.saltarCaptura){ui.saltarCaptura=false;return}const k=ui.ctxPrev;if(!k)return;const st=(ui.tmp[k]=ui.tmp[k]||{});
  $("#main").querySelectorAll("input[id],select[id],textarea[id]").forEach(el=>{if(TMP.test(el.id)&&!NO_TMP.has(el.id)&&el.type!=="file")st[el.id]=el.value});
  $("#main").querySelectorAll("details[id]").forEach(d=>{st["det:"+d.id]=d.open})}
@@ -405,14 +405,14 @@ function limpiarTmp(pref){const st=ui.tmp[ctxActual()];if(st)for(const id in st)
 function render(){enRender=true;try{vaciarPendientes()}finally{enRender=false}capturarTmp();const ae=document.activeElement;const fid=ae&&ae.id&&$("#main").contains(ae)?ae.id:null;let ss=null,se=null;try{ss=ae.selectionStart;se=ae.selectionEnd}catch(e){}
  nav();const m=$("#main");let h="";
  if(!cargado)h=`<div class="vacio">Cargando sus proyectos…</div>`;
- else h=({tablero:vTablero,proyectos:vProyectos,proyecto:vProyecto,ideas:vIdeas,tramites:vTramites,licencias:vLicencias}[vista]||vTablero)();
+ else h=({tablero:vTablero,proyectos:vProyectos,proyecto:vProyecto,ideas:vIdeas,grupos:vGrupos,tramites:vTramites,licencias:vLicencias}[vista]||vTablero)();
  if(!db&&cargado)h=`<div class="aviso">Modo de prueba: los cambios no se guardarán al cerrar. Abra la app desde su enlace en Claude para guardar sus proyectos.</div>`+h;
  m.innerHTML=h+`<div class="pie">Patent-IA — herramienta interna de SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758</div>`;
  restaurarTmp();ui.ctxPrev=ctxActual();
  if(fid){const n=document.getElementById(fid);if(n&&n!==document.activeElement){n.focus({preventScroll:true});try{if(ss!==null)n.setSelectionRange(ss,se)}catch(e){}}}
 }
 
-{const r0=render;render=function(){r0();try{puentesClaude()}catch(e){}}}
+{const r0=render;render=function(){r0();try{puentesClaude()}catch(e){}if(cargado&&!ui.sembrado&&!ui.errCarga&&!cfgG())setTimeout(()=>sembrarGrupos().catch(()=>{ui.sembrado=false}),0)}}
 function chipEtapa(e){return`<span class="chip ${CHIP_ETAPA[e]||""}">${esc(ETQ[e]||e)}</span>`}
 const M=window.MotorPI;
 function chipEv(e){const x=M.estado(e,hoyISO());return`<span class="chip ${x.cls}">${esc(x.txt)}</span>`}
@@ -445,7 +445,8 @@ function vTablero(){
  <div class="grid g2">
   <section class="panel"><h3>Trabajados recientemente</h3>${recientes.length?`<div class="lista">${recientes.map(p=>`<div class="it"><div><div class="t"><a href="#" data-abrir="${p.id}">${esc(p.titulo||"Sin título")}</a></div><div class="d"><span class="cod">${esc(p.codigo)}</span> · ${esc(p.modalidad||"")}${(()=>{const c=ruta(p).cur;return c?` · Sigue: <b>${esc(c.t)}</b>`:""})()}</div></div>${chipEtapa(p.etapa)}</div>`).join("")}</div>`:`<div class="vacio">Sus proyectos aparecerán aquí.</div>`}</section>
   <section class="panel"><h3>Licencias</h3><div class="lista">${ETAPAS_LIC.map(([k,l])=>`<div class="it"><span>${l}</span><b>${S.licencias.filter(x=>x.etapa===k).length}</b></div>`).join("")}</div><p class="ayuda">${neg} negociaciones abiertas.</p></section>
- </div>`;
+ </div>
+ ${grupos().length?`<div class="grid g2">${panelGruposTablero()}</div>`:""}`;
 }
 
 function vProyectos(){
@@ -456,6 +457,166 @@ function vProyectos(){
  ${l.length?`<div class="tabla-w"><table><thead><tr><th>Código</th><th>Proyecto</th><th>Modalidad</th><th>Sector</th><th>Etapa</th><th>Siguiente paso</th></tr></thead><tbody>${l.map(p=>`<tr class="clic" data-abrir="${p.id}" tabindex="0"><td class="cod">${esc(p.codigo)}</td><td><b>${esc(p.titulo||"Sin título")}</b><div class="ayuda">${esc((p.problema||"").slice(0,110))}</div></td><td>${esc(p.modalidad||"")}</td><td>${esc(p.sector||"")}</td><td>${chipEtapa(p.etapa)}</td><td>${(()=>{const c=ruta(p).cur;return c?esc(c.t):"—"})()}</td></tr>`).join("")}</tbody></table></div>`:`<div class="vacio">${S.proyectos.length?"Ningún proyecto coincide con la búsqueda.":"Aún no hay proyectos. Cree el primero o use el Taller de ideas para que Claude le proponga inventos a partir de un problema."}</div>`}`;
 }
 
+
+/* ===== Grupos de investigación (Minciencias): grupos, líneas, productos y cronograma ===== */
+const TIPOS_PROD=[["patente","Patente o modelo de utilidad (SIC)"],["diseno","Diseño industrial (SIC)"],["software","Software (registro DNDA)"],["articulo","Artículo (revista con ISSN)"],["libro","Libro (exige ISBN)"],["capitulo","Capítulo de libro (exige ISBN)"],["licencia","Licencia o contrato de transferencia"],["prototipo","Prototipo"],["otro","Otro"]];
+const EST_GL=[["","Sin registrar"],["cvlac","Registrado en CvLAC"],["vinculado","Vinculado al grupo en GrupLAC"]];
+const AVALES=[["avalado","Avalado"],["falta","Falta aval"]];
+const GRUPOS_INI=[
+ {id:"vih",nombre:"Grupo de Investigación en VIH y Enfermedades Infecciosas",corto:"VIH e Infecciosas",codigo:"COL0194131",desde:"2010",aval:"avalado",lineas:[],notas:"Antes “GENESIS - Grupo de Investigación en VIH”."},
+ {id:"nexus",nombre:"NEXUS – Grupo de Investigación en Ingeniería de Software y Sistemas Inteligentes",corto:"NEXUS",codigo:"00000000019938",desde:"2014",aval:"avalado",notas:"Antes “Inteligencias Múltiples”.",
+  lineas:["Ingeniería de software y plataformas SaaS","Salud digital y sistemas de información clínica","Tecnología educativa","Ciberseguridad y auditoría de sistemas","Desarrollo de software asistido por IA","Desarrollo de Inteligencias Múltiples"]},
+ {id:"autismo",nombre:"Autismo y Neurodesarrollo",corto:"Autismo y Neurodesarrollo",codigo:"",desde:"2010",aval:"falta",lineas:[],notas:""},
+ {id:"autiscan",nombre:"Autiscan Analytics – Grupo de Investigación en Autismo e Inteligencia Artificial",corto:"Autiscan Analytics",codigo:"00000000025253",desde:"2020",aval:"falta",notas:"",
+  lineas:["Tamizaje y detección temprana del autismo con IA","Neurodesarrollo, inclusión educativa e intervención en autismo"]},
+ {id:"prometeo",nombre:"PROMETEO – Grupo de Investigación en Hidrógeno Verde y Energías del Futuro",corto:"PROMETEO",codigo:"00000000025513",desde:"2026",aval:"falta",notas:"Aquí va la propuesta de hidrógeno al Ministerio de Minas y Energía.",
+  lineas:["Producción y almacenamiento de hidrógeno verde","Energías renovables y almacenamiento energético"]},
+ {id:"genesis",nombre:"GENESIS – Grupo de Investigación en Tecnologías de Frontera para el Desarrollo Humano",corto:"GENESIS",codigo:"00000000025514",desde:"2026",aval:"falta",notas:"",
+  lineas:["IA aplicada a salud y educación","Neurotecnología, bioingeniería y biónica","Robótica asistencial y educativa","Computación cuántica y algoritmos avanzados","Tecnologías emergentes y transformación digital"]}];
+const PEND_INI=["Avalar en InstituLAC los grupos Autismo y Neurodesarrollo, Autiscan Analytics, PROMETEO y GENESIS. Se espera la respuesta de Minciencias sobre el usuario de InstituLAC (pedida el 9 de octubre de 2026).",
+ "Autiscan Analytics: registrar en CvLAC el producto de IA en internet (falta el enlace y el registro DNDA de software).",
+ "Autiscan Analytics: registrar en CvLAC el libro “Autiscan Analytics®” (2025) (falta ISBN; tiene derechos de autor pero no ISBN).",
+ "Evaluar sacar ISBN con POLIANDES como editorial.",
+ "Publicar artículos de los grupos en la Revista Colombiana de Medicina, que tiene ISSN."];
+
+const cfgG=()=>S.config.find(c=>c.id==="grupos");
+const grupos=()=>(cfgG()||{}).lista||[];
+const grupo=id=>grupos().find(g=>g.id===id);
+const cortoG=g=>g?(g.corto||g.nombre):"";
+const linea=(g,id)=>g&&(g.lineas||[]).find(l=>l.id===id);
+async function guardarG(cambios){if(!cfgG()){toast("Los grupos aún no se han cargado. Espere un momento o recargue la página.");render();return false}const ok=await parchear("config","grupos",cambios);render();return ok}
+function tipoSug(p){const k=M.clase(p.modalidad);return k==="pi"||k==="mu"?"patente":k==="di"?"diseno":k==="da"?"software":k==="ob"?"libro":"otro"}
+const tipoProd=p=>p.tipoProducto||tipoSug(p);
+const etqTipo=t=>(TIPOS_PROD.find(x=>x[0]===t)||[,"Otro"])[1];
+const etqEst=e=>(EST_GL.find(x=>x[0]===(e||""))||EST_GL[0])[1];
+const esProducto=p=>p.estadoGrupLAC==="cvlac"||p.estadoGrupLAC==="vinculado";
+function etqRegistro(t){return({patente:"Número de expediente o de título (SIC)",diseno:"Número de expediente o de título (SIC)",software:"Número de registro DNDA",libro:"ISBN",capitulo:"ISBN del libro",articulo:"ISSN o DOI del artículo",licencia:"Número o fecha del contrato"})[t]||"Registro o identificador"}
+function reqMin(p){const t=tipoProd(p);const reg=String(p.registroProd||"").trim(),url=String(p.enlaceProd||"").trim();
+ if(p.grupoId==="ninguno")return"";if(!grupo(p.grupoId))return"Falta asignarlo a un grupo";
+ if(t==="patente"||t==="diseno")return!M.valida(p.fechaRadicacion)?"Falta radicación SIC":!M.valida(p.fechaConcesion)?"Falta la concesión de la SIC":"";
+ if(t==="software"){const f=[];if(!reg)f.push("registro DNDA");if(!url)f.push("enlace");return f.length?"Falta "+f.join(" y "):""}
+ if(t==="libro")return reg?"":"Falta ISBN";
+ if(t==="capitulo")return reg?"":"Falta ISBN del libro";
+ if(t==="articulo")return reg||url?"":"Falta publicarlo (ISSN o enlace del artículo)";
+ if(t==="licencia")return S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado")?"":"Falta el contrato firmado";
+ if(t==="prototipo")return S.archivos.some(a=>a.proyectoId===p.id)?"":"Falta evidencia (fotos o planos en Bitácora y archivos)";
+ return""}
+const prodsDe=gid=>S.proyectos.filter(p=>p.grupoId===gid);
+function ultimoProd(gid){return prodsDe(gid).filter(p=>esProducto(p)&&p.fechaGrupLAC).map(p=>p.fechaGrupLAC).sort().pop()||""}
+
+/* Cronograma: cada grupo con meta "1 producto cada N meses" desde metaDesde */
+function cronograma(){const H=hoyISO();const L=[];
+ for(const g of grupos()){const N=+(g.metaMeses??2);if(!N)continue;const ini=M.valida(g.metaDesde)?g.metaDesde:H.slice(0,8)+"01";
+  const fechas=prodsDe(g.id).filter(p=>esProducto(p)&&M.valida(p.fechaGrupLAC)).map(p=>p.fechaGrupLAC);
+  const cand=prodsDe(g.id).filter(p=>!esProducto(p)&&!["descartada","negada","vencida"].includes(p.etapa)).sort((a,b)=>(!!reqMin(a)-!!reqMin(b))||(a.codigo||"").localeCompare(b.codigo||""));
+  const G=[];let fut=false;
+  for(let i=0;i<240;i++){const a=sumar(ini,i*N),b=sumar(ini,(i+1)*N,-1);if(a>H){if(fut)break;fut=true}
+   const n=fechas.filter(f=>f>=a&&f<=b).length;G.push({grupo:g,desde:a,vence:b,cumplida:n>0,n})}
+  const abiertas=G.filter(x=>!x.cumplida&&x.vence>=H),venc=G.filter(x=>!x.cumplida&&x.vence<H).reverse();let ci=0;
+  for(const x of[...abiertas,...venc]){const c=cand[ci++];if(!c)break;x.proy=c;x.req=reqMin(c)}
+  L.push(...G)}
+ return L.sort((a,b)=>a.vence.localeCompare(b.vence))}
+function estMeta(x){const H=hoyISO();if(x.cumplida)return{cls:"v",txt:"Cumplida",nivel:0};const d=diasA(x.vence);if(x.vence<H)return{cls:"r",txt:"Vencida",nivel:4};if(d<=15)return{cls:"a",txt:`Vence en ${d} d`,nivel:3};return{cls:"",txt:"Pendiente",nivel:1}}
+function avisosGrupos(){const H=hoyISO();const cr=cronograma();const lim=sumar(H,-3);
+ const vg={};for(const x of cr)if(estMeta(x).nivel===4)(vg[x.grupo.id]=vg[x.grupo.id]||[]).push(x);
+ return{vencidas:cr.filter(x=>estMeta(x).nivel===4),vencPorGrupo:Object.values(vg),proximas:cr.filter(x=>estMeta(x).nivel===3),
+  sinProd:grupos().filter(g=>{const u=ultimoProd(g.id);if(u)return u<lim;return!!(M.valida(g.metaDesde)&&g.metaDesde<lim)}),proxima:cr.find(x=>!x.cumplida&&x.vence>=H)}}
+
+/* Carga inicial (una sola vez) */
+async function sembrarGrupos(){if(ui.sembrado||ui.errCarga||!cargado||cfgG())return;ui.sembrado=true;
+ const lista=GRUPOS_INI.map(g=>({...g,lineas:g.lineas.map((n,i)=>({id:g.id+"-"+(i+1),nombre:n})),metaMeses:2,metaDesde:hoyISO().slice(0,8)+"01"}));
+ const pendientes=PEND_INI.map((t,i)=>({id:"p"+(i+1),texto:t,hecho:false,creado:hoyISO()}));
+ const x={lista,pendientes,creado:new Date().toISOString()};local("config","grupos",x);if(!await guardar("config","grupos",x)){ui.sembrado=false;return}
+ const plato=S.proyectos.find(p=>p.codigo==="PIA-2026-001")||S.proyectos.find(p=>/plato/i.test(p.titulo||""));
+ const nuevos=[{sid:"seed-autiscan-sw",titulo:"Autiscan Analytics: herramienta de IA en internet",modalidad:"Derecho de autor (software)",sector:"Software y tecnología",grupoId:"autiscan",lineaId:"autiscan-1",tipoProducto:"software",notas:"Producto de IA en internet del grupo Autiscan Analytics. Falta el enlace y el registro DNDA de software para registrarlo en CvLAC."},
+  {sid:"seed-autiscan-libro",titulo:"Libro “Autiscan Analytics®” (2025)",modalidad:"Derecho de autor (obra escrita)",sector:"Salud y dispositivos médicos",grupoId:"autiscan",lineaId:"autiscan-2",tipoProducto:"libro",anioProd:"2025",notas:"Libro del grupo Autiscan Analytics. Tiene derechos de autor pero no ISBN. Evaluar sacar el ISBN con POLIANDES como editorial."}].filter(n=>!proy(n.sid)&&!S.proyectos.some(p=>p.titulo===n.titulo));
+ const y=new Date().getFullYear();let base=Math.max(0,...S.proyectos.filter(p=>(p.codigo||"").startsWith("PIA-"+y)).map(p=>+p.codigo.split("-")[2]||0));
+ const docs=nuevos.map(({sid,...n})=>({sid,p:{codigo:`PIA-${y}-${String(++base).padStart(3,"0")}`,etapa:"idea",problema:"",solucion:"",inventores:"Ricardo Londoño González",solicitante:"SkyNet Genesis",borrador:{},creado:new Date().toISOString(),...n}}));
+ for(const d of docs)local("proyectos",d.sid,d.p);
+ if(plato&&!plato.grupoId)await parchear("proyectos",plato.id,{grupoId:"autismo",lineaId:""});
+ for(const d of docs)await guardar("proyectos",d.sid,d.p);
+ render()}
+
+/* Vista: Grupos de investigación */
+function vGrupos(){const G=grupos();const cfg=cfgG()||{};const av=avisosGrupos();const H=hoyISO();
+ const pend=(cfg.pendientes||[]);const cr=cronograma();
+ const abierta={},ultV={};for(const x of cr){if(!x.cumplida&&x.vence>=H&&!abierta[x.grupo.id])abierta[x.grupo.id]=x;if(!x.cumplida&&x.vence<H)(ultV[x.grupo.id]=ultV[x.grupo.id]||[]).push(x)}
+ const vis=cr.filter(x=>x.cumplida?x.vence>=sumar(H,-6):abierta[x.grupo.id]===x||(ultV[x.grupo.id]||[]).slice(-2).includes(x));
+ return`<div class="cab"><div><h1>Grupos de investigación</h1><p>Sus grupos de Minciencias, sus líneas y el cronograma de productos para subir a GrupLAC.</p></div>
+ <div class="fila"><button class="btn sec" data-acc="claude" data-tarea="grupos">Consultar a Claude sobre los grupos</button><button class="btn pri" data-acc="nuevoG">+ Agregar grupo</button></div></div>
+ ${av.vencidas.length||av.proximas.length||av.sinProd.length?`<div class="aviso" role="status"><b>Avisos</b><ul style="margin:6px 0 0;padding-left:20px">
+  ${av.vencPorGrupo.map(v=>{const u=v[v.length-1];return`<li><b>${v.length>1?v.length+" metas vencidas":"Meta vencida"}</b>: ${esc(cortoG(u.grupo))} no registró producto${v.length>1?` en ${v.length} períodos (el último venció el ${fFecha(u.vence)})`:` en el período que venció el ${fFecha(u.vence)}`}.</li>`}).join("")}
+  ${av.proximas.map(x=>`<li><b>Meta próxima</b>: ${esc(cortoG(x.grupo))} debe registrar un producto antes del ${fFecha(x.vence)}${x.proy?` (sugerido: ${esc(x.proy.titulo)})`:""}.</li>`).join("")}
+  ${av.sinProd.length?`<li>Sin productos registrados en los últimos 3 meses: ${av.sinProd.map(g=>esc(cortoG(g))).join(", ")}.</li>`:""}</ul></div>`:""}
+ <section class="panel"><div class="cab"><h3>Pendientes de Minciencias</h3><span class="ayuda">${pend.filter(x=>!x.hecho).length} por hacer</span></div>
+ ${pend.length?`<div class="lista">${pend.map(x=>`<div class="it"><label class="ck" style="flex:1"><input type="checkbox" data-pendg="${x.id}" ${x.hecho?"checked":""}> <span style="${x.hecho?"text-decoration:line-through;color:var(--tx2)":""}">${esc(x.texto)}</span></label><button class="btn peligro peq" data-acc="pendDel" data-id="${x.id}" aria-label="Quitar pendiente">Quitar</button></div>`).join("")}</div>`:`<div class="vacio">No hay pendientes.</div>`}
+ <div class="fila" style="margin-top:10px"><input type="text" id="gp-nuevo" placeholder="Nuevo pendiente (ej.: pedir ISBN del libro…)" style="flex:1;min-width:220px"><button class="btn acc" data-acc="pendAdd">Agregar</button></div></section>
+ <div class="grid g2">${G.map(g=>ui.editG===g.id?formGrupo(g):fichaGrupo(g)).join("")}${ui.editG==="nuevo"?formGrupo({id:"nuevo",nombre:"",corto:"",codigo:"",desde:"",aval:"falta",lineas:[],metaMeses:2,notas:""}):""}</div>
+ <section class="panel"><div class="cab"><div><h3>Cronograma de productividad</h3><p class="ayuda">Cada grupo tiene una meta (por ejemplo, 1 producto cada 2 meses). Un producto cuenta cuando lo marca “Registrado en CvLAC” o “Vinculado al grupo”. Patent-IA sugiere qué proyecto subir.</p></div></div>
+ ${vis.length?`<div class="tabla-w"><table><thead><tr><th>Fecha meta</th><th>Grupo</th><th>Producto</th><th>Proyecto asociado</th><th>Estado</th><th></th></tr></thead><tbody>${vis.map(x=>{const e=estMeta(x);const p=x.proy;return`<tr><td>${fFecha(x.vence)}</td><td>${esc(cortoG(x.grupo))}</td><td>${p?esc(etqTipo(tipoProd(p))):x.cumplida?"Registrado":"Cualquier producto"}</td><td>${p?`<a href="#" data-abrir="${p.id}">${esc(p.titulo)}</a>${x.req?`<div class="ayuda">${esc(x.req)}</div>`:""}`:x.cumplida?"—":`<span class="ayuda">Sin proyecto asignado.</span> <button class="btn sec peq" data-acc="nuevoParaG" data-id="${x.grupo.id}">+ Proyecto para este grupo</button>`}</td><td><span class="chip ${e.cls}">${e.txt}</span></td><td>${p&&!x.cumplida?`<button class="btn ${x.req?"sec":"acc"} peq" data-acc="gruplac" data-id="${p.id}">Registrar en GrupLAC</button>`:""}</td></tr>`}).join("")}</tbody></table></div>`:`<div class="vacio">Sin metas. Ponga una meta a cada grupo con “Editar”.</div>`}
+ </section>`}
+function fichaGrupo(g){const P=prodsDe(g.id);const reg=P.filter(esProducto).length;const u=ultimoProd(g.id);
+ return`<section class="panel grupo"><div class="fila" style="justify-content:space-between;align-items:flex-start"><div style="min-width:0"><h3 style="margin:0">${esc(g.nombre)}</h3><p class="ayuda" style="margin:2px 0 0">${g.codigo?`Código ${esc(g.codigo)} · `:""}${g.desde?`desde ${esc(g.desde)}`:""}</p></div><span class="chip ${g.aval==="avalado"?"v":"a"}">${g.aval==="avalado"?"Avalado":"Falta aval"}</span></div>
+ ${g.notas?`<p class="ayuda" style="margin:8px 0 0">${esc(g.notas)}</p>`:""}
+ <p style="margin:10px 0 4px"><b>Líneas</b> <span class="ayuda">(proyectos en cada línea)</span></p>
+ ${(g.lineas||[]).length?`<div class="lista">${g.lineas.map(l=>`<div class="it"><span>${esc(l.nombre)}</span><b>${P.filter(p=>p.lineaId===l.id).length}</b></div>`).join("")}</div>`:`<p class="ayuda" style="margin:0">Sin líneas registradas. Agréguelas con “Editar”.</p>`}
+ ${P.filter(p=>!(g.lineas||[]).some(l=>l.id===p.lineaId)).length?`<p class="ayuda" style="margin:6px 0 0">${P.filter(p=>!(g.lineas||[]).some(l=>l.id===p.lineaId)).length} proyecto(s) sin línea.</p>`:""}
+ <p class="ayuda" style="margin:10px 0 0">Productos registrados: <b>${reg}</b> de ${P.length} proyecto(s) · Meta: ${+(g.metaMeses??2)?`1 producto cada ${+(g.metaMeses??2)} mes(es)`:"sin meta"} · Último producto: ${u?fFecha(u):"ninguno"}</p>
+ ${P.length?`<div class="fila" style="margin-top:8px;gap:6px">${P.map(p=>`<a href="#" class="chip ${esProducto(p)?"v":"g"}" style="max-width:100%;overflow:hidden;text-overflow:ellipsis" data-abrir="${p.id}">${esc(p.codigo)} · ${esc((p.titulo||"").slice(0,40))}</a>`).join("")}</div>`:""}
+ <div class="fila" style="margin-top:12px"><label class="c" style="min-width:150px">Aval<select data-aval="${g.id}">${AVALES.map(([k,l])=>`<option value="${k}" ${g.aval===k?"selected":""}>${l}</option>`).join("")}</select></label><button class="btn sec peq" data-acc="editG" data-id="${g.id}" style="align-self:flex-end">Editar</button></div></section>`}
+function formGrupo(g){return`<section class="panel grupo"><h3>${g.id==="nuevo"?"Nuevo grupo":"Editar grupo"}</h3><div class="campos" style="grid-template-columns:1fr">
+ <label class="c">Nombre completo<input type="text" id="ge-nombre" value="${esc(g.nombre)}"></label>
+ <label class="c">Nombre corto (para listas y avisos)<input type="text" id="ge-corto" value="${esc(g.corto)}"></label>
+ <div class="campos"><label class="c">Código o id en GrupLAC<input type="text" id="ge-codigo" value="${esc(g.codigo)}"></label><label class="c">Desde (año)<input type="text" id="ge-desde" inputmode="numeric" value="${esc(g.desde)}"></label></div>
+ <div class="campos"><label class="c">Aval<select id="ge-aval">${AVALES.map(([k,l])=>`<option value="${k}" ${g.aval===k?"selected":""}>${l}</option>`).join("")}</select></label>
+ <label class="c">Meta de productividad<select id="ge-meta">${[[1,"1 producto al mes"],[2,"1 producto cada 2 meses"],[3,"1 producto cada 3 meses"],[4,"1 producto cada 4 meses"],[6,"1 producto cada 6 meses"],[12,"1 producto al año"],[0,"Sin meta"]].map(([v,l])=>`<option value="${v}" ${+(g.metaMeses??2)===v?"selected":""}>${l}</option>`).join("")}</select></label></div>
+ <label class="c">Líneas de investigación (una por renglón)<textarea id="ge-lineas" rows="5">${esc((g.lineas||[]).map(l=>l.nombre).join("\n"))}</textarea></label>
+ <label class="c">Notas<input type="text" id="ge-notas" value="${esc(g.notas)}"></label></div>
+ <div class="fila" style="margin-top:12px;justify-content:space-between">${g.id!=="nuevo"?`<button class="btn peligro peq" data-acc="borrarG" data-id="${g.id}">Eliminar grupo</button>`:"<span></span>"}<div class="fila"><button class="btn sec" data-acc="cancelarG">Cancelar</button><button class="btn acc" data-acc="guardarGrupo" data-id="${g.id}">Guardar</button></div></div></section>`}
+function lineasDeTexto(g,txt){const viejas=g.lineas||[];const nombres=txt.split("\n").map(s=>s.trim()).filter(Boolean);const usadas=new Set();
+ const L=nombres.map((n,i)=>{let o=viejas.find(l=>l.nombre===n&&!usadas.has(l.id));const nn=n.toLowerCase();if(!o)o=viejas.find(l=>!usadas.has(l.id)&&!nombres.includes(l.nombre)&&(nn.includes(l.nombre.toLowerCase())||l.nombre.toLowerCase().includes(nn)));if(!o&&nombres.length===viejas.length&&viejas[i]&&!nombres.includes(viejas[i].nombre)&&!usadas.has(viejas[i].id))o=viejas[i];if(o){usadas.add(o.id);return{id:o.id,nombre:n}}return{id:(g.id==="nuevo"?"g":g.id)+"-"+uid().slice(-5),nombre:n}});return L}
+
+/* Recuadro Minciencias en la ficha del proyecto */
+function pMin(p){const G=grupos();const g=grupo(p.grupoId);const t=tipoProd(p);const rq=reqMin(p);
+ return`<section class="panel" id="minciencias"><div class="cab"><div><h3>Minciencias: grupo de investigación</h3><p class="ayuda">Con qué grupo y línea se registra este proyecto como producto en GrupLAC.</p></div>${grupo(p.grupoId)?`<button class="btn ${rq?"sec":"acc"}" data-acc="gruplac" data-id="${p.id}">Registrar en GrupLAC</button>`:""}</div>
+ <div class="campos">
+ <label class="c">Grupo de investigación<select id="g-grupo" data-gru="${p.id}"><option value="">Sin asignar</option>${G.map(x=>`<option value="${x.id}" ${p.grupoId===x.id?"selected":""}>${esc(cortoG(x))}</option>`).join("")}<option value="ninguno" ${p.grupoId==="ninguno"?"selected":""}>No es de ningún grupo</option></select></label>
+ <label class="c">Línea de investigación<select id="g-linea" data-campo="lineaId" data-id="${p.id}" ${g?"":"disabled"}><option value="">${g&&!(g.lineas||[]).length?"El grupo no tiene líneas":"Sin línea"}</option>${(g?g.lineas||[]:[]).map(l=>`<option value="${l.id}" ${p.lineaId===l.id?"selected":""}>${esc(l.nombre)}</option>`).join("")}</select></label>
+ <label class="c">Tipo de producto para Minciencias<select id="g-tipo" data-campo="tipoProducto" data-id="${p.id}">${TIPOS_PROD.map(([k,l])=>`<option value="${k}" ${t===k?"selected":""}>${l}</option>`).join("")}</select></label>
+ <label class="c">Estado en GrupLAC<select id="g-estado" data-gl="${p.id}">${EST_GL.map(([k,l])=>`<option value="${k}" ${(p.estadoGrupLAC||"")===k?"selected":""}>${l}</option>`).join("")}</select></label>
+ <label class="c">${etqRegistro(t)}<input type="text" id="g-registro" data-campo="registroProd" data-id="${p.id}" value="${esc(p.registroProd)}"></label>
+ <label class="c">Enlace del producto<input type="text" id="g-enlace" data-campo="enlaceProd" data-id="${p.id}" placeholder="https://" value="${esc(p.enlaceProd)}"></label>
+ <label class="c">Año del producto<input type="text" id="g-anio" inputmode="numeric" data-campo="anioProd" data-id="${p.id}" value="${esc(p.anioProd)}" placeholder="${new Date().getFullYear()}"></label>
+ </div>
+ <p style="margin:10px 0 0">${rq?`<span class="chip a">Requisito pendiente</span> ${esc(rq)}`:`<span class="chip v">Listo para registrar</span> ${p.estadoGrupLAC==="vinculado"?"Ya está vinculado al grupo.":"Puede registrarlo en CvLAC y vincularlo al grupo."}`}${p.fechaGrupLAC&&esProducto(p)?` <span class="ayuda">· ${esc(etqEst(p.estadoGrupLAC))} el ${fFecha(p.fechaGrupLAC)}</span>`:""}</p></section>`}
+
+/* Ventana "Registrar en GrupLAC": datos listos para copiar */
+function textoGrupLAC(p){const g=grupo(p.grupoId);const l=linea(g,p.lineaId);const t=tipoProd(p);
+ const anio=p.anioProd||(M.valida(p.fechaConcesion)?p.fechaConcesion.slice(0,4):M.valida(p.fechaRadicacion)?p.fechaRadicacion.slice(0,4):String(new Date().getFullYear()));
+ const reg=p.registroProd||((t==="patente"||t==="diseno")&&p.expediente?p.expediente:"");
+ return[`Tipo de producto: ${etqTipo(t)}`,`Título: ${p.titulo||""}`,`Año: ${anio}`,`Autores: ${p.inventores||""}`,`Grupo: ${g?g.nombre:""}${g&&g.codigo?` (${g.codigo})`:""}`,`Línea de investigación: ${l?l.nombre:"(sin línea)"}`,`${etqRegistro(t)}: ${reg||"(pendiente)"}`,`Enlace: ${p.enlaceProd?(/^https?:\/\//i.test(String(p.enlaceProd).trim())?String(p.enlaceProd).trim():"https://"+String(p.enlaceProd).trim()):"(no tiene)"}`,`Institución que avala: Corporación Politécnico Industrial de Los Andes (POLIANDES)`,
+  `Descripción: ${String(p.problema||"").trim()} ${String(p.solucion||"").trim()}`.trim().slice(0,600),`Código interno: ${p.codigo||""} (Patent-IA)`].join("\n")}
+function abrirGrupLAC(id){const p=proy(id);if(!p)return;const g=grupo(p.grupoId);
+ if(!g){toast("Primero asigne el proyecto a un grupo.");subtab="ficha";if(vista!=="proyecto")ir("proyecto",id);else render();setTimeout(()=>{const e=$("#g-grupo");if(e){e.scrollIntoView({block:"center"});e.focus()}},60);return}
+ const tx=textoGrupLAC(p);const rq=reqMin(p);
+ $("#capa").innerHTML=`<div class="modal-f"><div class="modal puente" role="dialog" aria-modal="true" aria-label="Registrar en GrupLAC"><h2>Registrar en GrupLAC</h2>
+ <p class="ayuda" style="margin:0">${esc(p.codigo)} · ${esc(p.titulo)} → ${esc(cortoG(g))}</p>
+ ${rq?`<div class="aviso" style="margin:10px 0 0"><b>Antes de registrarlo:</b> ${esc(rq)}. Minciencias puede no reconocer el producto sin ese soporte.</div>`:""}
+ <ol class="pc-pasos"><li><b>Copie los datos.</b> <button class="btn pri peq" id="gl-copiar">Copiar datos</button> <span id="gl-ok" class="chip v" hidden>Copiado</span><textarea id="gl-texto" readonly rows="9">${esc(tx)}</textarea></li>
+ <li><b>Entre a CvLAC</b> con su usuario y registre el producto en la sección que corresponde al tipo (${esc(etqTipo(tipoProd(p)))}). <a class="btn sec peq" href="https://scienti.minciencias.gov.co/cvlac/" target="_blank" rel="noopener">Abrir CvLAC ↗</a></li>
+ <li><b>Entre a GrupLAC</b> y vincule el producto al grupo ${esc(cortoG(g))}. <a class="btn sec peq" href="https://scienti.minciencias.gov.co/gruplac/" target="_blank" rel="noopener">Abrir GrupLAC ↗</a></li></ol>
+ <div class="fila" style="justify-content:flex-end"><button class="btn sec" id="gl-cerrar">Cerrar</button><button class="btn sec" data-acc="glEstado" data-id="${p.id}" data-estado="cvlac">Ya lo registré en CvLAC</button><button class="btn acc" data-acc="glEstado" data-id="${p.id}" data-estado="vinculado">Ya quedó vinculado en GrupLAC</button></div></div></div>`;
+ $("#gl-copiar").onclick=async()=>{if(await copiarTexto(tx)){$("#gl-ok").hidden=false;toast("Datos copiados. Péguelos en CvLAC.")}else{$("#gl-texto").select();toast("Copie los datos manualmente (Ctrl+C).")}};
+ $("#gl-cerrar").onclick=()=>{$("#capa").innerHTML=""};$("#gl-copiar").focus()}
+async function marcarGL(id,est){const p=proy(id);if(!p)return;const pt={estadoGrupLAC:est};if(est&&(!p.fechaGrupLAC||!esProducto(p)))pt.fechaGrupLAC=hoyISO();if(!est)pt.fechaGrupLAC="";await parchear("proyectos",id,pt);render()}
+
+/* Recuadro del tablero */
+function panelGruposTablero(){const G=grupos();if(!G.length)return"";const av=avisosGrupos();
+ return`<section class="panel"><div class="cab"><h3>Grupos de investigación</h3><a href="#" data-vista-l="grupos" class="ayuda">Ver grupos →</a></div>
+ <div class="lista">${G.map(g=>{const P=prodsDe(g.id);return`<div class="it"><div><div class="t"><a href="#" data-vista-l="grupos">${esc(cortoG(g))}</a></div><div class="d">${P.length} proyecto(s) · ${g.aval==="avalado"?"Avalado":"Falta aval"}</div></div><span class="chip ${P.filter(esProducto).length?"v":"g"}">${P.filter(esProducto).length} producto(s)</span></div>`}).join("")}</div>
+ ${av.sinProd.length?`<p class="ayuda" style="margin:8px 0 0">Sin producción en los últimos 3 meses: ${av.sinProd.map(g=>esc(cortoG(g))).join(", ")}.</p>`:""}
+ ${av.vencidas.length?`<p style="margin:8px 0 0;color:var(--rojo)"><b>${av.vencidas.length} meta(s) vencida(s).</b></p>`:""}
+ ${av.proxima?`<p style="margin:8px 0 0">Próxima meta: <b>${fFecha(av.proxima.vence)}</b> · ${esc(cortoG(av.proxima.grupo))}${av.proxima.proy?` · ${esc(av.proxima.proy.titulo)}`:""}</p>`:""}</section>`}
 
 /* ===== Puente con Claude (versión sin IA en el servidor): copiar el pedido, pegarlo en Claude y pegar aquí la respuesta ===== */
 const PUENTE_ACC={evaluar:"evaluar",redactarTodo:"redactar",redactar:"redactar",dibujar:"dibujos",sugLic:"lic",ideas:"ideas"};
@@ -469,6 +630,26 @@ function pedidoClaude(tarea,id,sec){const p=id?proy(id):null;const cab=p?`[Pedid
  if(tarea==="lic")return cab+`${BASE}\n\nSugiere a quién licenciar o vender este desarrollo en Colombia y Latinoamérica. NO nombres empresas reales: describe TIPOS de empresa.\n\n${contextoProy(p)}\nResponde con un arreglo JSON de 5 objetos {"tipoEmpresa": string, "sector": string, "modelo": string (tipo de acuerdo y forma de cobro sugerida), "porQue": string (una frase)}.`+PIDE_JSON;
  if(tarea==="ideas"){const f=ideasForm;return cab+`${BASE}\n\nUn inventor observó este problema y quiere soluciones técnicas protegibles (patente de invención, modelo de utilidad o diseño industrial).\nProblema: ${f.problema}\nSector: ${f.sector}\nCondiciones: ${f.contexto||"ninguna"}\n\nPropón 4 soluciones distintas entre sí, concretas y fabricables, que no sean productos obvios ya en el mercado. Responde con un arreglo JSON de 4 objetos {"titulo": string, "solucion": string (4-6 frases: partes y funcionamiento), "modalidad": una de "${MODALIDADES.slice(0,3).join('", "')}", "novedad": string (qué la diferencia de lo existente), "fabricacion": string (materiales y proceso probable)}.`+PIDE_JSON}
  if(tarea==="consulta"){const r=ruta(p);const c=r.cur;return cab+`Hola Claude. Trabajo en Patent-IA (la fábrica de patentes de SkyNet Genesis) con este proyecto y necesito tu ayuda.\n\n${contextoProy(p)}\nEtapa actual: ${ETQ[p.etapa]||p.etapa}\nPaso de la ruta en el que voy: ${c?c.t:"ninguno pendiente"}\nPasos hechos: ${r.pasos.filter(s=>s.hecho).map(s=>s.t).join(", ")||"ninguno"}\n${M.valida(p.fechaRadicacion)?`Radicado en la SIC el ${p.fechaRadicacion}${p.expediente?` (expediente ${p.expediente})`:""}.\n`:""}\nMi pregunta: (escríbala aquí)`}
+ if(tarea==="producto"){const g=grupo(p.grupoId);const l=linea(g,p.lineaId);const tp=tipoProd(p);return cab+`Hola Claude. En Patent-IA (la fábrica de patentes de SkyNet Genesis) tengo este proyecto asignado a un grupo de investigación de Minciencias y necesito preparar el producto para registrarlo en CvLAC/GrupLAC.
+
+${contextoProy(p)}
+Grupo: ${g?g.nombre:""}
+Línea: ${l?l.nombre:"(sin línea)"}
+Tipo de producto: ${etqTipo(tp)}
+Requisito pendiente: ${reqMin(p)||"ninguno"}
+
+${tp==="articulo"?"Ayúdame a estructurar y redactar un artículo para la Revista Colombiana de Medicina (o una revista con ISSN): título, resumen, introducción, métodos, resultados esperados, discusión y referencias por verificar.":tp==="libro"||tp==="capitulo"?"Ayúdame con lo que falta para que el libro o capítulo cuente ante Minciencias (ISBN, editorial, ficha bibliográfica) y con el texto que haga falta.":tp==="software"?"Ayúdame a preparar el manual de usuario y la descripción técnica del software para el registro en la DNDA y para CvLAC.":"Ayúdame a preparar la evidencia y la descripción del producto para CvLAC."}
+
+Mi pregunta: (escríbala aquí)`}
+ if(tarea==="grupos"){const cr=cronograma();const H=hoyISO();return`[Pedido de Patent-IA · Grupos de investigación]
+Hola Claude. Estos son mis grupos de investigación en Minciencias y su estado en Patent-IA. Ayúdame a planear la productividad para subir productos a GrupLAC con regularidad.
+
+${grupos().map(g=>`- ${g.nombre}${g.codigo?` (${g.codigo})`:""}, ${g.aval==="avalado"?"avalado":"falta aval"}. Líneas: ${(g.lineas||[]).map(l=>l.nombre).join("; ")||"sin líneas"}. Proyectos: ${prodsDe(g.id).map(p=>`${p.titulo} [${etqTipo(tipoProd(p))}; ${etqEst(p.estadoGrupLAC)}${reqMin(p)?`; ${reqMin(p)}`:""}]`).join("; ")||"ninguno"}. Meta: ${+(g.metaMeses??2)?`1 producto cada ${+(g.metaMeses??2)} meses`:"sin meta"}.`).join("\n")}
+
+Pendientes: ${(((cfgG()||{}).pendientes)||[]).filter(x=>!x.hecho).map(x=>x.texto).join(" | ")||"ninguno"}
+Próximas metas: ${cr.filter(x=>!x.cumplida&&x.vence>=H).slice(0,6).map(x=>`${x.vence} ${cortoG(x.grupo)}`).join("; ")||"ninguna"}
+
+Mi pregunta: (escríbala aquí)`}
  return""}
 
 function seccionesPedidas(p,sec){const b=p.borrador||{};let L=sec?SECCIONES.filter(s=>s[0]===sec):SECCIONES.filter(([k])=>!String(b[k]||"").trim());if(!L.length)L=SECCIONES;return L}
@@ -506,8 +687,8 @@ async function aplicarPuente(tarea,id,texto,sec,claves){const p=id?proy(id):null
 
 async function copiarTexto(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;left:-9999px;top:0";document.body.appendChild(ta);ta.select();let ok=false;try{ok=ta.selectionEnd-ta.selectionStart===t.length&&document.execCommand("copy")}catch(_){}ta.remove();return ok}}
 function abrirPuente(tarea,id,sec){if(tarea==="ideas"){ideasForm.problema=($("#i-problema")?.value||"").trim();ideasForm.contexto=($("#i-contexto")?.value||"").trim();ideasForm.sector=$("#i-sector")?.value||ideasForm.sector;if(!ideasForm.problema){toast("Escriba primero el problema que observó.");$("#i-problema")?.focus();return}}
- const ped=pedidoClaude(tarea,id,sec);if(!ped)return;const consulta=tarea==="consulta";
- const tit={evaluar:"Evaluar con Claude",redactar:sec?"Redactar esta sección con Claude":"Redactar la solicitud con Claude",dibujos:"Pedir los dibujos a Claude",lic:"Sugerir empresas con Claude",ideas:"Pedir ideas a Claude",consulta:"Consultar a Claude sobre este proyecto"}[tarea];
+ const ped=pedidoClaude(tarea,id,sec);if(!ped)return;const consulta=["consulta","producto","grupos"].includes(tarea);
+ const tit={evaluar:"Evaluar con Claude",redactar:sec?"Redactar esta sección con Claude":"Redactar la solicitud con Claude",dibujos:"Pedir los dibujos a Claude",lic:"Sugerir empresas con Claude",ideas:"Pedir ideas a Claude",consulta:"Consultar a Claude sobre este proyecto",producto:"Preparar el producto con Claude",grupos:"Consultar a Claude sobre los grupos"}[tarea];
  ui.puente={tarea,id,sec,claves:tarea==="redactar"?seccionesPedidas(proy(id),sec).map(x=>x[0]):null};
  $("#capa").innerHTML=`<div class="modal-f"><div class="modal puente" role="dialog" aria-modal="true" aria-label="${esc(tit)}"><h2>${esc(tit)}</h2>
  <p class="ayuda" style="margin:0">Se hace con su suscripción de Claude, sin costo adicional.</p>
@@ -551,7 +732,7 @@ function ruta(p){
   acc:[{e:"Generar ficha comercial",a:"rutaDoc",tipo:"ficha",cls:"pri"},{e:"Sugerir empresas con Claude",a:"sugLic",ia:1},{e:"Agregar una empresa",a:"rutaIr",sub:"licencias",foco:"l-empresa"}]};
 
  add({k:"describir",t:"Describir el invento",auto:p.titulo&&p.titulo!=="Nuevo proyecto"&&lleno(p.problema)&&(k==="ma"||(lleno(p.solucion)&&String(p.inventores||"").trim())),sinMarcar:1,
-  que:k==="ma"?"Escriba el nombre de la marca y qué productos o servicios va a identificar.":"Escriba el título, el problema que resuelve, cómo funciona y quiénes son los inventores.",
+  que:k==="ma"?"Escriba el nombre de la marca y qué productos o servicios va a identificar.":k==="ob"?"Escriba el título de la obra, de qué trata y quiénes son los autores.":"Escriba el título, el problema que resuelve, cómo funciona y quiénes son los inventores.",
   por:"Todo lo demás (evaluación, redacción y contratos) sale de esta ficha.",
   acc:[{e:"Completar la ficha",a:"rutaIr",sub:"ficha",foco:"f-problema",cls:"pri"}]});
  if(pat||k==="di")add({k:"evaluar",t:"Evaluar si se puede proteger",auto:!!p.evaluacion,
@@ -573,14 +754,14 @@ function ruta(p){
   por:k==="di"?"La SIC exige la representación gráfica del diseño con todas sus vistas.":"Se exigen cuando son necesarios para entender el invento, y casi siempre ayudan a definir lo que se protege.",
   acc:[{e:"Dibujar con Claude",a:"dibujar",ia:1,cls:"pri"},{e:"Abrir dibujos",a:"rutaIr",sub:"dibujos",foco:"dib-pedido"},{e:"Agregar enlace de un plano (Drive)",a:"rutaIr",sub:"bitacora",foco:"a-url"},{e:"Generar tarea: planos definitivos",a:"rutaTarea",tipo:"Prototipo",dias:15,nota:"Planos o vistas definitivas para la solicitud."}]})}
  const reqCes=M.requisitos(p).some(r=>r[0]==="cesion");
- if(k!=="ma")add({k:"proteger",t:"Proteger la confidencialidad",auto:docDe(p.id,"nda")&&(!reqCes||docDe(p.id,"cesion")),
+ if(k!=="ma"&&k!=="ob")add({k:"proteger",t:"Proteger la confidencialidad",auto:docDe(p.id,"nda")&&(!reqCes||docDe(p.id,"cesion")),
   que:"Antes de mostrarlo a fabricantes, inversionistas o compradores, haga firmar un acuerdo de confidencialidad."+(reqCes?" Como el solicitante no es el inventor, firme también la cesión de derechos.":""),
   por:"Mostrarlo sin acuerdo puede destruir la novedad o facilitar la copia.",
   acc:[{e:"Generar acuerdo de confidencialidad",a:"rutaDoc",tipo:"nda",cls:"pri"},...(reqCes?[{e:"Generar cesión del inventor",a:"rutaDoc",tipo:"cesion"}]:[])]});
- if(k==="da")add({k:"registro",t:"Registrar en Derecho de Autor",
-  que:"Registre el software en la Dirección Nacional de Derecho de Autor (en línea y gratis).",
+ if(k==="da"||k==="ob")add({k:"registro",t:"Registrar en Derecho de Autor",
+  que:k==="ob"?"Registre la obra en la Dirección Nacional de Derecho de Autor (en línea y gratis). Si es un libro, tramite también el ISBN.":"Registre el software en la Dirección Nacional de Derecho de Autor (en línea y gratis).",
   por:"No es obligatorio, pero es la mejor prueba de autoría y fecha.",
-  acc:[{e:"Abrir el registro en línea",href:"https://www.derechodeautor.gov.co/"},{e:"Generar tarea: registrar",a:"rutaTarea",tipo:"Otro",dias:15,nota:"Registro del software en la DNDA."}]});
+  acc:[{e:"Abrir el registro en línea",href:"https://www.derechodeautor.gov.co/"},{e:"Generar tarea: registrar",a:"rutaTarea",tipo:"Otro",dias:15,nota:k==="ob"?"Registro de la obra en la DNDA (y el ISBN si es un libro).":"Registro del software en la DNDA."}]});
  if(reg){const req=M.requisitos(p).filter(r=>r[0]!=="busqueda");const ch=p.checklist||{};const n=req.filter(r=>ch[r[0]]).length;
   add({k:"requisitos",t:"Reunir los requisitos para radicar",auto:req.length>0&&n===req.length,prog:`${n} de ${req.length} listos`,
   que:`Marque en el Expediente cada requisito a medida que lo tenga: ${req.map(r=>r[1].charAt(0).toLowerCase()+r[1].slice(1)).join("; ")}.`,
@@ -597,6 +778,11 @@ function ruta(p){
    por:nx?(nx.nota||nx.norma||""):"Cada notificación abre un plazo; Patent-IA lo calcula cuando escribe la fecha.",
    acc:[{e:"Abrir el expediente",a:"rutaIr",sub:"expediente",cls:nx?"sec":"pri"}]})}}
  add(lic);
+ if(p.grupoId!=="ninguno"&&(!["ma","si"].includes(k)||grupo(p.grupoId))){const gg=grupo(p.grupoId);const rq=reqMin(p);const tp=tipoProd(p);const escrito=["articulo","libro","capitulo","software"].includes(tp);
+  add({k:"gruplac",t:"Registrar en GrupLAC",auto:p.estadoGrupLAC==="vinculado",sinMarcar:1,sinCur:!gg,prog:etqEst(p.estadoGrupLAC),
+  que:!gg?"Asigne el proyecto a un grupo de investigación y a una línea (recuadro Minciencias de la Ficha). Si no es un producto de investigación, elija “No es de ningún grupo”.":rq?`Cuando el producto esté listo, regístrelo en CvLAC y vincúlelo al grupo ${cortoG(gg)}. Pendiente: ${rq}.`:`El producto ya cumple los requisitos: regístrelo en CvLAC y vincúlelo al grupo ${cortoG(gg)} en GrupLAC.`,
+  por:"Así cuenta como producción del grupo ante Minciencias y ayuda a su categoría.",
+  acc:[!gg?{e:"Asignar grupo",a:"rutaIr",sub:"ficha",foco:"g-grupo",cls:"pri"}:{e:"Registrar en GrupLAC",a:"gruplac",cls:rq?"sec":"pri"},...(gg?[{e:"Ver datos Minciencias",a:"rutaIr",sub:"ficha",foco:"g-grupo"}]:[]),...(gg&&escrito?[{e:tp==="software"?"Preparar el manual con Claude":"Preparar el texto con Claude",a:"claude",tarea:"producto"}]:[])]})}
  if(conc&&(pat||k==="ma")){const nm=proximoMant(p);
   add({k:"mantener",t:k==="ma"?"Mantener la marca":"Mantener la patente vigente",continuo:1,sinMarcar:1,ev:nm,
   que:nm?`Lo próximo: ${nm.tipo}.`:"No hay pagos pendientes por ahora.",
@@ -607,26 +793,27 @@ function ruta(p){
  const cerrado=["descartada","vencida"].includes(p.etapa)||(fin&&diasA(fin.vence)<0)||(p.etapa==="negada"&&(!neg||(tr&&tr.hecho)));
  if(cerrado)return{pasos:L,cur:null,k,R,cerrado:true};
  const mt=L.find(s=>s.k==="mantener");const urg=mt&&mt.ev&&M.estado(mt.ev,hoyISO()).nivel>=3;
- const cur=urg?mt:(L.find(s=>!s.hecho&&!s.continuo)||L.find(s=>s.continuo)||null);
+ const gl=L.find(s=>s.k==="gruplac");const c0=L.find(s=>!s.hecho&&!s.continuo&&!s.sinCur);const glListo=gl&&!gl.hecho&&grupo(p.grupoId)&&!reqMin(p);
+ const cur=urg?mt:(c0&&c0.k==="licenciar"&&glListo?gl:(c0||L.find(s=>s.continuo)||L.find(s=>s.sinCur&&!s.hecho)||null));
  return{pasos:L,cur,k,R}}
 
 function etapaRuta(p,r){if(["descartada","negada","vencida"].includes(p.etapa))return null;
  const H=hoyISO();let sug=M.etapaSugerida(p,H);
  if(sug==="concedida"&&S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado"))sug="licenciada";
- if(!sug&&["da","si"].includes(r.k)&&S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado"))sug="licenciada";
- if(!sug&&!r.R&&r.cur&&!["da","si"].includes(r.k)){const c=r.cur.k;sug=c==="describir"?"idea":["evaluar","antecedentes"].includes(c)?"evaluacion":["redactar","dibujos","proteger","requisitos","radicar"].includes(c)?"redaccion":null;
+ if(!sug&&["da","si","ob"].includes(r.k)&&S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado"))sug="licenciada";
+ if(!sug&&!r.R&&r.cur&&!["da","si","ob"].includes(r.k)){const c=r.cur.k;sug=c==="describir"?"idea":["evaluar","antecedentes"].includes(c)?"evaluacion":["redactar","dibujos","proteger","requisitos","radicar"].includes(c)?"redaccion":null;
   if(sug==="redaccion"&&p.etapa==="prototipo")sug=null}
  if(!sug||sug===p.etapa)return null;
  const ord=ETAPAS.map(e=>e[0]);if(!["negada","vencida"].includes(sug)&&ord.indexOf(sug)<ord.indexOf(p.etapa))return null;
  return sug}
 
 function btnRuta(pid,b){if(b.href)return`<a class="btn sec peq" target="_blank" rel="noopener" href="${esc(b.href)}">${esc(b.e)} ↗</a>`;
- const d=Object.entries({ir:b.sub,foco:b.foco,tipo:b.tipo,dias:b.dias,nota:b.nota,k:b.k,clave:b.clave}).filter(([,v])=>v!=null).map(([x,v])=>` data-${x}="${esc(v)}"`).join("");
+ const d=Object.entries({ir:b.sub,foco:b.foco,tarea:b.tarea,tipo:b.tipo,dias:b.dias,nota:b.nota,k:b.k,clave:b.clave}).filter(([,v])=>v!=null).map(([x,v])=>` data-${x}="${esc(v)}"`).join("");
  const oc=b.ia&&(ui.ocupado[(b.a==="evaluar"?"eval":b.a==="redactarTodo"?"todo":b.a==="sugLic"?"lic":"")+pid]);
  return`<button class="btn ${b.cls||"sec"} ${b.ia?"ia":""} peq" data-acc="${b.a}" data-id="${pid}"${d} ${oc?"disabled":""}>${oc?"Trabajando…":esc(b.e)}</button>`}
 
-const DONDE={describir:"Aquí en Patent-IA",evaluar:"Con Claude",antecedentes:"En internet y aquí",redactar:"Con Claude",dibujos:"Con Claude",proteger:"Aquí, y se firma en papel",registro:"En la DNDA (en línea)",requisitos:"Aquí y en la SIC",radicar:"En la SIC (en línea)",tramite:"En la SIC y aquí",licenciar:"Aquí y con Claude",mantener:"En la SIC"};
-const CHAT={evaluar:"Si quiere discutir cómo fortalecer el invento o cambiar la modalidad, consulte a Claude en la conversación.",antecedentes:"Si encuentra una patente muy parecida, consulte a Claude antes de seguir: puede ajustar el invento para diferenciarlo.",redactar:"Para afinar las reivindicaciones o el alcance de la protección, siga con Claude en la conversación.",dibujos:"Para planos de precisión, modelos 3D o cambios a los bocetos, pídalos a Claude en la conversación.",tramite:"Si la SIC le envía un requerimiento o una negación, consulte a Claude en la conversación y a su agente.",licenciar:"Para preparar la negociación, el precio o revisar un contrato, consulte a Claude en la conversación.",proteger:"Si la otra parte pide cambios al acuerdo, consulte a Claude en la conversación."};
+const DONDE={describir:"Aquí en Patent-IA",evaluar:"Con Claude",antecedentes:"En internet y aquí",redactar:"Con Claude",dibujos:"Con Claude",proteger:"Aquí, y se firma en papel",registro:"En la DNDA (en línea)",requisitos:"Aquí y en la SIC",radicar:"En la SIC (en línea)",tramite:"En la SIC y aquí",licenciar:"Aquí y con Claude",mantener:"En la SIC",gruplac:"En CvLAC y GrupLAC (Minciencias)"};
+const CHAT={evaluar:"Si quiere discutir cómo fortalecer el invento o cambiar la modalidad, consulte a Claude en la conversación.",antecedentes:"Si encuentra una patente muy parecida, consulte a Claude antes de seguir: puede ajustar el invento para diferenciarlo.",redactar:"Para afinar las reivindicaciones o el alcance de la protección, siga con Claude en la conversación.",dibujos:"Para planos de precisión, modelos 3D o cambios a los bocetos, pídalos a Claude en la conversación.",tramite:"Si la SIC le envía un requerimiento o una negación, consulte a Claude en la conversación y a su agente.",licenciar:"Para preparar la negociación, el precio o revisar un contrato, consulte a Claude en la conversación.",proteger:"Si la otra parte pide cambios al acuerdo, consulte a Claude en la conversación.",gruplac:"Si el producto necesita un artículo, un capítulo o el manual del software, prepárelo con Claude en la conversación."};
 const TAB_AYUDA={ficha:"Aquí describe el invento: es el primer paso de la ruta.",evaluacion:"Aquí queda la evaluación de Claude y lo que usted encuentre al buscar antecedentes.",redaccion:"Aquí se arma el texto de la solicitud que se radica en la SIC.",dibujos:"Aquí se guardan los bocetos de las figuras de la solicitud.",bitacora:"Diario del inventor y enlaces a fotos, planos y oficios: prueba de autoría y de fechas.",expediente:"Fechas del trámite en la SIC, requisitos para radicar y calendario legal.",documentos:"Contratos y ficha comercial listos para revisar, guardar y descargar.",costos:"Tasas, gastos e ingresos del proyecto.",licencias:"Empresas interesadas y negociaciones de licencia o venta."};
 function vSeguir(p){const r=ruta(p);if(!r.cur)return"";const c=r.cur;const acc=c.acc.filter(b=>!b.href&&b.a!=="rutaTarea").slice(0,2);
  return`<div class="seguir"><span>Siguiente paso de la ruta: <b>${esc(c.t)}</b> <span class="chip g">${esc(DONDE[c.k]||"")}</span></span><div class="fila">${acc.map(b=>btnRuta(p.id,b)).join("")}<a href="#" class="btn sec peq" data-acc="verRuta" data-id="${p.id}">Ver la ruta ↑</a></div></div>`}
@@ -662,7 +849,7 @@ function vProyecto(){
  const st=[["ficha","Ficha"],["evaluacion","Evaluación"],["redaccion","Redacción"],["dibujos","Dibujos"],["bitacora","Bitácora y archivos"],["expediente","Expediente SIC"],["documentos","Documentos"],["costos","Costos"],["licencias","Licencias"]];
  const body=({ficha:pFicha,evaluacion:pEval,redaccion:pRed,dibujos:pDib,bitacora:pBit,expediente:pExp,tramites:pExp,documentos:pDocs,costos:pCostos,licencias:pLic}[subtab]||pFicha)(p);
  return`<div><a href="#" data-vista-l="proyectos" class="ayuda">← Banco de proyectos</a></div>
- <div class="cab"><div><span class="cod">${esc(p.codigo)}</span><h1>${esc(p.titulo||"Sin título")}</h1><p>${esc(p.modalidad||"")}${p.sector?" · "+esc(p.sector):""}</p></div>
+ <div class="cab"><div><span class="cod">${esc(p.codigo)}</span><h1>${esc(p.titulo||"Sin título")}</h1><p>${esc(p.modalidad||"")}${p.sector?" · "+esc(p.sector):""}${grupo(p.grupoId)?` · Grupo <a href="#" data-vista-l="grupos">${esc(cortoG(grupo(p.grupoId)))}</a>`:""}</p></div>
  <label class="c" style="min-width:200px">Etapa<select id="f-etapa" data-campo="etapa" data-id="${p.id}">${ETAPAS.map(([k,v])=>`<option value="${k}" ${p.etapa===k?"selected":""}>${v}</option>`).join("")}</select></label></div>
  ${vRuta(p)}
  ${REMOTO&&!sample&&["evaluacion","redaccion","dibujos","licencias"].includes(subtab)?`<div class="aviso">Lo que hace la inteligencia artificial se hace con Claude, sin costo adicional: pulse un botón verde <b>“…con Claude (copiar y pegar)”</b>, pegue el pedido en Claude y luego pegue aquí la respuesta.</div>`:""}
@@ -680,6 +867,7 @@ function pFicha(p){return`<section class="panel"><div class="campos">
  <p class="ayuda ancho" style="margin:0">Las fechas legales (radicación, publicación, concesión…) van en la pestaña Expediente SIC.</p>
  <label class="c ancho">Notas del inventor (su aporte, pruebas, observaciones)<textarea id="f-notas" data-campo="notas" data-id="${p.id}">${esc(p.notas)}</textarea></label>
  </div></section>
+ ${pMin(p)}
  <div class="fila" style="justify-content:space-between"><span class="ayuda">Los cambios se guardan solos.</span><button class="btn peligro peq" data-acc="borrarProy" data-id="${p.id}">Eliminar proyecto</button></div>`}
 
 function pEval(p){const e=p.evaluacion;const oc=ui.ocupado["eval"+p.id];
@@ -722,7 +910,7 @@ function formTram(pid){return`<details class="panel" id="det-tram"><summary styl
 function campoFecha(p,k,l,ayuda){return`<label class="c">${l}<input type="date" id="x-${k}" data-campo="${k}" data-id="${p.id}" value="${esc(p[k])}">${ayuda?`<span class="ayuda" style="font-weight:400">${ayuda}</span>`:""}</label>`}
 function campoCheck(p,k,l){return`<label class="ck"><input type="checkbox" id="x-${k}" data-campo="${k}" data-id="${p.id}" ${p[k]?"checked":""}> ${l}</label>`}
 function pExp(p){const k=M.clase(p.modalidad);const H=hoyISO();
- if(k==="da"||k==="si")return`<section class="panel"><h3>${esc(p.modalidad)}</h3><p>${k==="da"?"El software se protege con derecho de autor desde que se crea. El registro ante la Dirección Nacional de Derecho de Autor (DNDA) es voluntario, gratuito y sirve como prueba. No tiene plazos de la SIC.":"El secreto industrial no se registra: se protege mientras se mantenga en reserva, con acuerdos de confidencialidad y medidas de seguridad (art. 260 D. 486). No tiene plazos de la SIC."}</p></section>
+ if(k==="da"||k==="si"||k==="ob")return`<section class="panel"><h3>${esc(p.modalidad)}</h3><p>${k==="ob"?"La obra escrita (libro, capítulo o artículo) se protege con derecho de autor desde que se crea. El registro ante la DNDA es voluntario y gratuito. Para Minciencias, un libro o capítulo necesita ISBN y un artículo debe publicarse en una revista con ISSN. No tiene plazos de la SIC.":k==="da"?"El software se protege con derecho de autor desde que se crea. El registro ante la Dirección Nacional de Derecho de Autor (DNDA) es voluntario, gratuito y sirve como prueba. No tiene plazos de la SIC.":"El secreto industrial no se registra: se protege mientras se mantenga en reserva, con acuerdos de confidencialidad y medidas de seguridad (art. 260 D. 486). No tiene plazos de la SIC."}</p></section>
  <section class="panel"><h3>Trámites y tareas</h3>${manuales(p.id).length?tablaEv(manuales(p.id),false):`<div class="vacio">Sin tareas todavía.</div>`}</section>${formTram(p.id)}`;
  const A=M.alertas(p,H,S.licencias);let sug=M.etapaSugerida(p,H);if(sug==="concedida"&&S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado"))sug="licenciada";const req=M.requisitos(p);const ch=p.checklist||{};const hechosReq=req.filter(r=>ch[r[0]]).length;
  const ev=[...eventosProy(p),...eventosLic().filter(e=>e.proyectoId===p.id),...manuales(p.id)].sort((a,b)=>(a.vence||"9").localeCompare(b.vence||"9"));
@@ -1099,6 +1287,18 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
   case"rutaDoc":{const p=proy(id);if(!p)break;const tp=t.dataset.tipo;ui.docTipo=tp;ui.docTexto=tp==="ficha"?plantillaFicha(p):plantilla(tp,p,{});ui.docTitulo=(TIPOS_DOC.find(x=>x[0]===tp)||[,"Documento"])[1];subtab="documentos";render();setTimeout(()=>$("#d-texto")?.scrollIntoView({block:"center"}),60);toast("Documento generado. Complete los espacios en blanco y pulse Guardar.");break}
   case"rutaEv":{const cl=t.dataset.clave;const pt={hechos:{[cl]:hoyISO()}};const pp=proy(id);if(cl==="pedir-fondo"&&pp&&!pp.fechaPeticionFondo)pt.fechaPeticionFondo=hoyISO();await parchear("proyectos",id,pt);if(ui.rutaSel)delete ui.rutaSel[id];render();toast("Marcado como hecho");break}
   case"claude":ev.preventDefault();abrirPuente(t.dataset.tarea,id,t.dataset.sec);break;
+  case"gruplac":ev.preventDefault();abrirGrupLAC(id);break;
+  case"glEstado":$("#capa").innerHTML="";await marcarGL(id,t.dataset.estado);toast(t.dataset.estado==="vinculado"?"Producto vinculado al grupo. Cuenta para el cronograma.":"Registrado en CvLAC. Falta vincularlo al grupo en GrupLAC.");break;
+  case"nuevoParaG":{const g=grupo(id);crearProyecto({grupoId:id,lineaId:(g&&g.lineas&&g.lineas[0]?g.lineas[0].id:"")});break}
+  case"nuevoG":ui.editG="nuevo";render();setTimeout(()=>$("#ge-nombre")?.focus(),50);break;
+  case"editG":ui.editG=id;render();setTimeout(()=>$("#ge-nombre")?.focus(),50);break;
+  case"cancelarG":limpiarTmp("ge-");ui.editG=null;render();break;
+  case"guardarGrupo":{const nom=$("#ge-nombre").value.trim();if(!nom){toast("Escriba el nombre del grupo.");$("#ge-nombre").focus();return}const L=[...grupos()];const i=L.findIndex(g=>g.id===id);const base=i>=0?L[i]:{id:"g"+uid().slice(-6),metaDesde:hoyISO().slice(0,8)+"01"};
+   const g={...base,nombre:nom,corto:$("#ge-corto").value.trim(),codigo:$("#ge-codigo").value.trim(),desde:$("#ge-desde").value.trim(),aval:$("#ge-aval").value,metaMeses:+$("#ge-meta").value,notas:$("#ge-notas").value.trim()};g.lineas=lineasDeTexto(i>=0?base:{...g,id:g.id},$("#ge-lineas").value);
+   if(i>=0)L[i]=g;else L.push(g);if(!cfgG()){toast("Los grupos aún no se han cargado. Espere un momento o recargue la página.");return}limpiarTmp("ge-");ui.editG=null;await guardarG({lista:L});toast("Grupo guardado");break}
+  case"borrarG":{const g=grupo(id);const n=prodsDe(id).length;confirmar(`¿Eliminar el grupo “${g?.nombre}”?${n?` Sus ${n} proyecto(s) quedarán sin grupo.`:""}`,async()=>{ui.editG=null;for(const p of prodsDe(id))await parchear("proyectos",p.id,{grupoId:"",lineaId:""});await guardarG({lista:grupos().filter(x=>x.id!==id)});toast("Grupo eliminado")});break}
+  case"pendAdd":{const tx=($("#gp-nuevo").value||"").trim();if(!tx){toast("Escriba el pendiente.");$("#gp-nuevo").focus();return}const P=[...((cfgG()||{}).pendientes||[]),{id:"p"+uid().slice(-6),texto:tx,hecho:false,creado:hoyISO()}];$("#gp-nuevo").value="";limpiarTmp("gp-");await guardarG({pendientes:P});toast("Pendiente agregado");break}
+  case"pendDel":confirmar("¿Quitar este pendiente?",async()=>{await guardarG({pendientes:((cfgG()||{}).pendientes||[]).filter(x=>x.id!==id)})},"Quitar");break;
   case"verRuta":ev.preventDefault();$(".ruta")?.scrollIntoView({block:"start",behavior:"smooth"});break;
   case"evaluar":evaluar(id);break;
   case"redactar":conIA(t.dataset.sec+id,()=>redactar(id,t.dataset.sec));break;
@@ -1138,7 +1338,11 @@ document.addEventListener("input",ev=>{const el=ev.target;if(el.dataset.campo||e
  else if(el.id==="d-texto")ui.docTexto=el.value;
  else if(el.id==="i-problema")ideasForm.problema=el.value;else if(el.id==="i-contexto")ideasForm.contexto=el.value});
 document.addEventListener("change",ev=>{const el=ev.target;
- if(el.dataset.campo&&(el.tagName==="SELECT"||el.type==="date"))campoCambia(el);
+ if(el.dataset.gru){const pid=el.dataset.gru,v=el.value,pp=proy(pid);if(pp&&esProducto(pp)&&v!==pp.grupoId){render();confirmar("Este producto ya está registrado en GrupLAC con su grupo actual. Si lo cambia de grupo, su estado en GrupLAC vuelve a “Sin registrar”. ¿Cambiarlo?",async()=>{await parchear("proyectos",pid,{grupoId:v,lineaId:"",estadoGrupLAC:"",fechaGrupLAC:""});render()},"Cambiar de grupo")}else{parchear("proyectos",pid,{grupoId:v,lineaId:""});render()}}
+ else if(el.dataset.gl){marcarGL(el.dataset.gl,el.value)}
+ else if(el.dataset.aval){const L=grupos().map(g=>g.id===el.dataset.aval?{...g,aval:el.value}:g);guardarG({lista:L});toast(el.value==="avalado"?"Grupo marcado como avalado":"Grupo marcado sin aval")}
+ else if(el.dataset.pendg){const P=((cfgG()||{}).pendientes||[]).map(x=>x.id===el.dataset.pendg?{...x,hecho:el.checked,hechoEl:el.checked?hoyISO():""}:x);guardarG({pendientes:P})}
+ else if(el.dataset.campo&&(el.tagName==="SELECT"||el.type==="date"))campoCambia(el);
  else if(el.dataset.campo&&el.type==="checkbox"){parchear("proyectos",el.dataset.id,{[el.dataset.campo]:el.checked});render()}
  else if(el.id==="filtroEtapa"){ui.filtroEtapa=el.value;render()}
  else if(el.id==="i-sector")ideasForm.sector=el.value;
@@ -1173,7 +1377,7 @@ async function iniciar(){
 function suscribir(){let faltan=new Set(COL);let migrado=false;
  for(const col of COL){db.collection(col).onSnapshot(sn=>{S[col]=sn.docs.map(x=>({id:x.id,...x.data()}));faltan.delete(col);if(!faltan.size)cargado=true;
   if(col==="tramites"&&!migrado){migrado=true;for(const t of S.tramites.filter(t=>t.sugerido&&t.estado!=="hecho"))borrar("tramites",t.id)}
-  pedirRender()},e=>{faltan.delete(col);if(!faltan.size)cargado=true;estado("loc","Sin conexión a los datos");pedirRender()})}}
+  pedirRender()},e=>{ui.errCarga=true;faltan.delete(col);if(!faltan.size)cargado=true;estado("loc","Sin conexión a los datos");pedirRender()})}}
 
 /* ---------- Versión con servidor (patentes.skynetgenesis.com) ---------- */
 let TOKEN="";try{TOKEN=localStorage.getItem("patentia_token")||""}catch(e){}
