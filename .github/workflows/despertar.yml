@@ -22,6 +22,7 @@ jobs:
           https://patentes-api-1e30.onrender.com/api/ping
           https://agenda-ia-api.onrender.com/api/ping
           https://factura-ia-jf8b.onrender.com/api/ping
+          https://contable-ia.onrender.com/api/ping
           "
           for u in $URLS; do ( f=$(mktemp)
             for i in $(seq 1 30); do
