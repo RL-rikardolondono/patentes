@@ -19,9 +19,9 @@ jobs:
           https://centinela-sst-api.onrender.com/api/ping
           https://diligencia-api.onrender.com/api/ping
           https://enfermeria-api-2ksu.onrender.com/health
-          https://gestion-comercial-mj1h.onrender.com/salud
           https://patentes-api-1e30.onrender.com/api/ping
           https://agenda-ia-api.onrender.com/api/ping
+          https://factura-ia-jf8b.onrender.com/api/ping
           "
           for u in $URLS; do ( f=$(mktemp)
             for i in $(seq 1 30); do
