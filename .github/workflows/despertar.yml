@@ -24,6 +24,7 @@ jobs:
           https://factura-ia-jf8b.onrender.com/api/ping
           https://contable-ia.onrender.com/api/ping
           https://iglesia-ia.onrender.com/api/ping
+          https://hotel-ia-g654.onrender.com/api/ping
           "
           for u in $URLS; do ( f=$(mktemp)
             for i in $(seq 1 30); do
