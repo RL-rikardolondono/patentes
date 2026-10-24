@@ -71,7 +71,7 @@ main{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:22px 40px;
 .fila{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 
 label.c{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--tx2);min-width:0}
-input[type=text],input[type=date],input[type=number],input[type=search],select,textarea{width:100%;border:1px solid var(--borde);border-radius:8px;padding:8px 10px;background:var(--sup);font-size:14.5px;font-weight:400}
+input[type=text],input[type=password],input[type=email],input[type=date],input[type=number],input[type=search],select,textarea{width:100%;border:1px solid var(--borde);border-radius:8px;padding:8px 10px;background:var(--sup);font-size:14.5px;font-weight:400}
 textarea{resize:vertical;min-height:84px;line-height:1.55}
 textarea.larga{min-height:200px}
 .campos{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
@@ -141,8 +141,33 @@ tr.info td{color:var(--tx2)}tr.info b{font-weight:600}
 .tab-ayuda{margin:8px 0 10px}
 .puente ol.pc-pasos{padding-left:20px;margin:12px 0;display:grid;gap:12px}.puente textarea{width:100%;margin-top:6px;font-size:13px}
 .modal.puente{max-width:640px;width:calc(100% - 24px)}
-body.sin-ia .btn.ia{display:none!important}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:#1C2B39;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:50;max-width:calc(100% - 32px)}
+body.sin-ia .btn.ia[data-acc=dibujar]{display:none!important}
+body.sin-ia .btn.ia::before{display:none}
+.mk{gap:14px}.modulo{display:flex;flex-direction:column}.pedido{border:2px solid var(--verde)}
+.barra-pedido{display:none}
+@media (max-width:700px){.barra-pedido:not(:empty){display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--sup);border-top:1px solid var(--borde);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));justify-content:space-between;align-items:center;box-shadow:0 -4px 14px rgba(11,79,138,.12)}main{padding-bottom:80px}}
+.demo-cta{background:var(--suave-v);border:1px solid #BFE7DE;border-radius:var(--r);padding:10px 14px}
+.demo-cta select{width:auto;display:inline-block;padding:4px 8px}
+fieldset.ev{border:1px solid var(--borde);border-radius:8px;padding:8px 12px;display:grid;gap:4px}fieldset.ev legend{font-weight:700;padding:0 4px}
+.salir{background:var(--rojo-s)!important;border-color:#F2C4BE!important;color:var(--rojo)!important;font-weight:700}
+.acceso h2{margin:0}
+.modal{max-height:88vh;overflow-y:auto}
+.toast{position:fixed;left:16px;right:16px;margin:0 auto;width:fit-content;bottom:calc(18px + env(safe-area-inset-bottom,0px));background:#0B4F8A;color:#fff;padding:14px 20px;border-radius:12px;font-size:16px;font-weight:700;line-height:1.35;z-index:120;max-width:min(560px,calc(100% - 32px));box-shadow:0 10px 30px rgba(11,79,138,.35)}
+body.con-barra-demo .toast{bottom:calc(var(--barra,80px) + 12px)}
+@media (max-width:640px){body.con-barra-demo .toast{bottom:calc(var(--barra,80px) + 60px)}.barra-demo{font-size:13px;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));gap:6px}.barra-demo .largo{display:none}}
+/* casillas, opciones, fechas y listas: fondo blanco y borde visible (nunca negro) */
+input[type=checkbox],input[type=radio]{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex:none;margin:0;border:2px solid #9DB0C3;background:#fff;border-radius:5px;display:inline-grid;place-content:center;cursor:pointer;vertical-align:middle}
+input[type=radio]{border-radius:50%}
+input[type=checkbox]:checked,input[type=radio]:checked{border-color:var(--verde);background:var(--verde)}
+input[type=checkbox]:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+input[type=radio]:checked::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+input[type=date],input[type=time],input[type=datetime-local],select{color-scheme:light;background-color:#fff;color:#1C2B39}
+.ver-clave{margin-top:6px;align-self:flex-start}
+.quien{display:flex;flex-direction:column;line-height:1.15;font-size:12px;color:var(--suave);margin-left:10px;padding-left:10px;border-left:1px solid var(--borde);max-width:220px;overflow:hidden}.quien b{color:var(--texto);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.quien span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:640px){.quien{max-width:110px;margin-left:6px;padding-left:6px;font-size:11px}.quien b{font-size:11.5px}}
+.acceso-sg{background:none;border:1px solid var(--borde);border-radius:6px;padding:5px 10px;min-height:28px;font:inherit;font-size:12px;color:var(--suave);cursor:pointer}
+.barra-demo{position:fixed;left:0;right:0;bottom:0;z-index:90;background:#fff;border-top:3px solid var(--verde);box-shadow:0 -6px 20px rgba(0,0,0,.08);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+body.con-barra-demo{padding-bottom:calc(var(--barra,80px) + 16px)}body.con-barra-demo .barra-pedido{bottom:var(--barra,72px)}body.con-barra-demo .modal-f{z-index:100}
 .pie{font-size:12px;color:var(--tx2);text-align:center;padding-top:8px;border-top:1px solid var(--borde)}
 .modal-f{position:fixed;inset:0;background:rgba(28,43,57,.35);z-index:40;display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px;overflow-y:auto}
 .modal{background:var(--sup);border-radius:12px;max-width:640px;width:100%;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 40px rgba(11,79,138,.2)}
@@ -156,6 +181,7 @@ body.sin-ia .btn.ia{display:none!important}
       <svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>
       <div><div class="nom">Patent-IA</div><div class="por">por <b>SKYNET <i>GENESIS</i></b></div></div>
       <div class="estado" id="estado"><i class="pt"></i><span>Conectando…</span></div>
+      <div class="quien" id="quien" hidden></div>
     </div>
     <nav class="tabs" id="nav" aria-label="Módulos"></nav>
   </div>
@@ -352,12 +378,12 @@ const diasA=iso=>{if(!iso)return null;const[y,m,d]=iso.split("-").map(Number);co
 const sumar=(iso,meses,dias=0)=>{const[y,m,d]=iso.split("-").map(Number);const t=new Date(y,m-1+meses,d+dias);return`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`};
 const cop=n=>"$ "+Math.round(Number(n)||0).toLocaleString("es-CO");
 const proy=id=>S.proyectos.find(p=>p.id===id);
-let tTimer;function toast(m){clearTimeout(tTimer);let t=$(".toast");if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.append(t)}t.textContent=m;tTimer=setTimeout(()=>t.remove(),3200)}
+let tTimer;function toast(m){clearTimeout(tTimer);let t=$(".toast");if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.append(t)}t.textContent=m;tTimer=setTimeout(()=>t.remove(),Math.max(5500,Math.min(12000,String(m).length*90)))}
 
 /* ---------- Datos ---------- */
 const cadenas={};
 function enCadena(k,fn){const p=(cadenas[k]||Promise.resolve()).catch(()=>{}).then(fn);cadenas[k]=p;return p}
-function errDb(e){const c=e&&e.code;if(c==="quota_exceeded")toast("El almacenamiento está lleno. Borre registros que ya no necesite.");else if(c==="invalid_argument")toast("No se pudo guardar: el registro es demasiado grande o usted no tiene permiso para editar esta app.");else toast("No se pudo guardar. Intente de nuevo en un momento.")}
+function errDb(e){const c=e&&e.code;if(REMOTO&&e&&e.message&&["permiso","bloqueo","invalid_argument"].includes(c)){toast(e.message);return}if(c==="quota_exceeded")toast("El almacenamiento está lleno. Borre registros que ya no necesite.");else if(c==="invalid_argument")toast("No se pudo guardar: el registro es demasiado grande o usted no tiene permiso para editar esta app.");else toast("No se pudo guardar. Intente de nuevo en un momento.")}
 function local(col,id,data,merge){const a=S[col];const i=a.findIndex(x=>x.id===id);if(data===null){if(i>=0)a.splice(i,1)}else if(i>=0)a[i]=merge?deepMerge(a[i],data):{id,...data};else if(!merge)a.push({id,...data})}
 function deepMerge(a,b){const o={...a};for(const k in b){o[k]=(b[k]&&typeof b[k]==="object"&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==="object")?deepMerge(a[k],b[k]):b[k]}return o}
 const MAXDOC=250000;
@@ -385,13 +411,14 @@ document.addEventListener("pointercancel",()=>{punteroAbajo=false},true);
 document.addEventListener("focusout",()=>setTimeout(renderSiPend,0));
 
 /* ---------- Claude ---------- */
-function errIA(e){const c=e&&e.code;return({not_granted:"Debe permitir que la app consulte a Claude.",rate_limited:"Claude está ocupado. Espere un momento y vuelva a intentar.",refused:"Claude no quiso responder esa solicitud.",prompt_too_large:"El texto es demasiado largo para enviarlo de una vez.",invalid_json:"La respuesta llegó incompleta. Intente de nuevo.",cancelled:"Consulta cancelada.",guardado:"Claude respondió, pero no se pudo guardar el texto.",session_expired:"Su sesión expiró. Recargue la página."})[c]||"No se pudo consultar a Claude. Intente de nuevo."}
+function errIA(e){const c=e&&e.code;if(MODO!=="claude")return({fuera_tema:(e&&e.message)||"Esa pregunta no es del tema: no se envió a la IA ni gastó créditos.",sin_creditos:"Su empresa no tiene créditos de IA vigentes. El administrador puede tomar el plan de IA en Mi empresa → Market.",rate_limited:"La IA está ocupada. Espere un momento y vuelva a intentar.",prompt_too_large:"El texto es demasiado largo para enviarlo de una vez.",invalid_json:"La respuesta llegó incompleta. Intente de nuevo (no se cobran créditos si la IA no responde).",guardado:"La IA respondió, pero no se pudo guardar el texto."})[c]||(e&&e.message)||"No se pudo consultar la IA. Intente de nuevo.";return({not_granted:"Debe permitir que la app consulte a Claude.",rate_limited:"Claude está ocupado. Espere un momento y vuelva a intentar.",refused:"Claude no quiso responder esa solicitud.",prompt_too_large:"El texto es demasiado largo para enviarlo de una vez.",invalid_json:"La respuesta llegó incompleta. Intente de nuevo.",cancelled:"Consulta cancelada.",guardado:"Claude respondió, pero no se pudo guardar el texto.",session_expired:"Su sesión expiró. Recargue la página."})[c]||"No se pudo consultar a Claude. Intente de nuevo."}
 const BASE="Eres un agente de propiedad industrial y un ingeniero de producto que trabaja para SkyNet Genesis (Colombia). Escribes en español latinoamericano neutro, técnico y claro. Aplicas la Decisión 486 de la Comunidad Andina y la práctica de la Superintendencia de Industria y Comercio (SIC). Nunca inventes números de patentes ni citas: si mencionas antecedentes, descríbelos de forma general o di que deben verificarse.";
 function contextoProy(p){const b=p.borrador||{};return `PROYECTO ${p.codigo||""}\nTítulo: ${p.titulo||""}\nModalidad: ${p.modalidad||""}\nSector: ${p.sector||""}\nProblema que resuelve: ${p.problema||""}\nSolución propuesta: ${p.solucion||""}\nNotas del inventor: ${p.notas||""}\n`+(b.descripcion?`\nDescripción ya redactada:\n${String(b.descripcion).slice(0,6000)}\n`:"")+(b.reivindicaciones?`\nReivindicaciones actuales:\n${String(b.reivindicaciones).slice(0,4000)}\n`:"")}
 
 /* ---------- Navegación ---------- */
 const VISTAS=[["tablero","Tablero"],["proyectos","Proyectos"],["grupos","Grupos de investigación"],["ideas","Taller de ideas"],["tramites","Trámites y plazos"],["licencias","Licencias y ventas"]];
-function nav(){document.body.classList.toggle("sin-ia",REMOTO&&!sample);$("#nav").innerHTML=VISTAS.map(([k,l])=>`<button data-vista="${k}" aria-current="${vista===k||(vista==="proyecto"&&k==="proyectos")}">${l}</button>`).join("")}
+function vistasActivas(){if(SUPER)return[["super","Empresas"]];return VISTAS.filter(([k])=>(k!=="grupos"||modOn("grupos"))&&(k!=="licencias"||modOn("licencias"))).concat(MODO==="claude"?[]:[["empresa",esAdmin()?"Mi empresa":"Mi cuenta"]])}
+function nav(){sincronizarIA();document.body.classList.toggle("sin-ia",!sample);document.body.classList.toggle("solo-lectura",soloLectura());$("#nav").innerHTML=vistasActivas().map(([k,l])=>`<button data-vista="${k}" aria-current="${vista===k||(vista==="proyecto"&&k==="proyectos")}">${l}</button>`).join("")}
 function ir(v,id){vista=v;if(id!==undefined&&id!==proyActual){ui.docTexto=""}if(id!==undefined)proyActual=id;if(v==="proyecto"&&id!==undefined)subtab="ficha";render();window.scrollTo({top:0})}
 
 /* ---------- Render ---------- */
@@ -405,14 +432,17 @@ function limpiarTmp(pref){const st=ui.tmp[ctxActual()];if(st)for(const id in st)
 function render(){enRender=true;try{vaciarPendientes()}finally{enRender=false}capturarTmp();const ae=document.activeElement;const fid=ae&&ae.id&&$("#main").contains(ae)?ae.id:null;let ss=null,se=null;try{ss=ae.selectionStart;se=ae.selectionEnd}catch(e){}
  nav();const m=$("#main");let h="";
  if(!cargado)h=`<div class="vacio">Cargando sus proyectos…</div>`;
- else h=({tablero:vTablero,proyectos:vProyectos,proyecto:vProyecto,ideas:vIdeas,grupos:vGrupos,tramites:vTramites,licencias:vLicencias}[vista]||vTablero)();
- if(!db&&cargado)h=`<div class="aviso">Modo de prueba: los cambios no se guardarán al cerrar. Abra la app desde su enlace en Claude para guardar sus proyectos.</div>`+h;
- m.innerHTML=h+`<div class="pie">Patent-IA — herramienta interna de SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758</div>`;
+ else if(SUPER)h=vSuper();
+ else{if((vista==="grupos"&&!modOn("grupos"))||(vista==="licencias"&&!modOn("licencias"))||(vista==="empresa"&&MODO==="claude"))vista="tablero";h=({tablero:vTablero,proyectos:vProyectos,proyecto:vProyecto,ideas:sample?vIdeas:vIdeasGuia,grupos:vGrupos,tramites:vTramites,licencias:vLicencias,empresa:vEmpresa}[vista]||vTablero)()}
+ if(!db&&cargado&&MODO==="claude")h=`<div class="aviso">Modo de prueba: los cambios no se guardarán al cerrar. Abra la app desde su enlace en Claude para guardar sus proyectos.</div>`+h;
+ if(cargado&&!SUPER)h=bannerControl()+bannerDemo()+bannerPago()+(soloLectura()?`<div class="aviso">Su usuario es de <b>solo consulta</b>: puede ver todo, pero no hacer cambios.</div>`:"")+h;
+ m.innerHTML=h+`<div class="pie">Patent-IA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758</div>`;
  restaurarTmp();ui.ctxPrev=ctxActual();
  if(fid){const n=document.getElementById(fid);if(n&&n!==document.activeElement){n.focus({preventScroll:true});try{if(ss!==null)n.setSelectionRange(ss,se)}catch(e){}}}
 }
 
-{const r0=render;render=function(){r0();try{puentesClaude()}catch(e){}if(cargado&&!ui.sembrado&&!ui.errCarga&&!cfgG())setTimeout(()=>sembrarGrupos().catch(()=>{ui.sembrado=false}),0)}}
+{const r0=render;render=function(){r0();try{puentesClaude()}catch(e){}try{textosIA()}catch(e){}try{quienSoy();ojosClave();barraDemo()}catch(e){}if(soloLectura()){for(const el of $("#main").querySelectorAll("input,select,textarea"))if(!["busca","filtroEtapa","verTodo","rolDemo"].includes(el.id))el.disabled=true;for(const b of $("#main").querySelectorAll("button[data-acc]"))if(!LECTURA_OK.has(b.dataset.acc))b.hidden=true}
+ if(cargado&&MODO==="servidor"&&ORG&&!SUPER&&!esSkynet()&&modOn("grupos")&&!cfgG()&&!ui.errCarga&&!ui.gruposVacio&&!soloLectura()){ui.gruposVacio=true;const x={lista:[],pendientes:[],creado:new Date().toISOString()};local("config","grupos",x);guardar("config","grupos",x)}if(cargado&&esSkynet()&&!soloLectura()&&!ui.sembrado&&!ui.errCarga&&!cfgG())setTimeout(()=>sembrarGrupos().catch(()=>{ui.sembrado=false}),0)}}
 function chipEtapa(e){return`<span class="chip ${CHIP_ETAPA[e]||""}">${esc(ETQ[e]||e)}</span>`}
 const M=window.MotorPI;
 function chipEv(e){const x=M.estado(e,hoyISO());return`<span class="chip ${x.cls}">${esc(x.txt)}</span>`}
@@ -431,12 +461,12 @@ function vTablero(){
  const max=Math.max(1,...ETAPAS.map(([k])=>S.proyectos.filter(p=>p.etapa===k).length));
  const recientes=[...S.proyectos].sort((a,b)=>(b.actualizado||"").localeCompare(a.actualizado||"")).slice(0,6);
  return`<div class="cab"><div><h1>Fábrica de patentes</h1><p>De la idea a la licencia: invente, redacte, radique en la SIC y venda sus desarrollos a empresas.</p></div>
- <div class="fila">${REMOTO?`<button class="btn sec" data-acc="restaurar">Restaurar respaldo</button>`:""}<button class="btn sec" data-acc="respaldo">Descargar respaldo</button><button class="btn pri" data-acc="nuevo">+ Nuevo proyecto</button></div></div>
+ <div class="fila">${REMOTO&&MODO==="servidor"&&esAdmin()?`<button class="btn sec" data-acc="restaurar">Restaurar respaldo</button>`:""}<button class="btn sec" data-acc="respaldo">Descargar respaldo</button><button class="btn pri" data-acc="nuevo">+ Nuevo proyecto</button></div></div>
  <div class="grid g4">
   <div class="kpi"><span class="l">Proyectos activos</span><span class="v">${act.length}</span><span class="s">${S.proyectos.length-act.length} cerrados o descartados</span></div>
   <div class="kpi"><span class="l">Radicados o concedidos</span><span class="v">${prot}</span><span class="s">ante la SIC</span></div>
   <div class="kpi ${venc?"alerta":""}"><span class="l">Plazos</span><span class="v">${venc?venc+" vencidos":prox}</span><span class="s">${venc?prox+" en los próximos 30 días":"vencen en los próximos 30 días"}</span></div>
-  <div class="kpi"><span class="l">Balance</span><span class="v">${cop(ing-gas)}</span><span class="s">Ingresos ${cop(ing)} · Gastos ${cop(gas)}</span></div>
+  ${modOn("costos")?`<div class="kpi"><span class="l">Balance</span><span class="v">${cop(ing-gas)}</span><span class="s">Ingresos ${cop(ing)} · Gastos ${cop(gas)}</span></div>`:`<div class="kpi"><span class="l">Licencias en negociación</span><span class="v">${neg}</span><span class="s">${S.licencias.filter(x=>x.etapa==="firmado").length} firmadas</span></div>`}
  </div>
  <div class="grid g2">
   <section class="panel"><h3>Proyectos por etapa</h3>${S.proyectos.length?`<div class="embudo">${ETAPAS.map(([k,l])=>{const n=S.proyectos.filter(p=>p.etapa===k).length;return`<div class="r"><span>${l}</span><span class="b"><i style="width:${n/max*100}%"></i></span><span class="n">${n}</span></div>`}).join("")}</div>`:`<div class="vacio">Aún no hay proyectos. Empiece en el Taller de ideas o cree uno nuevo.</div>`}</section>
@@ -446,13 +476,13 @@ function vTablero(){
   <section class="panel"><h3>Trabajados recientemente</h3>${recientes.length?`<div class="lista">${recientes.map(p=>`<div class="it"><div><div class="t"><a href="#" data-abrir="${p.id}">${esc(p.titulo||"Sin título")}</a></div><div class="d"><span class="cod">${esc(p.codigo)}</span> · ${esc(p.modalidad||"")}${(()=>{const c=ruta(p).cur;return c?` · Sigue: <b>${esc(c.t)}</b>`:""})()}</div></div>${chipEtapa(p.etapa)}</div>`).join("")}</div>`:`<div class="vacio">Sus proyectos aparecerán aquí.</div>`}</section>
   <section class="panel"><h3>Licencias</h3><div class="lista">${ETAPAS_LIC.map(([k,l])=>`<div class="it"><span>${l}</span><b>${S.licencias.filter(x=>x.etapa===k).length}</b></div>`).join("")}</div><p class="ayuda">${neg} negociaciones abiertas.</p></section>
  </div>
- ${grupos().length?`<div class="grid g2">${panelGruposTablero()}</div>`:""}`;
+ ${modOn("grupos")&&grupos().length?`<div class="grid g2">${panelGruposTablero()}</div>`:""}`;
 }
 
 function vProyectos(){
  const q=ui.busca.toLowerCase();
  const l=S.proyectos.filter(p=>(!ui.filtroEtapa||p.etapa===ui.filtroEtapa)&&(!q||[p.titulo,p.codigo,p.problema,p.sector].join(" ").toLowerCase().includes(q))).sort((a,b)=>(b.codigo||"").localeCompare(a.codigo||""));
- return`<div class="cab"><div><h1>Banco de proyectos</h1><p>Cada invento, diseño o desarrollo con su etapa, su modalidad de protección y su avance.</p></div><button class="btn pri" data-acc="nuevo">+ Nuevo proyecto</button></div>
+ return`<div class="cab"><div><h1>Banco de proyectos</h1><p>Cada invento, diseño o desarrollo con su etapa, su modalidad de protección y su avance.</p></div><div class="fila">${MODO!=="claude"?`<button class="btn sec" data-acc="importar">Importar desde Excel</button>`:""}<button class="btn pri" data-acc="nuevo">+ Nuevo proyecto</button></div></div>
  <div class="fila"><input type="search" id="busca" placeholder="Buscar por título, código o sector" value="${esc(ui.busca)}" style="max-width:340px"><select id="filtroEtapa" style="max-width:220px"><option value="">Todas las etapas</option>${ETAPAS.map(([k,v])=>`<option value="${k}" ${ui.filtroEtapa===k?"selected":""}>${v}</option>`).join("")}</select></div>
  ${l.length?`<div class="tabla-w"><table><thead><tr><th>Código</th><th>Proyecto</th><th>Modalidad</th><th>Sector</th><th>Etapa</th><th>Siguiente paso</th></tr></thead><tbody>${l.map(p=>`<tr class="clic" data-abrir="${p.id}" tabindex="0"><td class="cod">${esc(p.codigo)}</td><td><b>${esc(p.titulo||"Sin título")}</b><div class="ayuda">${esc((p.problema||"").slice(0,110))}</div></td><td>${esc(p.modalidad||"")}</td><td>${esc(p.sector||"")}</td><td>${chipEtapa(p.etapa)}</td><td>${(()=>{const c=ruta(p).cur;return c?esc(c.t):"—"})()}</td></tr>`).join("")}</tbody></table></div>`:`<div class="vacio">${S.proyectos.length?"Ningún proyecto coincide con la búsqueda.":"Aún no hay proyectos. Cree el primero o use el Taller de ideas para que Claude le proponga inventos a partir de un problema."}</div>`}`;
 }
@@ -618,6 +648,341 @@ function panelGruposTablero(){const G=grupos();if(!G.length)return"";const av=av
  ${av.vencidas.length?`<p style="margin:8px 0 0;color:var(--rojo)"><b>${av.vencidas.length} meta(s) vencida(s).</b></p>`:""}
  ${av.proxima?`<p style="margin:8px 0 0">Próxima meta: <b>${fFecha(av.proxima.vence)}</b> · ${esc(cortoG(av.proxima.grupo))}${av.proxima.proy?` · ${esc(av.proxima.proy.titulo)}`:""}</p>`:""}</section>`}
 
+/* ===== Plataforma de venta: empresas, usuarios, Market, pagos Bold, superadministrador y demostración ===== */
+const PRECIOS={mensual:99000,modulos:{grupos:60000,licencias:50000,plantillas:60000,costos:30000,importar:25000},ia:{ia100:{creditos:100,valor:60000},ia300:{creditos:300,valor:150000},ia1000:{creditos:1000,valor:400000}}};
+const DIAS_PRUEBA=15;
+const MOD_INFO={
+ grupos:{n:"Grupos de investigación (Minciencias)",d:"Sus grupos y líneas de GrupLAC, cada proyecto como producto, cronograma de productividad y datos listos para CvLAC.",ic:"🎓"},
+ licencias:{n:"Licencias y ventas",d:"Empresas interesadas, negociaciones, contratos de licencia, ficha comercial y sugerencias de compradores por sector.",ic:"🤝"},
+ plantillas:{n:"Plantillas de redacción de solicitudes",d:"Llena la solicitud de la SIC (descripción, reivindicaciones, resumen…) a partir de la ficha, lista para completar y radicar.",ic:"📝"},
+ costos:{n:"Costos e ingresos",d:"Tasas de la SIC, gastos, regalías e ingresos por proyecto, con balance y recomendación de qué conviene proteger.",ic:"💰"},
+ importar:{n:"Importar desde Excel",d:"Cargue de una vez su lista de inventos o proyectos desde un archivo de Excel (CSV).",ic:"📥"}};
+const ROL_NOM={admin:"Administrador",investigador:"Investigador o inventor",consulta:"Solo consulta",super:"Superadministrador"};
+let ORG=null,YO=null,MODO="claude",SUPER=null,MODO_CONTROL=false;
+const esDemo=()=>MODO==="demo";
+const esSkynet=()=>!!ORG&&ORG.id==="skynet";
+/* IA: el puente gratis (copiar y pegar en su propio asistente) es solo para la casa (Claude y empresas internas).
+   Las empresas clientes usan IA con créditos prepagados, que se compran después de tener algún módulo. */
+const puenteGratis=()=>MODO==="claude"||!!(ORG&&ORG.interna);
+const iaDe=()=>(ORG&&ORG.ia)||{creditos:0,usados:0,servicio:false,puedeComprar:false};
+const iaActiva=()=>MODO==="servidor"&&!soloLectura()&&iaDe().servicio&&iaDe().creditos>0;
+function leerJSON(t){t=String(t||"").replace(/```(?:json)?/gi,"").trim();try{return JSON.parse(t)}catch(e){}const a=Math.min(...["[","{"].map(c=>{const i=t.indexOf(c);return i<0?1e9:i}));const b=Math.max(t.lastIndexOf("]"),t.lastIndexOf("}"));if(a<1e9&&b>a){try{return JSON.parse(t.slice(a,b+1))}catch(e){}}throw{code:"invalid_json"}}
+const IA_SERVIDOR=(()=>{const f=async(prompt,o)=>{let j;try{j=await api("POST","/api/ia",{prompt,nivel:o&&o.modelTier==="complex"?"complex":"default",...(o&&o.pregunta?{pregunta:o.pregunta,contexto:o.contexto||""}:{})})}catch(e){const sinC=e&&e.status===402&&!e.bloqueo;if(sinC)refrescarYo();throw{code:sinC?"sin_creditos":(e&&e.code)||"ia",message:e&&e.message}}
+  if(ORG&&ORG.ia&&typeof j.creditos==="number"){ORG.ia.creditos=j.creditos;ORG.ia.usados=(ORG.ia.usados||0)+(j.cobrados||0)}if(o&&o.onText)try{o.onText({text:j.text})}catch(e){}return{text:j.text||"",truncated:!!j.truncated}};
+ f.json=async(prompt,o)=>leerJSON((await f(prompt+"\n\nResponde SOLO con el JSON pedido, sin texto antes ni después y sin bloques de código.",o)).text);return f})();
+function sincronizarIA(){if(MODO==="servidor")sample=iaActiva()?IA_SERVIDOR:null}
+const modOn=m=>MODO!=="servidor"||!!(ORG&&ORG.modulos&&ORG.modulos[m]);
+const esAdmin=()=>!YO||YO.rol==="admin";
+const soloLectura=()=>!!YO&&YO.rol==="consulta";
+const cop0=n=>"$ "+Math.round(+n||0).toLocaleString("es-CO");
+const APP_URL_PUB="https://patent-ia.skynetgenesis.com";
+const WA="https://wa.me/573044375758?text=";
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+
+/* --- pedido del Market (tipo supermercado) --- */
+const kPedido=()=>"pia_pedido_"+(ORG?ORG.id:"x");
+function pedido(){try{const a=JSON.parse(lsGet(kPedido())||"[]");return Array.isArray(a)?a.filter(x=>x==="mensual"||(PRECIOS.ia[x]&&(esDemo()||iaDe().puedeComprar))||(PRECIOS.modulos[x]&&!(MODO==="servidor"&&ORG&&ORG.modulos&&ORG.modulos[x]))):[]}catch(e){return[]}}
+function ponPedido(a){const ia=a.filter(x=>PRECIOS.ia[x]).pop();lsSet(kPedido(),JSON.stringify([...new Set(a.filter(x=>!PRECIOS.ia[x]).concat(ia?[ia]:[]))]))}/* un solo plan de IA por pedido */
+function precioDe(x){return x==="mensual"?(ORG&&ORG.valor||PRECIOS.mensual):PRECIOS.ia[x]?PRECIOS.ia[x].valor:PRECIOS.modulos[x]||0}
+function totalPedido(){return pedido().reduce((s,x)=>s+precioDe(x),0)}
+function nomItem(x){return x==="mensual"?"Mensualidad Patent-IA (1 mes)":PRECIOS.ia[x]?`Plan de IA mensual (${PRECIOS.ia[x].creditos.toLocaleString("es-CO")} créditos)`:MOD_INFO[x].n}
+
+function chipPago(pg){const e=pg&&pg.estado;return e==="activa"?`<span class="chip v">Al día</span>`:e==="prueba"?`<span class="chip a">Prueba gratis: ${pg.dias} día(s)</span>`:e==="pendiente"?`<span class="chip a">Pague antes del ${fFecha(pg.cierre)}</span>`:`<span class="chip r">Cerrada${pg&&pg.motivo==="prueba"?": terminó la prueba":" por pago"}</span>`}
+function textoPago(pg){const e=pg&&pg.estado;return e==="activa"?`Su empresa está al día${ORG&&ORG.pagadoHasta?`: pagado hasta ${fFecha(ORG.pagadoHasta)}`:""}.`
+ :e==="prueba"?`Está en la prueba gratis: ${pg.dias===1?"hoy es el último día":`le quedan <b>${pg.dias} días</b>`} (hasta el ${fFecha(pg.hasta)}). La prueba es de ${DIAS_PRUEBA} días y no se renueva. Si paga ahora, el resto del mes le sale gratis.`
+ :e==="pendiente"?`Su mensualidad está pendiente. Páguela antes del <b>${fFecha(pg.cierre)}</b>: ese día se cierra el acceso si no se ha pagado.`
+ :pg&&pg.motivo==="prueba"?"Terminó la prueba gratis. Pague la mensualidad para volver a entrar.":`El acceso está cerrado por falta de pago. Debe ${pg&&pg.meses||1} mes(es).`}
+function upsell(m,texto){return`<div class="aviso fila" style="justify-content:space-between"><span>${MOD_INFO[m].ic} ${esc(texto||MOD_INFO[m].d)} <b>Módulo “${esc(MOD_INFO[m].n)}”: ${cop0(PRECIOS.modulos[m])} pago único.</b></span>${esAdmin()?`<button class="btn acc peq" data-acc="mkAgregar" data-mod="${m}">Agregar al pedido</button>`:`<span class="ayuda">Pídale al administrador de su empresa que lo active.</span>`}</div>`}
+function pedirModulo(m){if(modOn(m))return true;$("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true"><h2>${MOD_INFO[m].ic} ${esc(MOD_INFO[m].n)}</h2><p style="margin:0">${esc(MOD_INFO[m].d)}</p><p style="margin:0"><b>${cop0(PRECIOS.modulos[m])}</b> · pago único, sin mensualidad adicional.</p>${esAdmin()?"":`<p class="ayuda" style="margin:0">Solo el administrador de su empresa puede activarlo.</p>`}<div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">← Volver</button>${esAdmin()?`<button class="btn acc" data-acc="mkAgregar" data-mod="${m}" data-ir="1">Agregar al pedido y ver el Market</button>`:""}</div></div></div>`;return false}
+
+/* --- Vista Empresa: usuarios, Market, pagos y mi cuenta --- */
+function vEmpresa(){const sub=ui.subEmp||(esAdmin()?"market":"cuenta");const tabs=esAdmin()?[["market","Market de módulos"],["usuarios","Usuarios"],["pagos","Pagos"],["cuenta","Mi cuenta"]]:[["cuenta","Mi cuenta"]];
+ return`<div class="cab"><div><h1>${esc(ORG?ORG.nombre:"Mi empresa")}</h1><p>${esAdmin()?"Módulos, usuarios, pagos y su cuenta. La mensualidad es una sola por empresa, con usuarios ilimitados.":"Su cuenta en Patent-IA."}</p></div></div>
+ <div class="subtabs">${tabs.map(([k,l])=>`<button data-acc="subEmp" data-k="${k}" aria-current="${sub===k}">${l}</button>`).join("")}</div>
+ ${({market:pMarket,usuarios:pUsuarios,pagos:pPagos,cuenta:pCuenta}[sub]||pCuenta)()}`}
+function pMarket(){const P=pedido();const M=ORG&&ORG.modulos||{};const pg=ORG&&ORG.pago||{};
+ const deuda=pg.meses||0;
+ return`<div class="grid mk">
+ <section class="panel"><h3>Lo que incluye su mensualidad</h3><p class="ayuda" style="margin-top:-6px">${cop0(ORG&&ORG.valor||PRECIOS.mensual)} al mes por empresa, usuarios ilimitados.</p>
+ <p style="margin:0">Banco de proyectos con ruta guiada · expediente SIC con plazos legales (Decisión 486) · trámites y plazos · bitácora del inventor · acuerdo de confidencialidad y cesión · autoevaluación guiada · guía de inventiva · usuarios y roles.</p>
+ <div class="fila" style="margin-top:12px">${esDemo()?`<span class="chip a">Prueba gratis de ${DIAS_PRUEBA} días</span>`:chipPago(pg)}${ORG&&ORG.pagadoHasta&&pg.estado==="activa"?`<span class="ayuda">Pagado hasta ${fFecha(ORG.pagadoHasta)}</span>`:""}${deuda>1&&pg.estado!=="prueba"?`<span class="ayuda">· debe ${deuda} mes(es)</span>`:""}
+ ${P.includes("mensual")?`<span class="chip g">En su pedido</span>`:`<button class="btn acc peq" data-acc="mkAgregar" data-mod="mensual">Agregar mensualidad al pedido</button>`}</div></section>
+ <h3 style="margin:6px 0 0">Módulos para crecer <span class="ayuda" style="font-weight:400">· pago único, se activan solos al pagar</span></h3>
+ <div class="grid g2">${Object.keys(MOD_INFO).map(m=>`<section class="panel modulo"><div class="fila" style="justify-content:space-between;align-items:flex-start"><h3 style="margin:0">${MOD_INFO[m].ic} ${esc(MOD_INFO[m].n)}</h3><b>${cop0(PRECIOS.modulos[m])}</b></div><p class="ayuda" style="margin:8px 0">${esc(MOD_INFO[m].d)}</p>
+  ${M[m]&&!esDemo()?`<span class="chip v">✓ Activo en su empresa</span>`:P.includes(m)?`<span class="chip g">En su pedido</span> <button class="btn sec peq" data-acc="mkQuitar" data-mod="${m}">Quitar</button>`:`<button class="btn acc peq" data-acc="mkAgregar" data-mod="${m}">${esDemo()?"Lo quiero para mi empresa":"Agregar al pedido"}</button>`}</section>`).join("")}</div>
+ ${pIA()}
+ </div>
+ <section class="panel pedido" id="su-pedido"><h3>Su pedido</h3>${P.length?`<div class="lista">${P.map(x=>`<div class="it"><span>${esc(nomItem(x))}</span><span class="fila"><b>${cop0(precioDe(x))}</b><button class="btn sec peq" data-acc="mkQuitar" data-mod="${x}" aria-label="Quitar ${esc(nomItem(x))}">Quitar</button></span></div>`).join("")}</div>
+  <div class="fila" style="justify-content:space-between;margin-top:10px"><b>Total a pagar hoy</b><b style="font-size:20px">${cop0(totalPedido())}</b></div>
+  <p class="ayuda" style="margin:6px 0 0">${P.some(x=>PRECIOS.modulos[x])?"Los módulos se pagan una sola vez. ":""}${P.some(x=>PRECIOS.ia[x])?"El plan de IA trae créditos para 30 días. ":""}${P.includes("mensual")?(ORG&&ORG.quedaHasta?`Con este pago queda al día hasta el <b>${fFecha(ORG.quedaHasta)}</b>.`:"La mensualidad cubre un mes de servicio."):"Lo que se paga cada mes es la mensualidad de la empresa (y el plan de IA, si lo toma)."}</p>
+  <div id="mboldzona" style="margin-top:12px"><button class="btn acc" data-acc="mkPagar">${esDemo()?"¡Quiero Patent-IA ya para mi empresa!":"Pagar todo en un solo pago"}</button></div><p class="ayuda" style="margin:6px 0 0">Todos los medios de pago: tarjeta débito o crédito, PSE, Nequi y llave Bre-B.</p>`
+  :`<div class="vacio">Agregue la mensualidad o los módulos que quiera. Aquí verá la lista y el total.</div>`}</section>
+ <div class="barra-pedido">${P.length?`<span>${P.length} en su pedido · <b>${cop0(totalPedido())}</b></span><a href="#su-pedido" class="btn acc peq">Ver pedido</a>`:""}</div>`}
+/* Créditos de IA: se compran aparte (pago único), solo después de tener algún módulo */
+function pIA(){const ia=iaDe();const puede=esDemo()||ia.puedeComprar;const gratis=MODO==="claude"||(ORG&&ORG.interna);const P=pedido();
+ return`<section class="panel" id="mk-ia"><div class="fila" style="justify-content:space-between;align-items:flex-start"><h3 style="margin:0">✨ Inteligencia artificial · plan mensual</h3>${!esDemo()&&MODO==="servidor"?`<span class="chip ${ia.creditos>0?"v":"g"}">${ia.creditos>0?`${ia.creditos} crédito(s) hasta el ${fFecha(ia.vence)}`:"Sin plan de IA vigente"}</span>`:""}</div>
+ <p class="ayuda" style="margin:8px 0">La IA evalúa su invento, redacta la solicitud de la SIC, dibuja bocetos, propone ideas, sugiere compradores y responde consultas sobre su proyecto. Es un <b>plan mensual opcional</b>, aparte de la mensualidad: cada pago trae créditos para 30 días; los que no use en ese tiempo se pierden. Una consulta corta gasta 1 crédito; una sección larga de la solicitud, entre 2 y 4. Las preguntas que no son de su proyecto no se envían a la IA ni gastan créditos.</p>
+ ${gratis?`<div class="aviso">Su empresa es interna de SkyNet Genesis: usa el asistente de IA sin costo (copiar y pegar).</div>`:!puede?`<div class="aviso">🔒 El plan de IA se puede tomar cuando su empresa tenga al menos un módulo activo. Primero compre un módulo.</div>`
+ :`<div class="grid g4">${Object.entries(PRECIOS.ia).map(([k,x])=>`<div class="modulo panel" style="margin:0"><b style="font-size:18px">${x.creditos.toLocaleString("es-CO")} créditos al mes</b><div style="font-size:20px;margin:4px 0"><b>${cop0(x.valor)}</b> <span class="ayuda">al mes</span></div><p class="ayuda" style="margin:0 0 8px">${cop0(x.valor/x.creditos)} por crédito</p>
+  ${!esAdmin()?`<span class="ayuda">Lo toma el administrador.</span>`:P.includes(k)?`<span class="chip g">En su pedido</span> <button class="btn sec peq" data-acc="mkQuitar" data-mod="${k}">Quitar</button>`:`<button class="btn acc peq" data-acc="mkAgregar" data-mod="${k}">${esDemo()?"Lo quiero":"Agregar al pedido"}</button>`}</div>`).join("")}</div>`}
+ ${!esDemo()&&ia.usados?`<p class="ayuda" style="margin:8px 0 0">Créditos usados hasta hoy: ${ia.usados}.</p>`:""}</section>
+ <section class="panel"><div class="fila" style="justify-content:space-between;align-items:flex-start"><h3 style="margin:0">📘 Manuales del usuario</h3><b>Gratis</b></div><p class="ayuda" style="margin:8px 0">Manual general y uno por perfil (Administrador, Investigador o inventor, Solo consulta), en PDF. Cada persona lo descarga en Mi cuenta.</p></section>
+ <section class="panel"><div class="fila" style="justify-content:space-between;align-items:flex-start"><h3 style="margin:0">🌐 Creamos la página web de su empresa</h3><b>Cotización</b></div><p class="ayuda" style="margin:8px 0">Si su empresa, universidad o grupo no tiene página web, SkyNet Genesis se la crea, con su propio panel para que usted cambie textos e imágenes.</p><a class="btn sec peq" target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, quiero que SkyNet Genesis cree la página web de "+(ORG?ORG.nombre:"mi empresa"))}">Pedir cotización por WhatsApp</a></section>`}
+function ofrecerIA(){const ia=iaDe();const ok=esDemo()||ia.puedeComprar;const sinServ=MODO==="servidor"&&!ia.servicio;
+ $("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true"><h2>✨ Hacerlo con inteligencia artificial</h2>
+ <p style="margin:0">Con créditos de IA, Patent-IA evalúa, redacta, dibuja y responde por usted. Los asistentes guiados y las plantillas siguen sin costo.</p>
+ ${soloLectura()?`<p class="ayuda" style="margin:0">Su usuario es solo de consulta: no puede usar la IA.</p>`:sinServ?`<p class="ayuda" style="margin:0">La IA no está disponible en este momento. Escríbanos por WhatsApp.</p>`:!ok?`<p style="margin:0"><b>Primero active un módulo</b> en el Market; después podrá tomar el plan de IA (desde ${cop0(PRECIOS.ia.ia100.valor)} al mes por ${PRECIOS.ia.ia100.creditos} créditos).</p>`:`<p style="margin:0">Plan mensual desde <b>${cop0(PRECIOS.ia.ia100.valor)}</b> al mes por ${PRECIOS.ia.ia100.creditos} créditos, aparte de la mensualidad.${MODO==="servidor"?` Su empresa tiene ${ia.creditos} crédito(s) vigentes.`:""}</p>`}
+ ${!esAdmin()&&!soloLectura()?`<p class="ayuda" style="margin:0">Lo toma el administrador de su empresa.</p>`:""}
+ <div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">← Volver</button>${esDemo()?`<button class="btn acc" data-acc="irRegistro">¡Quiero Patent-IA ya!</button>`:esAdmin()&&!sinServ?`<button class="btn acc" data-acc="irMarketIA">${ok?"Ver el plan de IA":"Ir al Market"}</button>`:""}</div></div></div>`}
+/* Consulta libre a la IA sobre un proyecto o los grupos (gasta créditos) */
+let consultaIA=null;
+function abrirConsultaIA(tarea,id){consultaIA={tarea,id,resp:""};
+ const tit={consulta:"Consultar a la IA sobre este proyecto",producto:"Preparar el producto con la IA",grupos:"Consultar a la IA sobre los grupos"}[tarea]||"Consultar a la IA";
+ $("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true" aria-label="${esc(tit)}"><h2>${esc(tit)}</h2>
+ <p class="ayuda" style="margin:0">La IA ya conoce los datos ${tarea==="grupos"?"de sus grupos":"del proyecto"}. Cada pregunta gasta 1 crédito (las muy largas, 2). Su empresa tiene <b id="ia-cred">${iaDe().creditos}</b> crédito(s).</p>
+ <label class="c">Su pregunta<textarea id="ia-preg" rows="3" placeholder="Ej.: ¿Conviene patente de invención o modelo de utilidad? ¿Qué debo probar antes de radicar?"></textarea></label>
+ <div id="ia-resp" class="ayuda" style="white-space:pre-wrap;max-height:40vh;overflow:auto"></div>
+ <div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">Cerrar</button>${id&&tarea!=="grupos"?`<button class="btn sec" data-acc="iaGuardarBit" id="ia-guardar" hidden>Guardar en la bitácora</button>`:""}<button class="btn acc" data-acc="iaPreguntar" id="ia-btn">Preguntar</button></div></div></div>`;
+ setTimeout(()=>$("#ia-preg")?.focus(),30)}
+async function preguntarIA(){if(!consultaIA)return;const q=($("#ia-preg")?.value||"").trim();if(q.length<3){toast("Escriba su pregunta.");$("#ia-preg")?.focus();return}
+ const b=$("#ia-btn");b.disabled=true;b.textContent="Pensando…";
+ try{const ctx=pedidoClaude(consultaIA.tarea,consultaIA.id)||"";const r=await IA_SERVIDOR(`${BASE}\n\n${ctx}\n\nPregunta del usuario: ${q}\n\nResponde claro y breve (máximo 300 palabras), con pasos concretos.`,{pregunta:q,contexto:ctx});
+  consultaIA.resp=r.text.trim();consultaIA.preg=q;const z=$("#ia-resp");if(z){z.textContent=consultaIA.resp;z.classList.remove("ayuda")}$("#ia-cred")&&($("#ia-cred").textContent=iaDe().creditos);const g=$("#ia-guardar");if(g)g.hidden=false}
+ catch(e){toast(errIA(e))}finally{if(document.body.contains(b)){b.disabled=false;b.textContent="Preguntar otra cosa"}}}
+async function guardarRespuestaIA(){const c=consultaIA;if(!c||!c.resp||!c.id)return;const bid=uid();const x={proyectoId:c.id,fecha:hoyISO(),tipo:"Otro",autor:"Consulta a la IA",texto:`Pregunta: ${c.preg}\n\nRespuesta de la IA: ${c.resp}`.slice(0,20000),creado:new Date().toISOString()};local("bitacora",bid,x);if(await guardar("bitacora",bid,x)){toast("Guardado en la bitácora del proyecto");const g=$("#ia-guardar");if(g)g.hidden=true}}
+function pPagos(){const pg=ORG&&ORG.pago||{};const L=(ORG&&ORG.pagos)||[];
+ return`<section class="panel"><h3>Estado de la mensualidad</h3><p style="margin:0">${textoPago(pg)}</p>
+ ${ORG&&ORG.quedaHasta?`<p style="margin:10px 0 0">Mensualidad: <b>${cop0(ORG&&ORG.valor||PRECIOS.mensual)}</b>. Con este pago queda al día hasta el <b>${fFecha(ORG.quedaHasta)}</b>.</p>`:""}
+ <div id="pboldzona" class="fila" style="margin-top:12px"><button class="btn acc" data-acc="pagarMeses">Pagar la mensualidad</button><a class="btn sec" target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, necesito ayuda con el pago de Patent-IA para "+(ORG?ORG.nombre:""))}">Soporte por WhatsApp</a></div>
+ <p class="ayuda">Se paga mes a mes. No hay mora ni multas: si la mensualidad no se paga, el día 5 del mes siguiente se cierra el acceso. Se abre de nuevo apenas se paga, desde ese mes (no se cobran los meses que estuvo cerrado).</p></section>
+ <section class="panel"><h3>Compras de módulos</h3>${(ORG&&ORG.compras||[]).length?`<div class="lista">${ORG.compras.slice().reverse().map(c=>`<div class="it"><span>${esc((MOD_INFO[c.modulo]||{}).n||c.modulo)}${c.manual?" (activado por SkyNet Genesis)":""}</span><span class="ayuda">${fFecha((c.fecha||"").slice(0,10))}</span></div>`).join("")}</div>`:`<div class="vacio">Aún no ha comprado módulos.</div>`}</section>`}
+function pCuenta(){return`<section class="panel"><h3>Mi cuenta</h3><p style="margin:0">${esc(YO?YO.nombre:"")} · ${esc(YO?YO.email:"")} · <span class="chip">${esc(ROL_NOM[YO&&YO.rol]||"")}</span></p>
+ ${esDemo()?`<p class="ayuda">En la demostración no se cambian claves.</p>`:`<div class="campos" style="margin-top:12px;max-width:620px"><label class="c">Clave actual<input type="password" id="mc-actual" autocomplete="current-password"></label><label class="c">Clave nueva (10 o más, con letras y números)<input type="password" id="mc-nueva" autocomplete="new-password"></label><label class="c">Repita la clave nueva<input type="password" id="mc-nueva2" autocomplete="new-password"></label></div>
+ <div class="fila" style="margin-top:12px"><button class="btn acc" data-acc="cambiarClave">Cambiar mi clave</button></div>`}</section>
+ <section class="panel"><h3>📘 Manual del usuario</h3><p class="ayuda" style="margin-top:-6px">Paso a paso de su trabajo en Patent-IA, en PDF. Gratis con su cuenta.</p><div class="fila"><button class="btn acc" data-acc="manual" data-p="${esc(YO&&YO.rol||"general")}">Descargar mi manual (${esc(ROL_NOM[YO&&YO.rol]||"")})</button><button class="btn sec" data-acc="manual" data-p="general">Manual general</button></div></section>
+ <section class="panel"><h3>Soporte</h3><p style="margin:0">contacto@skynetgenesis.com · <a target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, necesito ayuda con Patent-IA")}">WhatsApp 304 437 5758</a></p></section>`}
+function pUsuarios(){const L=ui.usuarios;if(!L&&!esDemo()){cargarUsuarios();return`<div class="vacio">Cargando usuarios…</div>`}
+ const lista=esDemo()?DEMO_USUARIOS:L;
+ return`<section class="panel"><div class="cab"><div><h3>Usuarios de ${esc(ORG?ORG.nombre:"")}</h3><p class="ayuda">Usuarios ilimitados sin costo adicional. Cada persona entra con su correo y su propia clave.</p></div></div>
+ <div class="tabla-w"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th></th></tr></thead><tbody>${lista.map(u=>`<tr><td><b>${esc(u.nombre)}</b></td><td>${esc(u.email)}</td>
+  <td><select data-urol="${esc(u.id)}" ${esDemo()||u.id===YO.id?"disabled":""}>${["admin","investigador","consulta"].map(r=>`<option value="${r}" ${u.rol===r?"selected":""}>${ROL_NOM[r]}</option>`).join("")}</select></td>
+  <td>${u.activo?(u.tiene_clave===false?`<span class="chip a">Invitado: falta crear clave</span>`:`<span class="chip v">Activo</span>`):`<span class="chip g">Desactivado</span>`}</td><td class="ayuda">${u.ultimo?fFecha(String(u.ultimo).slice(0,10)):"—"}</td>
+  <td class="fila">${!esDemo()&&u.id!==YO.id?`<button class="btn sec peq" data-acc="uActivo" data-id="${esc(u.id)}" data-v="${u.activo?0:1}">${u.activo?"Desactivar":"Activar"}</button>${u.activo?`<button class="btn sec peq" data-acc="uReenviar" data-id="${esc(u.id)}">${u.tiene_clave===false?"Reenviar invitación":"Enviar enlace de clave"}</button>`:""}`:""}</td></tr>`).join("")}</tbody></table></div></section>
+ <section class="panel"><h3>Invitar a una persona</h3><div class="campos"><label class="c">Nombre<input type="text" id="un-nombre"></label><label class="c">Correo<input type="text" id="un-email" inputmode="email"></label>
+ <label class="c">Rol<select id="un-rol"><option value="investigador">${ROL_NOM.investigador}: crea y edita proyectos</option><option value="consulta">${ROL_NOM.consulta}: solo ve</option><option value="admin">${ROL_NOM.admin}: todo, usuarios y pagos</option></select></label></div>
+ <div class="fila" style="margin-top:12px"><button class="btn acc" data-acc="uInvitar">Enviar invitación</button><span class="ayuda">Le llega un correo para crear su clave (el enlace vence en 3 días).</span></div></section>`}
+const DEMO_USUARIOS=[{id:"d1",nombre:"Laura Méndez (demo)",email:"demo@skynetgenesis.com",rol:"admin",activo:true},{id:"d2",nombre:"Andrés Rojas",email:"andres@ejemplo.com",rol:"investigador",activo:true},{id:"d3",nombre:"Paola Ruiz",email:"paola@ejemplo.com",rol:"consulta",activo:true,tiene_clave:false}];
+async function cargarUsuarios(){try{const j=await api("GET","/api/usuarios");ui.usuarios=j.usuarios;render()}catch(e){toast(e.message||"No se pudieron cargar los usuarios.")}}
+
+/* --- Bold: firmador central de SkyNet Genesis --- */
+async function boldFirma(plan,meses){const u=`https://skynetgenesis.com/bold-firma.php?plan=${encodeURIComponent(plan)}&empresa=${encodeURIComponent(ORG.id)}&org=${encodeURIComponent(ORG.nombre||"")}&meses=${meses||1}&volver=${encodeURIComponent(location.origin+location.pathname)}`;
+ let r;try{r=await fetch(u)}catch(e){throw new Error("No se pudo conectar con el sistema de pagos. Intente de nuevo en unos minutos o escriba a soporte.")}
+ let j={};try{j=await r.json()}catch(e){}if(!r.ok||j.error)throw new Error(j.error||"El pago no está disponible en este momento. Intente más tarde o escriba a soporte por WhatsApp.");return j}
+function montarBold(z,f,desc){const v=(...k)=>k.map(x=>f[x]).find(x=>x!=null&&x!=="");z.innerHTML="";const s=document.createElement("script");s.src="https://checkout.bold.co/library/boldPaymentButton.js";
+ Object.entries({"data-bold-button":"dark-L","data-order-id":v("orderId","order_id","pedido"),"data-currency":v("currency","moneda")||"COP","data-amount":String(v("amount","monto","valor")),"data-api-key":v("apiKey","api_key","llave"),"data-integrity-signature":v("signature","integritySignature","firma"),"data-redirection-url":v("redirectionUrl","redirect","volver"),"data-description":v("description","descripcion")||desc}).forEach(([k,x])=>{if(x!=null)s.setAttribute(k,x)});
+ z.appendChild(s);z.insertAdjacentHTML("beforeend",`<p class="ayuda">Valor: <b>${cop0(+v("amount","monto","valor")||0)}</b>. Pulse el botón para pagar.</p>`)}
+async function pagarPlan(plan,meses,zona,desc){const z=$("#"+zona);if(!z)return;if(MODO_CONTROL){toast("En modo Superadministrador no se paga por la empresa.");return}
+ if(MODO!=="servidor"){if(esDemo()){irRegistro();return}toast("Aquí en Claude el pago es simulado: en la app real se abre la ventana de pago.");return}
+ z.innerHTML=`<span class="ayuda">Preparando el pago…</span>`;try{const f=await boldFirma(plan,meses);try{sessionStorage.setItem("pia_pago","1")}catch(e){}montarBold(z,f,desc)}catch(e){z.innerHTML=`<div class="aviso">${esc(e.message)}</div>`}}
+function planPedido(){const P=pedido();const mods=P.filter(x=>PRECIOS.modulos[x]);const ia=P.find(x=>PRECIOS.ia[x]);
+ if(P.length===1)return P[0]==="mensual"?"patent-ia:mensual":ia?"patent-ia:"+ia:"patent-ia:mod-"+P[0];
+ return"patent-ia:paq"+(P.includes("mensual")?"_mensual":"")+mods.map(m=>"_mod-"+m).join("")+(ia?"_"+ia:"")}
+/* al volver de Bold */
+const VUELTA_BOLD=(()=>{try{const q=new URLSearchParams(location.search);const ref=q.get("bold-order-id");const st=(q.get("bold-tx-status")||"").toLowerCase();if(!ref&&!st)return null;history.replaceState(null,"",location.pathname+location.hash);return{ref,st}}catch(e){return null}})();
+async function procesarVueltaBold(){if(!VUELTA_BOLD||MODO!=="servidor")return;const{ref,st}=VUELTA_BOLD;
+ if(st&&st!=="approved"){toast("El pago no se completó. Su pedido sigue guardado para intentarlo de nuevo.");return}
+ ponPedido([]);toast("Pago recibido. Se aplica solo en unos minutos, apenas Bold lo confirme.");
+ if(ref){try{const r=await api("POST","/api/bold/volver",{ref});if(r&&r.ok){toast(r.repetido?"Su pago ya estaba aplicado.":"¡Pago aplicado! Gracias.");setTimeout(()=>location.reload(),1500)}}catch(e){}}}
+async function refrescarYo(){try{const j=await api("GET","/api/yo");YO=j.usuario;if(j.org)ORG=j.org;render()}catch(e){}}
+
+/* --- Aviso de pago y bloqueo --- */
+function bannerPago(){if(!ORG||MODO!=="servidor")return"";const p=ORG.pago||{};
+ if(p.estado==="prueba"||p.estado==="pendiente")return`<div class="${p.estado==="prueba"&&p.dias>3?"aviso":"alerta"} fila" role="status" style="justify-content:space-between"><span>${p.estado==="prueba"?`<b>Prueba gratis: ${p.dias===1?"hoy es el último día":`le quedan ${p.dias} días`}.</b> ${esAdmin()?"Pague la mensualidad para no perder el acceso; la prueba no se renueva.":"Avise a la administración de su empresa."}`:`<b>${esAdmin()?`Mensualidad pendiente: páguela antes del ${fFecha(p.cierre)}.`:"Hay un pago pendiente de su empresa."}</b> ${esAdmin()?"Ese día se cierra el acceso si no se ha pagado.":"Avise a la administración de su empresa."}`}</span>${esAdmin()?`<span class="fila"><button class="btn acc peq" data-acc="irPagos">Pagar ahora</button><a class="btn sec peq" target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, necesito ayuda con el pago de Patent-IA")}">WhatsApp</a></span>`:""}</div>`;
+ return""}
+function pantallaBloqueo(e){const pago=e&&e.bloqueo==="pago";$("#nav").innerHTML="";
+ $("#main").innerHTML=`<section class="panel" style="max-width:560px;margin:6vh auto;width:100%"><h2>${pago?"Acceso cerrado temporalmente":"Acceso suspendido"}</h2><p>${esc(e&&e.message||"")}</p>
+ ${pago&&esAdmin()&&!MODO_CONTROL?`<p style="margin:0">Mensualidad: <b>${cop0(ORG&&ORG.valor||PRECIOS.mensual)}</b>${ORG&&ORG.quedaHasta?`. Con este pago queda al día hasta el <b>${fFecha(ORG.quedaHasta)}</b>`:""}.</p><div id="pboldzona" class="fila" style="margin-top:12px"><button class="btn acc" data-acc="pagarMeses">Pagar la mensualidad</button></div>`:""}
+ <div class="fila" style="margin-top:14px">${MODO_CONTROL?`<button class="btn pri" data-acc="salirControl">Salir del modo administrador</button>`:`<a class="btn sec" target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, necesito ayuda con Patent-IA")}">Soporte por WhatsApp</a><button class="btn sec" data-acc="salir">Salir</button>`}</div></section>`}
+
+const LECTURA_OK=new Set(["manual","verClave","verPlanes","salirControl","verRuta","rutaSel","respaldo","exportar","bajarDoc","bajarBit","bajarSvg","bajarDocActual","salir","subEmp","cambiarClave","cerrarCapa","claude","gruplac","abrirDoc","irRegistro","salirDemo"]);
+/* --- Pantallas de entrada --- */
+function pantallaAcceso(modo,msg,extra){modo=modo||"entrar";$("#nav").innerHTML="";estado("","");document.body.classList.remove("con-sesion");
+ const volver=`<p class="ayuda" style="margin:0 0 8px"><a href="#" data-acc="accVolver">← Volver al inicio</a></p>`;
+ let h="";
+ if(modo==="entrar")h=`<h2>Entrar a Patent-IA</h2>${msg?`<div class="aviso">${esc(msg)}</div>`:""}<form id="f-acc" class="campos" style="grid-template-columns:1fr" novalidate>
+  <label class="c">Correo<input type="text" id="acc-email" autocomplete="username" inputmode="email"></label><label class="c">Clave<input type="password" id="acc-clave" autocomplete="current-password"></label>
+  <button class="btn acc" type="submit">Entrar</button></form><p class="ayuda" style="margin:0"><a href="#" data-acc="accModo" data-m="olvide">¿Olvidó su clave?</a></p>
+  <hr style="border:0;border-top:1px solid var(--borde);margin:6px 0"><p style="margin:0"><b>¿Aún no tiene Patent-IA?</b></p><div class="fila"><button class="btn acc" data-acc="accModo" data-m="registro">Crear la cuenta de mi empresa</button><button class="btn sec" data-acc="irDemo">Probar la demostración</button></div>`;
+ else if(modo==="olvide")h=`${volver}<h2>Crear o recuperar su clave</h2><p class="ayuda" style="margin:0">Escriba su correo. Le enviaremos un enlace para crear una clave nueva.</p><form id="f-acc" class="campos" style="grid-template-columns:1fr" novalidate><label class="c">Correo<input type="text" id="acc-email" inputmode="email" autocomplete="username"></label><div class="fila"><button class="btn acc" type="submit">Enviar enlace</button><button type="button" class="btn sec" data-acc="accVolver">Cancelar</button></div></form>`;
+ else if(modo==="registro"){const mods=(extra&&extra.mods)||[];h=`${volver}<h2>Crear la cuenta de mi empresa</h2>
+  <p class="ayuda" style="margin:0">Pruébela gratis ${DIAS_PRUEBA} días (una sola vez por empresa, no se renueva). Le llegará un correo para crear su clave y cada día un aviso de cuántos días de prueba le quedan; luego paga la mensualidad (${cop0(PRECIOS.mensual)}, usuarios ilimitados) y los módulos que escoja, en un solo pago.</p>
+  ${mods.length?`<div class="aviso">Su pedido: ${mods.map(m=>esc(MOD_INFO[m]?MOD_INFO[m].n:m)).join(", ")}. Lo verá listo en el Market al entrar.</div>`:""}
+  <form id="f-acc" class="campos" style="grid-template-columns:1fr" novalidate><label class="c">Nombre de la empresa, universidad o grupo<input type="text" id="acc-empresa"></label><label class="c">Su nombre<input type="text" id="acc-nombre" autocomplete="name"></label><label class="c">Su correo<input type="text" id="acc-email" inputmode="email" autocomplete="email"></label>
+  <label class="ck"><input type="checkbox" id="acc-acepto"> Acepto el tratamiento de mis datos para usar Patent-IA (Ley 1581 de 2012).</label>
+  <div class="fila"><button class="btn acc" type="submit">Crear mi cuenta</button><button type="button" class="btn sec" data-acc="accVolver">Cancelar</button></div></form>
+  <p class="ayuda" style="margin:0"><a target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, quiero información de Patent-IA")}">Hablar con un asesor</a></p>`}
+ else if(modo==="clave")h=`<h2>${extra&&extra.tipo==="invitacion"?"Cree su clave":"Cree una clave nueva"}</h2><p class="ayuda" style="margin:0">Mínimo 10 caracteres, con letras y números. Escríbala dos veces.</p><form id="f-acc" class="campos" style="grid-template-columns:1fr" novalidate><label class="c">Clave nueva<input type="password" id="acc-clave" autocomplete="new-password"></label><label class="c">Repita la clave<input type="password" id="acc-clave2" autocomplete="new-password"></label><div class="fila"><button class="btn acc" type="submit">Guardar mi clave</button><button type="button" class="btn sec" data-acc="accVolver">Cancelar</button></div></form>`;
+ else if(modo==="resultado")h=`<h2>${esc(extra.titulo)}</h2><p style="margin:0">${extra.html}</p><div class="fila">${extra.botones||`<button class="btn acc" data-acc="accVolver">Ir a entrar</button>`}</div>`;
+ $("#main").innerHTML=`<section class="panel acceso" style="max-width:480px;margin:5vh auto;width:100%;display:flex;flex-direction:column;gap:12px">${h}</section><div class="pie">Patent-IA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758 · <button type="button" class="acceso-sg" data-acc="accesoSkynet">Acceso SkyNet Genesis</button></div>`;ojosClave();
+ pantallaAcceso.modo=modo;pantallaAcceso.extra=extra;
+ const f=$("#f-acc");if(f){f.querySelector("input")?.focus();f.onsubmit=async ev=>{ev.preventDefault();const b=f.querySelector("button[type=submit]");b.disabled=true;try{await enviarAcceso(modo,extra)}catch(er){toast(er.message||"No se pudo completar.")}finally{b.disabled=false}}}}
+async function enviarAcceso(modo,extra){const v=id=>($("#"+id)?.value||"").trim();
+ if(modo==="entrar"){const j=await api("POST","/api/login",{email:v("acc-email"),clave:$("#acc-clave").value});TOKEN=j.token;lsSet("patentia_token",TOKEN);arrancarSesion();return}
+ if(modo==="olvide"){if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("acc-email"))){toast("Escriba un correo válido.");return}const j=await api("POST","/api/olvide",{email:v("acc-email")});
+  pantallaAcceso("resultado",null,{titulo:"Revise su correo",html:`Si <b>${esc(j.oculto||v("acc-email"))}</b> tiene cuenta en Patent-IA, le llegó un enlace para crear su clave (revise también la carpeta de spam). El enlace vence en una hora.${j.enlace?`<br><a href="${esc(j.enlace)}">Enlace (modo de prueba)</a>`:""}`,botones:`<button class="btn acc" data-acc="accVolver">Ir a entrar</button><button class="btn sec" data-acc="accModo" data-m="olvide">Reenviar o corregir el correo</button>`});return}
+ if(modo==="registro"){if(!$("#acc-acepto").checked){toast("Debe aceptar el tratamiento de datos para crear la cuenta.");return}const email=v("acc-email");const j=await api("POST","/api/registro",{empresa:v("acc-empresa"),nombre:v("acc-nombre"),email});
+  lsSet("pia_pedido_registro",JSON.stringify({email,mods:["mensual",...((extra&&extra.mods)||[])]}));
+  pantallaAcceso("resultado",null,{titulo:"¡Cuenta creada!",html:`Le enviamos un correo a <b>${esc(email)}</b> para crear su clave (revise también spam). Después entre con su correo y su clave: tendrá ${DIAS_PRUEBA} días de prueba gratis y su pedido listo en el Market.${j.enlace?`<br><a href="${esc(j.enlace)}">Enlace (modo de prueba)</a>`:""}`,botones:`<button class="btn acc" data-acc="accVolver">Ir a entrar</button><button class="btn sec" data-acc="accModo" data-m="olvide">No me llegó el correo</button>`});return}
+ if(modo==="clave"){const c=$("#acc-clave").value;if(c!==$("#acc-clave2").value){toast("Las claves no coinciden.");return}const j=await api("POST","/api/restablecer",{token:extra.token,clave:c});history.replaceState(null,"",location.pathname);
+  pantallaAcceso("resultado",null,{titulo:"Clave guardada",html:"Ya puede entrar con su correo y su clave nueva.",botones:`<button class="btn acc" data-acc="accVolver">Entrar a Patent-IA</button>`});const e=j&&j.email;if(e)setTimeout(()=>{},0);return}}
+function irRegistro(){const mods=pedido().filter(x=>x!=="mensual");const url=`${APP_URL_PUB}/#registro${mods.length?"&mods="+mods.join(","):""}`;
+ if(MODO==="demo"&&REMOTO){location.hash="registro"+(mods.length?"&mods="+mods.join(","):"");location.reload();return}
+ $("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true"><h2>¡Quiero Patent-IA para mi empresa!</h2><p style="margin:0">Cree la cuenta de su empresa en <b>patent-ia.skynetgenesis.com</b>: la prueba gratis es de ${DIAS_PRUEBA} días${mods.length?" y su pedido queda listo en el Market":""}.</p><div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">Seguir probando</button><a class="btn acc" href="${esc(url)}" target="_blank" rel="noopener">Crear mi cuenta</a></div></div></div>`}
+
+/* --- Arranque con servidor --- */
+async function arrancarSesion(){$("#main").innerHTML=`<div class="vacio">Entrando…</div>`;
+ let j;try{j=await api("GET","/api/yo")}catch(e){if(e.code!=="revoked")pantallaAcceso("entrar",e.message||"No se pudo conectar con el servidor. Puede estar despertando: espere un minuto e intente de nuevo.");return}
+ YO=j.usuario;document.body.classList.add("con-sesion");
+ if(j.super){MODO="servidor";SUPER={avisos:j.avisos};vista="super";botonSalir();estado("ok","Superadministrador");cargarSuper();return}
+ ORG=j.org;MODO="servidor";MODO_CONTROL=!!j.control;
+ const reg=lsGet("pia_pedido_registro");if(reg){try{const o=JSON.parse(reg);if(o&&o.email===YO.email){if(!pedido().length)ponPedido(o.mods||[]);lsSet("pia_pedido_registro",null)}else if(Array.isArray(o)){lsSet("pia_pedido_registro",null)}}catch(e){lsSet("pia_pedido_registro",null)}}
+ if(!MODO_CONTROL&&esSkynet()===false&&!pedido().length&&ORG.pago&&ORG.pago.estado!=="activa")ponPedido(["mensual"]);
+ db=crearDbRemota();estado("","Despertando el servidor…");botonSalir();suscribir();procesarVueltaBold();render()}
+function botonSalir(){if(!$("#btn-salir"))$("#estado").insertAdjacentHTML("afterend",`<button class="btn sec peq salir" data-acc="salir" id="btn-salir" style="margin-left:8px">Salir</button>`)}
+async function iniciarRemoto(){downloads=descargasLocales;sample=null;assets=null;
+ const h=location.hash.replace(/^#/,"");const hp=new URLSearchParams(h.replace(/^[a-z]+&?/,""));
+ if(/^clave=/.test(h)){const p=new URLSearchParams(h);pantallaAcceso("clave",null,{token:p.get("clave"),tipo:p.get("tipo")});return}
+ if(/^registro/.test(h)){const mods=(hp.get("mods")||"").split(",").filter(m=>PRECIOS.modulos[m]);
+  if(TOKEN){let yo=null;try{yo=await api("GET","/api/yo")}catch(e){}
+   if(yo&&yo.usuario){pantallaAcceso("resultado",null,{titulo:"Ya tiene una sesión abierta",html:`Usted entró como <b>${esc(yo.usuario.email)}</b>${yo.org?` (${esc(yo.org.nombre)})`:""}. ¿Qué quiere hacer?`,botones:`<button class="btn acc" data-acc="regOtra" data-mods="${esc(mods.join(","))}">Crear una cuenta para otra empresa</button><button class="btn sec" data-acc="regSeguir" data-mods="${esc(mods.join(","))}">Seguir en mi cuenta</button>`});return}}
+  pantallaAcceso("registro",null,{mods});return}
+ if(/^demo/.test(h)){iniciarDemo();return}
+ if(!TOKEN){pantallaAcceso("entrar");return}
+ arrancarSesion()}
+
+/* --- Demostración (en el navegador del visitante; no toca el servidor) --- */
+function iniciarDemo(){MODO="demo";db=null;REMOTO_DEMO=true;ORG={id:"demo",nombre:"Laboratorio Andino de Innovación (demostración)",modulos:Object.fromEntries(Object.keys(MOD_INFO).map(m=>[m,true])),pago:{estado:"activa"},valor:PRECIOS.mensual};
+ YO={id:"d1",nombre:"Laura Méndez (demo)",email:"demo@skynetgenesis.com",rol:ui.rolDemo||"admin"};document.body.classList.add("con-sesion");
+ sembrarDemo();cargado=true;estado("ok","Demostración");botonSalir();render()}
+let REMOTO_DEMO=false;
+function sembrarDemo(){if(S.proyectos.length)return;const H=hoyISO();const id=()=>uid();
+ const p1=id(),p2=id(),p3=id();
+ const P=[[p1,{codigo:"PIA-2026-001",titulo:"Soporte ajustable para tablet en sillas de ruedas",modalidad:"Modelo de utilidad",sector:"Salud y dispositivos médicos",etapa:"redaccion",problema:"Las personas en silla de ruedas no tienen dónde apoyar una tablet sin que se caiga al moverse por la casa o la calle.",solucion:"Brazo articulado de aluminio con abrazadera universal al tubo de la silla, rótula con freno y bandeja con bordes de silicona que sujeta tablets de 7 a 12 pulgadas.",inventores:"Andrés Rojas",solicitante:"Laboratorio Andino de Innovación",notas:"Probado con 5 usuarios.",evaluacion:{novedad:4,nivelInventivo:3,aplicacionIndustrial:5,mercado:4,fabricacion:4,modalidadRecomendada:"Modelo de utilidad",resumen:"Buena aplicación industrial y mercado claro; la novedad depende de la rótula con freno.",mejoras:["Patentar la rótula con freno como característica principal"],riesgos:["Hay soportes parecidos para coches de bebé"],palabrasClave_es:["soporte","tablet","silla de ruedas"],palabrasClave_en:["wheelchair tablet mount"],cpc:[],fecha:new Date().toISOString()},antecedentesHallados:"Soportes de tablet para coches de bebé: no tienen freno en la rótula.",borrador:{titulo:"Soporte ajustable para tablet en sillas de ruedas",campo:"Dispositivos de apoyo para personas con movilidad reducida.",problema:"Las tablets se caen al mover la silla."},grupoId:"g-demo",lineaId:"g-demo-1",tipoProducto:"patente",creado:new Date().toISOString()}],
+  [p2,{codigo:"PIA-2026-002",titulo:"Aplicación de tamizaje visual escolar",modalidad:"Derecho de autor (software)",sector:"Software y tecnología",etapa:"idea",problema:"Los colegios no detectan a tiempo los problemas de visión de los niños.",solucion:"Aplicación que muestra pruebas de agudeza visual en la pantalla y genera un informe para los padres.",inventores:"Laura Méndez",solicitante:"Laboratorio Andino de Innovación",notas:"",grupoId:"g-demo",lineaId:"g-demo-2",tipoProducto:"software",creado:new Date().toISOString()}],
+  [p3,{codigo:"PIA-2026-003",titulo:"Filtro de agua por gravedad con cerámica y carbón de coco",modalidad:"Patente de invención",sector:"Energía y ambiente",etapa:"radicada",problema:"Familias rurales sin agua potable.",solucion:"Filtro de dos etapas por gravedad con vela cerámica impregnada de plata y carbón activado de cáscara de coco.",inventores:"Andrés Rojas; Laura Méndez",solicitante:"Laboratorio Andino de Innovación",fechaRadicacion:sumar(H,-5),expediente:"NC2026/0001234",notas:"",grupoId:"g-demo",lineaId:"g-demo-1",tipoProducto:"patente",creado:new Date().toISOString()}]];
+ for(const[i,d]of P)local("proyectos",i,d);
+ local("config","grupos",{lista:[{id:"g-demo",nombre:"Grupo de Investigación en Innovación Social (demo)",corto:"Innovación Social",codigo:"COL0000000",desde:"2018",aval:"avalado",lineas:[{id:"g-demo-1",nombre:"Tecnologías para la inclusión"},{id:"g-demo-2",nombre:"Salud digital"}],metaMeses:2,metaDesde:H.slice(0,8)+"01",notas:""}],pendientes:[{id:"p1",texto:"Registrar en CvLAC el software de tamizaje visual cuando tenga el registro DNDA.",hecho:false}]});
+ local("licencias",id(),{proyectoId:p1,empresa:"Ortopédicos del Valle S.A.S.",contacto:"Gerencia comercial",tipo:"Licencia no exclusiva",valor:15000000,regalia:"4 %",notas:"Pidieron prototipo para probar.",etapa:"negociacion",creado:new Date().toISOString()});
+ local("movimientos",id(),{fecha:sumar(H,-5),tipo:"gasto",proyectoId:p3,valor:1100000,concepto:"Tasa de solicitud de patente (SIC)"});
+ local("bitacora",id(),{proyectoId:p1,fecha:sumar(H,-20),tipo:"Prueba o ensayo",autor:"Andrés Rojas",texto:"Prueba con 5 usuarios: la rótula con freno evita que la tablet gire en bajadas.",creado:new Date().toISOString()})}
+function ojosClave(){for(const i of document.querySelectorAll('#main input[type=password],#capa input[type=password]')){if(!i.id||document.querySelector(`[data-acc=verClave][data-para="${i.id}"]`))continue;(i.closest("label")||i).insertAdjacentHTML("afterend",`<button type="button" class="btn sec peq ver-clave" data-acc="verClave" data-para="${i.id}" aria-controls="${i.id}" aria-pressed="false">Mostrar la clave</button>`)}}
+addEventListener("resize",()=>{const b=document.getElementById("barra-demo");if(b)document.body.style.setProperty("--barra",b.offsetHeight+"px")});
+function barraDemo(){let b=$("#barra-demo");if(!esDemo()){if(b)b.remove();document.body.classList.remove("con-barra-demo");return}if(!b){document.body.insertAdjacentHTML("beforeend",`<div id="barra-demo" class="barra-demo"><span><b>¿Quiere Patent-IA para su empresa?</b> ${DIAS_PRUEBA} días gratis<span class="largo">, sin tarjeta</span>.</span><span class="fila"><button class="btn acc peq" data-acc="irRegistro">Crear la cuenta de mi empresa</button><button class="btn sec peq" data-acc="verPlanes">Ver precios</button><a class="btn sec peq" target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, quiero información de Patent-IA")}">Asesor</a></span></div>`)}document.body.classList.add("con-barra-demo");document.body.style.setProperty("--barra",b.offsetHeight+"px")}
+async function salirDeControl(){const sup=lsGet("patentia_token_super");try{await api("POST","/api/salir",{})}catch(e){}lsSet("patentia_token_super",null);TOKEN=sup||"";lsSet("patentia_token",sup||null);if(!sup)toast("Vuelva a entrar como Superadministrador.");setTimeout(()=>location.reload(),sup?0:1500)}
+function bannerControl(){return MODO_CONTROL?`<div class="alerta fila" role="status" style="justify-content:space-between;background:#E8F1FA;border-color:#0B4F8A;color:#0B4F8A"><span><b>Modo Superadministrador:</b> está dentro de <b>${esc(ORG?ORG.nombre:"")}</b> como administrador. No se paga, no se invitan usuarios, no se cambian claves, no se importa, no se escribe en la bitácora ni se gasta IA de la empresa.</span><button class="btn pri peq" data-acc="salirControl">Salir del modo administrador</button></div>`:""}
+function quienSoy(){const q=$("#quien");if(!q)return;q.innerHTML=YO&&(MODO!=="claude"||ORG)?`<b>${esc(MODO_CONTROL?"Superadministrador":YO.nombre||"")}</b><span>${esc(SUPER?"Superadministrador":MODO_CONTROL?"en "+(ORG?ORG.nombre:""):(ROL_NOM[YO.rol]||"")+(ORG&&ORG.nombre?" · "+ORG.nombre:""))}</span>`:"";q.hidden=!q.innerHTML}
+function bannerDemo(){if(!esDemo())return"";return`<div class="demo-cta fila" style="justify-content:space-between"><span>Está en la <b>demostración</b> de Patent-IA. Ver como: <select id="rolDemo">${["admin","investigador","consulta"].map(r=>`<option value="${r}" ${YO.rol===r?"selected":""}>${ROL_NOM[r]}</option>`).join("")}</select></span><button class="btn acc" data-acc="irRegistro">¡Quiero Patent-IA ya para mi empresa!</button></div>`}
+
+/* --- Superadministrador --- */
+async function cargarSuper(){try{const[a,b,m]=await Promise.all([api("GET","/api/super/empresas"),api("GET","/api/super/avisos"),api("GET","/api/super/manuales").catch(()=>null)]);SUPER={...SUPER,empresas:a.empresas,ia:a.ia,avisos:b.avisos,manuales:m};cargado=true;render()}catch(e){toast(e.message||"No se pudo cargar.")}}
+function vSuper(){const E=(SUPER&&SUPER.empresas)||[];const A=(SUPER&&SUPER.avisos)||[];const d=SUPER&&SUPER.detalle;
+ return`<div class="cab"><div><h1>Administración de Patent-IA</h1><p>Empresas que usan Patent-IA, su pago y sus módulos. Los pagos, módulos y créditos solo los cambia Bold; aquí no se regala nada.</p></div><div class="fila"><button class="btn sec" data-acc="saRespaldo">Descargar respaldo de todas las empresas</button><button class="btn sec" data-acc="saPrueba">Pago de prueba de $1.000</button></div></div>
+ <div id="saboldzona"></div>
+ <section class="panel"><h3>Corregir un pago de Bold que no se aplicó</h3><p class="ayuda" style="margin-top:-6px">Solo para pagos que Bold aprobó y no llegaron a la empresa. Se aplica únicamente lo que Bold confirma.</p>
+  <div class="fila"><input type="text" id="sa-ref" placeholder="Referencia del pedido (SGPATENT-…) o número del pago" style="flex:1;min-width:220px"><button class="btn acc peq" data-acc="saAplicar">Comprobar y aplicar</button></div></section>
+ ${SUPER&&SUPER.ia?`<section class="panel"><h3>IA de las empresas</h3><p style="margin:0">${SUPER.ia.servicio?`Gasto real de IA este mes: <b>US$ ${SUPER.ia.gastoMesUSD}</b> en ${SUPER.ia.llamadas} consulta(s), de un tope de US$ ${SUPER.ia.topeUSD}. Si llega al tope, la IA se pausa hasta el mes siguiente.`:"La IA para empresas está apagada: falta la llave de la API de Anthropic en el servidor."}</p></section>`:""}
+ <section class="panel"><h3>Empresas (${E.length})</h3>${E.length?`<div class="tabla-w"><table><thead><tr><th>Empresa</th><th>Pago</th><th>Pagado hasta</th><th>Módulos</th><th>Usuarios</th><th>Proyectos</th><th>Último acceso</th><th></th></tr></thead><tbody>${E.map(o=>`<tr><td><b>${esc(o.nombre)}</b><div class="ayuda">${esc((o.admins||[]).join(", "))}</div>${o.suspendida?`<span class="chip r">Suspendida</span>`:""}</td>
+  <td>${o.interna?`<span class="chip v">Interna</span>`:o.pago.estado==="activa"?`<span class="chip v">Activa</span>`:o.pago.estado==="prueba"?`<span class="chip a">En prueba: ${o.pago.dias} día(s)</span>`:o.pago.estado==="pendiente"?`<span class="chip a">Pendiente (cierra ${fFecha(o.pago.cierre)})</span>`:`<span class="chip r">${o.pago.motivo==="prueba"?"Cerrada: terminó la prueba":"Cerrada por pago"}</span>`}${o.ia&&(o.ia.creditos||o.ia.usados)?`<div class="ayuda">IA: ${o.ia.creditos} créditos · ${o.ia.usados} usados</div>`:""}</td><td>${fFecha(o.pagadoHasta)}</td>
+  <td>${Object.keys(MOD_INFO).filter(m=>o.modulos[m]).map(m=>`<span class="chip g">${MOD_INFO[m].ic}</span>`).join(" ")||"—"}</td><td>${o.usuarios}</td><td>${o.proyectos}</td><td class="ayuda">${o.ultimo?fFecha(String(o.ultimo).slice(0,10)):"—"}</td>
+  <td><button class="btn sec peq" data-acc="saVer" data-id="${esc(o.id)}">Ver empresa</button></td></tr>`).join("")}</tbody></table></div>`:`<div class="vacio">Aún no hay empresas.</div>`}</section>
+ ${d?`<section class="panel"><div class="cab"><h3>${esc(d.nombre)}</h3><button class="btn sec peq" data-acc="saCerrar">Cerrar</button></div>
+  <p style="margin:0">${d.info.prueba&&!d.info.prueba.terminada?`En prueba gratis del ${fFecha(d.info.prueba.desde)} al ${fFecha(d.info.prueba.hasta)} (sin renovación).`:`Pagado hasta: <b>${fFecha(d.info.pagadoHasta)}</b>.`} Módulos: ${Object.keys(MOD_INFO).filter(m=>d.info.modulos[m]).map(m=>esc(MOD_INFO[m].n)).join(", ")||"ninguno"}. IA: ${d.info.ia&&d.info.ia.vence?`${d.info.ia.creditos||0} créditos hasta el ${fFecha(d.info.ia.vence)}`:"sin plan"}.</p>
+  <div class="fila" style="margin-top:10px"><button class="btn acc peq" data-acc="saEntrar" data-id="${esc(d.id)}">Entrar como administrador</button><label class="ck"><input type="checkbox" id="sa-int" ${d.info.interna?"checked":""}> Empresa interna de SkyNet Genesis (sin cobro)</label><button class="btn sec peq" data-acc="saGuardar" data-id="${esc(d.id)}">Guardar</button><button class="btn ${d.info.suspendida?"acc":"peligro"} peq" data-acc="saSuspender" data-id="${esc(d.id)}" data-v="${d.info.suspendida?0:1}">${d.info.suspendida?"Reactivar":"Suspender"}</button></div>
+  <h4>Usuarios</h4><div class="lista">${d.usuarios.map(u=>`<div class="it"><span>${esc(u.nombre)} · ${esc(u.email)} · ${esc(ROL_NOM[u.rol]||u.rol)}${u.activo?"":" (desactivado)"}</span><span class="ayuda">${u.ultimo?fFecha(String(u.ultimo).slice(0,10)):"sin acceso"}</span></div>`).join("")}</div>
+  <h4>Proyectos (${d.proyectos.length})</h4><div class="lista">${d.proyectos.slice(0,50).map(p=>`<div class="it"><span>${esc(p.codigo)} · ${esc(p.titulo)}</span><span class="ayuda">${esc(ETQ[p.etapa]||p.etapa||"")}</span></div>`).join("")||`<span class="ayuda">Sin proyectos.</span>`}</div>
+  <h4>Pagos</h4><div class="lista">${d.info.pagos.map(x=>`<div class="it"><span>${esc(x.plan)} · ${cop0(x.valor)}${x.paraRevisar?(x.revisado?` · entregado con motivo: ${esc(x.revisado.motivo)}`:` · <b>para revisar</b> <button class="btn sec peq" data-acc="saRevisar" data-id="${esc(d.id)}" data-pago="${esc(x.pagoId)}">Entregar con motivo</button>`):""}</span><span class="ayuda">${fFecha((x.fecha||"").slice(0,10))}</span></div>`).join("")||`<span class="ayuda">Sin pagos.</span>`}</div></section>`:""}
+ ${SUPER&&SUPER.manuales?`<section class="panel"><h3>📘 Manuales del usuario (PDF)</h3><p class="ayuda" style="margin-top:-6px">Cada usuario descarga solo el general y el de su perfil desde Mi cuenta. Cargue aquí la versión vigente de cada uno.</p><div class="lista">${Object.entries(SUPER.manuales.claves).map(([k,n])=>{const x=(SUPER.manuales.manuales||[]).find(y=>y.clave===k);return`<div class="it"><span>${esc(n)} ${x?`<span class="chip v">Cargado ${fFecha(String(x.actualizado).slice(0,10))}</span>`:`<span class="chip a">Falta</span>`}</span><span class="fila"><button class="btn sec peq" data-acc="saManual" data-p="${esc(k)}">${x?"Reemplazar":"Cargar PDF"}</button>${x?`<button class="btn sec peq" data-acc="manual" data-p="${esc(k)}">Descargar</button>`:""}</span></div>`}).join("")}</div></section>`:""}
+ <section class="panel"><h3>Avisos</h3>${A.length?`<div class="lista">${A.map(a=>`<div class="it"><span>${a.leido?"":"🔔 "}${esc(a.texto)}</span><span class="ayuda">${fFecha(String(a.creado).slice(0,10))}</span></div>`).join("")}</div>`:`<div class="vacio">Sin avisos.</div>`}</section>`}
+
+/* --- Importar proyectos desde Excel (CSV) --- */
+function leerCSV(t){const filas=[];let f=[],c="",q=false;const sep=(t.split("\n")[0].match(/;/g)||[]).length>(t.split("\n")[0].match(/,/g)||[]).length?";":",";
+ for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}else if(ch==='"')q=true;else if(ch===sep){f.push(c);c=""}else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&t[i+1]==="\n")i++;f.push(c);c="";if(f.some(x=>x.trim()))filas.push(f);f=[]}else c+=ch}
+ f.push(c);if(f.some(x=>x.trim()))filas.push(f);return filas}
+function importarCSV(){if(!pedirModulo("importar"))return;const inp=document.createElement("input");inp.type="file";inp.accept=".csv,text/csv";inp.onchange=async()=>{const fl=inp.files[0];if(!fl)return;let t=await fl.text();t=t.replace(/^﻿/,"");const F=leerCSV(t);if(F.length<2){toast("El archivo no tiene filas.");return}
+ const cab=F[0].map(x=>x.trim().toLowerCase());const col=(...n)=>cab.findIndex(h=>n.some(k=>h.includes(k)));const ci={t:col("título","titulo","nombre","proyecto"),pr:col("problema"),so:col("solución","solucion","descrip"),mo:col("modalidad"),se:col("sector"),inv:col("inventor","autor"),no:col("nota")};
+ if(ci.t<0){toast("Falta la columna “Título”. La primera fila debe tener los nombres de las columnas.");return}
+ const filas=F.slice(1).filter(r=>(r[ci.t]||"").trim()).slice(0,300);
+ confirmar(`Se van a crear ${filas.length} proyecto(s) desde el archivo. ¿Continuar?`,async()=>{let n=0;for(const r of filas){const g=k=>ci[k]>=0?String(r[ci[k]]||"").trim():"";const mod=MODALIDADES.find(m=>m.toLowerCase()===g("mo").toLowerCase())||"Modelo de utilidad";const sec=SECTORES.find(s=>s.toLowerCase()===g("se").toLowerCase())||"Otro";
+  const id=uid();const p={codigo:nuevoCodigo(),titulo:g("t").slice(0,200),modalidad:mod,sector:sec,etapa:"idea",problema:g("pr"),solucion:g("so"),inventores:g("inv")||(YO?YO.nombre:""),solicitante:ORG?ORG.nombre:"",notas:g("no"),borrador:{},creado:new Date().toISOString()};local("proyectos",id,p);if(await guardar("proyectos",id,p))n++}toast(`${n} proyecto(s) importado(s).`);ir("proyectos")},"Importar")};inp.click()}
+
+/* ===== Asistentes sin costo de IA: reglas y plantillas (versión para la venta) ===== */
+const PREG_EVAL=[
+ ["novedad","¿Qué tan nuevo es frente a lo que encontró?",["Ya existe igual en el mercado","Existe algo muy parecido","Tiene diferencias menores","Tiene una diferencia clara","No encontró nada parecido"]],
+ ["nivelInventivo","¿A un técnico del área se le habría ocurrido fácilmente?",["Sí, es obvio","Probablemente sí","Tal vez","Difícilmente","No: resuelve el problema de forma inesperada"]],
+ ["aplicacionIndustrial","¿Se puede fabricar o usar en una industria?",["No se puede fabricar hoy","Solo como prototipo artesanal","Con ajustes importantes","Sí, con procesos conocidos","Sí, fácilmente y en serie"]],
+ ["mercado","¿Hay quién lo compre?",["No se sabe","Pocas personas","Un nicho claro","Un mercado amplio","Hay empresas pidiéndolo"]],
+ ["fabricacion","¿Qué tan fácil y barato es fabricarlo?",["Muy difícil o costoso","Difícil","Regular","Fácil","Muy fácil y barato"]]];
+const MEJORA_EVAL={novedad:"Busque más antecedentes y cambie el diseño para diferenciarlo claramente de lo que ya existe.",nivelInventivo:"Agregue una característica técnica que no sea obvia (un mecanismo, una combinación o un material que resuelva el problema de otra forma).",aplicacionIndustrial:"Defina materiales, medidas y el proceso de fabricación; haga un prototipo funcional.",mercado:"Hable con 5 posibles compradores y anote qué pagarían y por qué.",fabricacion:"Simplifique piezas, use materiales comunes y cotice con un taller o fabricante."};
+const RIESGO_EVAL={novedad:"Si ya existe algo igual, la SIC negará la solicitud y se perderá la tasa.",nivelInventivo:"Una mejora obvia no alcanza para patente de invención; quizás solo para modelo de utilidad.",aplicacionIndustrial:"Sin aplicación industrial no hay patente.",mercado:"Sin mercado claro será difícil licenciarlo.",fabricacion:"Un costo de fabricación alto reduce el interés de los fabricantes."};
+const STOP=new Set("para con por una uno unos unas los las del que sus como sin más menos este esta estos estas cada sobre entre desde hasta hacia".split(" "));
+function abrirAutoeval(id){const p=proy(id);if(!p)return;const e=p.evaluacion||{};
+ $("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true" aria-label="Autoevaluación guiada"><h2>Autoevaluación guiada</h2><p class="ayuda" style="margin:0">Responda con honestidad. Patent-IA calcula el puntaje, sugiere la modalidad y le dice qué mejorar. Es una orientación; la búsqueda formal y un agente confirman.</p>
+ ${PREG_EVAL.map(([k,q,ops])=>`<fieldset class="ev"><legend>${esc(q)}</legend>${ops.map((o,i)=>`<label class="ck"><input type="radio" name="ev-${k}" value="${i+1}" ${(+e[k]||0)===i+1?"checked":""}> ${esc(o)}</label>`).join("")}</fieldset>`).join("")}
+ <div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">Cancelar</button><button class="btn acc" data-acc="guardarAutoeval" data-id="${p.id}">Guardar evaluación</button></div></div></div>`}
+async function guardarAutoeval(id){const p=proy(id);if(!p)return;const v={};for(const[k]of PREG_EVAL){const r=document.querySelector(`input[name="ev-${k}"]:checked`);if(!r){toast("Responda las cinco preguntas.");return}v[k]=+r.value}
+ const k=M.clase(p.modalidad);let mod=p.modalidad;if(["pi","mu"].includes(k))mod=v.novedad>=4&&v.nivelInventivo>=4?"Patente de invención":v.novedad>=3?"Modelo de utilidad":"Secreto industrial";
+ const prom=(v.novedad+v.nivelInventivo+v.aplicacionIndustrial+v.mercado+v.fabricacion)/5;
+ const bajos=PREG_EVAL.map(x=>x[0]).filter(x=>v[x]<=3);
+ const resumen=`Puntaje promedio ${prom.toFixed(1)} de 5. ${prom>=4?"Tiene buen potencial: avance a la búsqueda formal y la redacción.":prom>=3?"Tiene potencial, pero conviene fortalecerlo antes de radicar.":"Todavía es débil: trabaje las mejoras antes de gastar en tasas."}${mod!==p.modalidad?` Por las respuestas, la modalidad que más le conviene es ${mod}.`:""}`;
+ const pal=[...new Set(String(p.titulo||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/[^a-z0-9ñ]+/).filter(w=>w.length>3&&!STOP.has(w)))].slice(0,5);
+ const ev={...v,modalidadRecomendada:mod,resumen,mejoras:bajos.map(x=>MEJORA_EVAL[x]),riesgos:bajos.filter(x=>v[x]<=2).map(x=>RIESGO_EVAL[x]),palabrasClave_es:pal,palabrasClave_en:[],cpc:[],fecha:new Date().toISOString(),guiada:true};
+ $("#capa").innerHTML="";if(await parchear("proyectos",id,{evaluacion:ev,etapa:p.etapa==="idea"?"evaluacion":p.etapa}))toast("Evaluación guardada");render()}
+
+/* Plantillas de redacción (módulo del Market) */
+function plantillaSec(p,k){const t=(p.titulo||"[título]").trim();const tl=t.charAt(0).toLowerCase()+t.slice(1);const sol=String(p.solucion||"").trim();const prob=String(p.problema||"").trim();
+ const figs=dibujosDe(p).map((d,i)=>`FIG. ${i+1} — ${d.titulo}`).join("\n");
+ return({titulo:t,
+  campo:`La presente ${/dise/i.test(p.modalidad||"")?"creación":"invención"} se relaciona con el campo de ${(p.sector||"[campo técnico]").toLowerCase()}, y en particular con ${tl}.`,
+  antecedentes:`En la actualidad existen soluciones para ${prob?prob.charAt(0).toLowerCase()+prob.slice(1).replace(/\.$/,""):"[el problema]"}.\n\n${String(p.antecedentesHallados||"").trim()?`Entre los antecedentes encontrados están:\n${p.antecedentesHallados}\n\n`:"[Describa aquí los productos o documentos de patente existentes, con su número si lo tiene.]\n\n"}Estas soluciones presentan las siguientes limitaciones: [explique en qué fallan o qué no resuelven].`,
+  problema:`El problema técnico que resuelve la invención es: ${prob||"[describa el problema concreto]"}`,
+  descripcion:`La invención consiste en ${tl}.${sol?" "+sol:""}\n\nElementos (con sus números de referencia):\n10 — [elemento principal]\n11 — [parte del elemento principal]\n20 — [segundo elemento]\n30 — [mecanismo o unión]\n\nFuncionamiento: [explique paso a paso cómo se usa y cómo interactúan los elementos 10, 20 y 30].\n\nModo preferido de realización: [materiales, medidas, tolerancias y forma de fabricarlo].\n\nVariantes: [otras formas de hacerlo que también quiere proteger].`,
+  dibujosDesc:figs||"FIG. 1 — Vista en perspectiva de la invención.\nFIG. 2 — Vista lateral.\nFIG. 3 — Detalle del mecanismo.",
+  reivindicaciones:`1. ${t}, que comprende [elemento 10] y [elemento 20], caracterizado porque [la característica técnica nueva que lo diferencia de lo existente].\n2. ${t} según la reivindicación 1, caracterizado porque [una característica adicional].\n3. ${t} según la reivindicación 1 o 2, caracterizado porque [material, forma o variante].\n4. ${t} según cualquiera de las reivindicaciones anteriores, caracterizado porque [otra variante].`,
+  resumen:`${t}. ${sol?sol.split(/(?<=\.)\s+/).slice(0,2).join(" "):"[Resuma en qué consiste y cuál es su ventaja principal.]"} [Complete; máximo 150 palabras.]`,
+  referencias:"10 — \n11 — \n20 — \n30 — "})[k]||""}
+async function usarPlantilla(id,sec){if(!pedirModulo("plantillas"))return;const p=proy(id);if(!p)return;const b=p.borrador||{};
+ if(sec){const tx=plantillaSec(p,sec);if(String(b[sec]||"").trim()){const si=await new Promise(r=>confirmarArriba("Esta sección ya tiene texto. ¿Lo reemplaza por la plantilla?",r));if(!si)return}
+  await parchear("proyectos",id,{borrador:{[sec]:tx}});render();toast("Plantilla puesta. Complete lo que está entre corchetes [ ].");return}
+ const nuevo={};for(const[k]of SECCIONES)if(!String(b[k]||"").trim())nuevo[k]=plantillaSec(p,k);
+ if(!Object.keys(nuevo).length){toast("Todas las secciones ya tienen texto.");return}
+ const pat={borrador:nuevo};if(p.etapa==="idea"||p.etapa==="evaluacion")pat.etapa="redaccion";await parchear("proyectos",id,pat);render();toast(`${Object.keys(nuevo).length} sección(es) llenadas con la plantilla. Complete lo que está entre corchetes [ ].`)}
+
+/* Sugerencias de compradores por sector (módulo Licencias y ventas) */
+const SUG_SECTOR={
+ "Salud y dispositivos médicos":[["Fabricantes de dispositivos médicos","Licencia no exclusiva con regalía del 3 al 6 %","Ya tienen registro INVIMA y canal con clínicas"],["Distribuidores de equipos hospitalarios","Venta con acuerdo de fabricación","Llegan a hospitales y EPS"],["Ortopédicos y casas de ayudas técnicas","Licencia regional","Venden directo al paciente"]],
+ "Educación":[["Editoriales y empresas de material didáctico","Licencia con regalía por unidad","Tienen catálogo para colegios"],["Plataformas educativas","Licencia de uso anual","Llegan a miles de estudiantes"],["Secretarías de educación (vía contratistas)","Venta de licencias","Compran para muchos colegios"]],
+ "Seguridad y salud en el trabajo":[["Fabricantes de elementos de protección personal","Licencia exclusiva por tipo de producto","Producen en serie y venden a empresas"],["ARL y aseguradoras","Acuerdo de suministro","Buscan reducir accidentes"],["Distribuidores de dotación industrial","Venta con margen","Ya atienden empresas"]],
+ "Veterinaria y agro":[["Fabricantes de equipos agropecuarios","Licencia con regalía","Venden a fincas y gremios"],["Distribuidores de insumos veterinarios","Acuerdo de distribución","Llegan a clínicas y almacenes"],["Cooperativas y gremios productores","Venta o licencia colectiva","Compran para sus asociados"]],
+ "Hogar e infancia":[["Fabricantes de productos para bebés","Licencia con regalía del 3 al 5 %","Tienen canal en grandes superficies"],["Marcas de productos para el hogar","Licencia por línea de producto","Lanzan productos nuevos cada temporada"],["Tiendas en línea especializadas","Fabricación propia y venta","Prueban rápido en el mercado"]],
+ "Industria y manufactura":[["Fabricantes del mismo tipo de pieza o máquina","Licencia no exclusiva","Pueden producirlo con lo que ya tienen"],["Talleres metalmecánicos","Acuerdo de fabricación","Bajo costo para empezar"],["Integradores industriales","Venta o licencia por proyecto","Lo instalan en plantas"]],
+ "Software y tecnología":[["Empresas de software del mismo sector","Licencia de uso (SaaS) con participación","Ya tienen clientes"],["Integradores tecnológicos","Licencia por instalación","Lo implementan en empresas"],["Inversionistas o aceleradoras","Venta o participación","Financian el crecimiento"]],
+ "Construcción":[["Fabricantes de materiales de construcción","Licencia con regalía por unidad","Producen en volumen"],["Constructoras","Acuerdo de uso en sus proyectos","Pueden probarlo en obra"],["Ferreterías y depósitos mayoristas","Distribución","Llegan al maestro de obra"]],
+ "Energía y ambiente":[["Empresas de energía solar o renovable","Licencia o desarrollo conjunto","Buscan innovación"],["Fabricantes de equipos de tratamiento de agua","Licencia con regalía","Tienen canal rural e institucional"],["ONG y programas de cooperación","Venta o donación financiada","Compran para comunidades"]],
+ "Alimentos":[["Empresas procesadoras de alimentos","Licencia del proceso","Pueden escalar la producción"],["Fabricantes de empaques","Licencia por tipo de empaque","Venden a muchas marcas"],["Cadenas de restaurantes","Acuerdo de suministro","Prueban rápido"]],
+ "Transporte":[["Fabricantes de autopartes","Licencia no exclusiva","Ya venden repuestos"],["Empresas de transporte y logística","Acuerdo de uso","Reducen costos"],["Ensambladoras de carrocerías","Licencia por modelo","Lo incorporan en serie"]]};
+function sugerirPorSector(id){if(!pedirModulo("licencias"))return;const p=proy(id);if(!p)return;const L=(SUG_SECTOR[p.sector]||[]).concat([["Empresas que ya venden productos parecidos","Licencia no exclusiva con regalía","Ganan un producto nuevo sin desarrollarlo"],["Inversionistas, fondos o convocatorias","Venta o participación","Financian el prototipo y la producción"]]).slice(0,5);
+ ui.sugLic[id]=L.map(([tipoEmpresa,modelo,porQue])=>({tipoEmpresa,sector:p.sector||"",modelo,porQue}));render();toast("Sugerencias listas. Agregue las empresas reales que encuentre.")}
+
+/* Guía de inventiva (Taller de ideas sin costo de IA) */
+const PRINCIPIOS=[["Segmentar","Divida el objeto en partes independientes, desmontables o modulares.","Muebles por módulos, mangueras por tramos."],["Extraer","Separe la parte que molesta o use solo la parte necesaria.","Compresor del aire acondicionado afuera de la casa."],["Calidad local","Haga que cada parte cumpla una función distinta y óptima.","Lápiz con borrador; navaja multiusos."],["Asimetría","Cambie una forma simétrica por una asimétrica.","Enchufes que solo entran en una posición."],["Combinar","Una objetos u operaciones que se hacen por separado.","Bisturí con aspiración; plato con compartimentos."],["Universalidad","Haga que una pieza cumpla varias funciones.","Asiento de bebé que se convierte en coche."],["Anidar","Ponga un objeto dentro de otro.","Vasos plegables, antena telescópica."],["Acción previa","Haga antes lo que se necesita después.","Sobres prepagados, líneas de corte en el papel."],["Amortiguar de antemano","Prepare protección contra fallas.","Fusibles, airbags."],["Dinamizar","Haga que las partes se ajusten solas a cada situación.","Silla con altura regulable, lentes fotocromáticos."],["Del revés","Invierta la acción: lo fijo móvil, lo de arriba abajo.","Banda de caminar en lugar de pista."],["Autoservicio","Que el objeto se sirva o repare solo, aprovechando desechos.","Panel que se limpia con la lluvia."]];
+function vIdeasGuia(){return`<div class="cab"><div><h1>Taller de ideas</h1><p>Describa un problema y recorra estos principios de inventiva (método TRIZ). Cada uno es una forma probada de llegar a una solución nueva. Cuando tenga la idea, conviértala en proyecto.</p></div></div>
+ <section class="panel"><div class="campos"><label class="c ancho">Problema observado<textarea id="i-problema" placeholder="Ej.: los niños pequeños se niegan a probar alimentos nuevos">${esc(ideasForm.problema)}</textarea></label>
+ <label class="c">Sector<select id="i-sector">${SECTORES.map(s=>`<option ${ideasForm.sector===s?"selected":""}>${s}</option>`).join("")}</select></label></div></section>
+ <div class="grid g2">${PRINCIPIOS.map(([n,d,e],i)=>`<section class="panel idea"><h3>${i+1}. ${esc(n)}</h3><p style="margin:0">${esc(d)}</p><div class="m"><b>Ejemplos:</b> ${esc(e)}</div><div class="m">¿Cómo aplicaría “${esc(n.toLowerCase())}” a su problema?</div></section>`).join("")}</div>
+ <section class="panel"><h3>Mi idea</h3><div class="campos"><label class="c ancho">Título de la idea<input type="text" id="i-titulo" placeholder="Ej.: Plato con compartimentos que se abren de a poco"></label><label class="c ancho">¿Cómo funciona?<textarea id="i-solucion"></textarea></label></div>
+ <div class="fila" style="margin-top:12px"><button class="btn acc" data-acc="crearDeGuia">Crear proyecto con mi idea</button><button class="btn sec" data-acc="claude" data-tarea="ideas">Pedir ideas a su asistente de IA (copiar y pegar)</button></div></section>`}
+
 /* ===== Puente con Claude (versión sin IA en el servidor): copiar el pedido, pegarlo en Claude y pegar aquí la respuesta ===== */
 const PUENTE_ACC={evaluar:"evaluar",redactarTodo:"redactar",redactar:"redactar",dibujar:"dibujos",sugLic:"lic",ideas:"ideas"};
 const PIDE_JSON="\n\nIMPORTANTE: entrega la respuesta completa dentro de UN solo bloque de código ```json``` y nada más, para pegarla en Patent-IA.";
@@ -691,11 +1056,11 @@ function abrirPuente(tarea,id,sec){if(tarea==="ideas"){ideasForm.problema=($("#i
  const tit={evaluar:"Evaluar con Claude",redactar:sec?"Redactar esta sección con Claude":"Redactar la solicitud con Claude",dibujos:"Pedir los dibujos a Claude",lic:"Sugerir empresas con Claude",ideas:"Pedir ideas a Claude",consulta:"Consultar a Claude sobre este proyecto",producto:"Preparar el producto con Claude",grupos:"Consultar a Claude sobre los grupos"}[tarea];
  ui.puente={tarea,id,sec,claves:tarea==="redactar"?seccionesPedidas(proy(id),sec).map(x=>x[0]):null};
  $("#capa").innerHTML=`<div class="modal-f"><div class="modal puente" role="dialog" aria-modal="true" aria-label="${esc(tit)}"><h2>${esc(tit)}</h2>
- <p class="ayuda" style="margin:0">Se hace con su suscripción de Claude, sin costo adicional.</p>
+ <p class="ayuda" style="margin:0">Opcional: use su propio asistente de IA (Claude, ChatGPT u otro). Patent-IA no cobra nada por esto.</p>
  <ol class="pc-pasos"><li><b>Copie el pedido.</b> <button class="btn pri peq" id="pc-copiar">Copiar pedido</button> <span id="pc-ok" class="chip v" hidden>Copiado</span>
   <details><summary class="ayuda" style="cursor:pointer">Ver el pedido</summary><textarea id="pc-pedido" readonly rows="6">${esc(ped)}</textarea></details></li>
- <li><b>Péguelo en Claude</b> (Ctrl+V; en el celular, mantenga presionado y elija Pegar)${consulta?" y escriba su pregunta al final":""}. Puede usar una conversación nueva o la que usa para Patent-IA. <a class="btn sec peq" href="https://claude.ai/new" target="_blank" rel="noopener">Abrir Claude ↗</a></li>
- ${consulta?`<li>Siga la conversación con Claude allí. Cuando tenga un resultado que deba quedar en el proyecto, cópielo en la ficha, la redacción o la bitácora.</li>`:`<li><b>Copie toda la respuesta de Claude</b> (botón Copiar debajo de la respuesta; si Claude la muestra en un panel aparte, cópiela desde ese panel) <b>y péguela aquí:</b><textarea id="pc-resp" rows="5" placeholder="Pegue aquí la respuesta completa de Claude"></textarea></li>`}</ol>
+ <li><b>Péguelo en su asistente de IA</b> (Ctrl+V; en el celular, mantenga presionado y elija Pegar)${consulta?" y escriba su pregunta al final":""}. Puede usar una conversación nueva o la que usa para Patent-IA. <a class="btn sec peq" href="https://claude.ai/new" target="_blank" rel="noopener">Abrir Claude ↗</a> <a class="btn sec peq" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT ↗</a></li>
+ ${consulta?`<li>Siga la conversación con Claude allí. Cuando tenga un resultado que deba quedar en el proyecto, cópielo en la ficha, la redacción o la bitácora.</li>`:`<li><b>Copie toda la respuesta</b> (botón Copiar debajo de la respuesta; si Claude la muestra en un panel aparte, cópiela desde ese panel) <b>y péguela aquí:</b><textarea id="pc-resp" rows="5" placeholder="Pegue aquí la respuesta completa"></textarea></li>`}</ol>
  <div class="fila" style="justify-content:flex-end"><button class="btn sec" id="pc-cerrar">${consulta?"Listo":"Cancelar"}</button>${consulta?"":`<button class="btn acc" id="pc-guardar">Guardar en Patent-IA</button>`}</div></div></div>`;
  const copiar=async()=>{if(await copiarTexto(ped)){$("#pc-ok").hidden=false;toast("Pedido copiado. Ahora péguelo en Claude.")}else{$("#pc-pedido").closest("details").open=true;toast("Copie el pedido manualmente (Ctrl+C).")}};
  $("#pc-copiar").onclick=copiar;$("#pc-cerrar").onclick=()=>{$("#capa").innerHTML="";ui.puente=null};
@@ -704,10 +1069,18 @@ function abrirPuente(tarea,id,sec){if(tarea==="ideas"){ideasForm.problema=($("#i
  copiar()}
 
 /* En la versión sin IA, cada botón de IA ofrece al lado "Hacer con Claude" */
-function puentesClaude(){if(!(REMOTO&&!sample))return;
+/* Fuera de Claude, la IA se llama "la IA" (no "Claude") */
+const CAMBIOS_IA=[[/consulte a Claude en la conversación y a su agente/g,"consulte a la IA y a su agente"],[/(a|con) Claude en la conversación/g,"$1 la IA"],[/Consultar a Claude/g,"Consultar a la IA"],[/con Claude/g,"con IA"],[/\b(a|de|que) Claude/g,"$1 la IA"],[/^(\s*)Claude /,"$1La IA "],[/Claude/g,"la IA"]];
+const ZONA_IA="button,a,label,h1,h2,h3,h4,summary,option,.ayuda,.aviso,.vacio,.chip,.cab p,.seguir";
+function textosIA(){if(MODO==="claude"||puenteGratis())return;for(const raiz of [$("#main"),$("#capa")]){if(!raiz)continue;const w=document.createTreeWalker(raiz,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){if(!n.nodeValue.includes("Claude"))continue;const pa=n.parentElement;if(!pa||pa.closest("textarea,[contenteditable],.dato-usuario")||!pa.closest(ZONA_IA))continue;let v=n.nodeValue;for(const[a,b]of CAMBIOS_IA)v=v.replace(a,b);n.nodeValue=v}
+ for(const el of raiz.querySelectorAll("[placeholder*=Claude],[aria-label*=Claude],[title*=Claude]"))for(const at of ["placeholder","aria-label","title"]){const v=el.getAttribute(at);if(v&&v.includes("Claude")){let x=v;for(const[a,b]of CAMBIOS_IA)x=x.replace(a,b);el.setAttribute(at,x)}}}}
+function puentesClaude(){if(sample)return;if(!puenteGratis()){const R={evaluar:"Autoevaluación guiada",redactarTodo:"Llenar con plantillas",redactar:"Plantilla",sugLic:"Sugerir por sector"};for(const b of document.querySelectorAll("#main .btn.ia[data-acc]"))if(R[b.dataset.acc]&&!b.disabled)b.textContent=R[b.dataset.acc];
+  for(const b of document.querySelectorAll('#main [data-acc="claude"]')){if(b.dataset.iaOk)continue;b.dataset.iaOk="1";b.textContent=b.dataset.tarea==="ideas"?"Pedir ideas a la IA (créditos)":"Consultar a la IA (créditos)"}return}
+ const ETQ_REGLA={evaluar:"Autoevaluación guiada",redactarTodo:"Llenar con plantillas",redactar:"Plantilla",sugLic:"Sugerir por sector"};
  for(const b of document.querySelectorAll("#main .btn.ia[data-acc]")){const t=PUENTE_ACC[b.dataset.acc];if(!t||b.nextElementSibling?.classList.contains("puente-btn"))continue;
-  const n=document.createElement("button");n.type="button";n.className="btn acc peq puente-btn";n.dataset.acc="claude";n.dataset.tarea=t;if(b.dataset.id)n.dataset.id=b.dataset.id;if(b.dataset.sec)n.dataset.sec=b.dataset.sec;
-  n.textContent=t==="redactar"&&b.dataset.sec?"Con Claude":({evaluar:"Evaluar con Claude (copiar y pegar)",redactar:"Redactar con Claude (copiar y pegar)",dibujos:"Pedir dibujos a Claude (copiar y pegar)",lic:"Sugerir empresas con Claude (copiar y pegar)",ideas:"Pedir ideas a Claude (copiar y pegar)"}[t]);b.after(n)}}
+  if(ETQ_REGLA[b.dataset.acc]&&!b.disabled)b.textContent=ETQ_REGLA[b.dataset.acc];
+  const n=document.createElement("button");n.type="button";n.className="btn sec peq puente-btn";n.dataset.acc="claude";n.dataset.tarea=t;if(b.dataset.id)n.dataset.id=b.dataset.id;if(b.dataset.sec)n.dataset.sec=b.dataset.sec;
+  n.textContent=t==="redactar"&&b.dataset.sec?"Con su asistente de IA":({evaluar:"Evaluar con su asistente de IA (copiar y pegar)",redactar:"Redactar con su asistente de IA (copiar y pegar)",dibujos:"Pedir dibujos a su asistente de IA (copiar y pegar)",lic:"Sugerir empresas con su asistente de IA (copiar y pegar)",ideas:"Pedir ideas a su asistente de IA (copiar y pegar)"}[t]);b.after(n)}}
 
 /* ===== Ruta guiada del proyecto: qué sigue y botones para hacerlo ===== */
 const lleno=s=>String(s||"").trim().length>=15;
@@ -729,7 +1102,7 @@ function ruta(p){
  const lic={k:"licenciar",t:"Licenciar o vender",auto:firmada,
   que:"Prepare la ficha comercial, identifique empresas que lo puedan fabricar o vender y negocie una licencia o la venta.",
   por:"Es donde el desarrollo genera ingresos."+(reg?" Puede ofrecerlo desde que está radicado (“en trámite”), siempre con acuerdo de confidencialidad.":""),
-  acc:[{e:"Generar ficha comercial",a:"rutaDoc",tipo:"ficha",cls:"pri"},{e:"Sugerir empresas con Claude",a:"sugLic",ia:1},{e:"Agregar una empresa",a:"rutaIr",sub:"licencias",foco:"l-empresa"}]};
+  acc:modOn("licencias")?[{e:"Generar ficha comercial",a:"rutaDoc",tipo:"ficha",cls:"pri"},{e:"Sugerir empresas con Claude",a:"sugLic",ia:1},{e:"Agregar una empresa",a:"rutaIr",sub:"licencias",foco:"l-empresa"}]:[{e:"Activar el módulo Licencias y ventas",a:"pedirMod",mod:"licencias",cls:"pri"}]};
 
  add({k:"describir",t:"Describir el invento",auto:p.titulo&&p.titulo!=="Nuevo proyecto"&&lleno(p.problema)&&(k==="ma"||(lleno(p.solucion)&&String(p.inventores||"").trim())),sinMarcar:1,
   que:k==="ma"?"Escriba el nombre de la marca y qué productos o servicios va a identificar.":k==="ob"?"Escriba el título de la obra, de qué trata y quiénes son los autores.":"Escriba el título, el problema que resuelve, cómo funciona y quiénes son los inventores.",
@@ -778,7 +1151,7 @@ function ruta(p){
    por:nx?(nx.nota||nx.norma||""):"Cada notificación abre un plazo; Patent-IA lo calcula cuando escribe la fecha.",
    acc:[{e:"Abrir el expediente",a:"rutaIr",sub:"expediente",cls:nx?"sec":"pri"}]})}}
  add(lic);
- if(p.grupoId!=="ninguno"&&(!["ma","si"].includes(k)||grupo(p.grupoId))){const gg=grupo(p.grupoId);const rq=reqMin(p);const tp=tipoProd(p);const escrito=["articulo","libro","capitulo","software"].includes(tp);
+ if(modOn("grupos")&&p.grupoId!=="ninguno"&&(!["ma","si"].includes(k)||grupo(p.grupoId))){const gg=grupo(p.grupoId);const rq=reqMin(p);const tp=tipoProd(p);const escrito=["articulo","libro","capitulo","software"].includes(tp);
   add({k:"gruplac",t:"Registrar en GrupLAC",auto:p.estadoGrupLAC==="vinculado",sinMarcar:1,sinCur:!gg,prog:etqEst(p.estadoGrupLAC),
   que:!gg?"Asigne el proyecto a un grupo de investigación y a una línea (recuadro Minciencias de la Ficha). Si no es un producto de investigación, elija “No es de ningún grupo”.":rq?`Cuando el producto esté listo, regístrelo en CvLAC y vincúlelo al grupo ${cortoG(gg)}. Pendiente: ${rq}.`:`El producto ya cumple los requisitos: regístrelo en CvLAC y vincúlelo al grupo ${cortoG(gg)} en GrupLAC.`,
   por:"Así cuenta como producción del grupo ante Minciencias y ayuda a su categoría.",
@@ -787,7 +1160,7 @@ function ruta(p){
   add({k:"mantener",t:k==="ma"?"Mantener la marca":"Mantener la patente vigente",continuo:1,sinMarcar:1,ev:nm,
   que:nm?`Lo próximo: ${nm.tipo}.`:"No hay pagos pendientes por ahora.",
   por:k==="ma"?"La marca se renueva cada 10 años y debe usarse en el mercado.":"Si no se paga una anualidad (ni en el período de gracia), la patente caduca.",
-  acc:[{e:"Ver el calendario legal",a:"rutaIr",sub:"expediente"},{e:"Registrar el pago en Costos",a:"rutaIr",sub:"costos"}]})}
+  acc:[{e:"Ver el calendario legal",a:"rutaIr",sub:"expediente"},...(modOn("costos")?[{e:"Registrar el pago en Costos",a:"rutaIr",sub:"costos"}]:[])]})}
  const fin=M.eventos(p).find(e=>e.clave==="fin"&&!e.estimado);
  const tr=L.find(s=>s.k==="tramite");
  const cerrado=["descartada","vencida"].includes(p.etapa)||(fin&&diasA(fin.vence)<0)||(p.etapa==="negada"&&(!neg||(tr&&tr.hecho)));
@@ -808,15 +1181,16 @@ function etapaRuta(p,r){if(["descartada","negada","vencida"].includes(p.etapa))r
  return sug}
 
 function btnRuta(pid,b){if(b.href)return`<a class="btn sec peq" target="_blank" rel="noopener" href="${esc(b.href)}">${esc(b.e)} ↗</a>`;
- const d=Object.entries({ir:b.sub,foco:b.foco,tarea:b.tarea,tipo:b.tipo,dias:b.dias,nota:b.nota,k:b.k,clave:b.clave}).filter(([,v])=>v!=null).map(([x,v])=>` data-${x}="${esc(v)}"`).join("");
+ const d=Object.entries({ir:b.sub,foco:b.foco,tarea:b.tarea,mod:b.mod,tipo:b.tipo,dias:b.dias,nota:b.nota,k:b.k,clave:b.clave}).filter(([,v])=>v!=null).map(([x,v])=>` data-${x}="${esc(v)}"`).join("");
  const oc=b.ia&&(ui.ocupado[(b.a==="evaluar"?"eval":b.a==="redactarTodo"?"todo":b.a==="sugLic"?"lic":"")+pid]);
  return`<button class="btn ${b.cls||"sec"} ${b.ia?"ia":""} peq" data-acc="${b.a}" data-id="${pid}"${d} ${oc?"disabled":""}>${oc?"Trabajando…":esc(b.e)}</button>`}
 
+const DONDE_IA={evaluar:"Aquí (autoevaluación guiada)",redactar:"Aquí, con plantillas",dibujos:"En su programa de dibujo",licenciar:"Aquí"};
 const DONDE={describir:"Aquí en Patent-IA",evaluar:"Con Claude",antecedentes:"En internet y aquí",redactar:"Con Claude",dibujos:"Con Claude",proteger:"Aquí, y se firma en papel",registro:"En la DNDA (en línea)",requisitos:"Aquí y en la SIC",radicar:"En la SIC (en línea)",tramite:"En la SIC y aquí",licenciar:"Aquí y con Claude",mantener:"En la SIC",gruplac:"En CvLAC y GrupLAC (Minciencias)"};
 const CHAT={evaluar:"Si quiere discutir cómo fortalecer el invento o cambiar la modalidad, consulte a Claude en la conversación.",antecedentes:"Si encuentra una patente muy parecida, consulte a Claude antes de seguir: puede ajustar el invento para diferenciarlo.",redactar:"Para afinar las reivindicaciones o el alcance de la protección, siga con Claude en la conversación.",dibujos:"Para planos de precisión, modelos 3D o cambios a los bocetos, pídalos a Claude en la conversación.",tramite:"Si la SIC le envía un requerimiento o una negación, consulte a Claude en la conversación y a su agente.",licenciar:"Para preparar la negociación, el precio o revisar un contrato, consulte a Claude en la conversación.",proteger:"Si la otra parte pide cambios al acuerdo, consulte a Claude en la conversación.",gruplac:"Si el producto necesita un artículo, un capítulo o el manual del software, prepárelo con Claude en la conversación."};
 const TAB_AYUDA={ficha:"Aquí describe el invento: es el primer paso de la ruta.",evaluacion:"Aquí queda la evaluación de Claude y lo que usted encuentre al buscar antecedentes.",redaccion:"Aquí se arma el texto de la solicitud que se radica en la SIC.",dibujos:"Aquí se guardan los bocetos de las figuras de la solicitud.",bitacora:"Diario del inventor y enlaces a fotos, planos y oficios: prueba de autoría y de fechas.",expediente:"Fechas del trámite en la SIC, requisitos para radicar y calendario legal.",documentos:"Contratos y ficha comercial listos para revisar, guardar y descargar.",costos:"Tasas, gastos e ingresos del proyecto.",licencias:"Empresas interesadas y negociaciones de licencia o venta."};
 function vSeguir(p){const r=ruta(p);if(!r.cur)return"";const c=r.cur;const acc=c.acc.filter(b=>!b.href&&b.a!=="rutaTarea").slice(0,2);
- return`<div class="seguir"><span>Siguiente paso de la ruta: <b>${esc(c.t)}</b> <span class="chip g">${esc(DONDE[c.k]||"")}</span></span><div class="fila">${acc.map(b=>btnRuta(p.id,b)).join("")}<a href="#" class="btn sec peq" data-acc="verRuta" data-id="${p.id}">Ver la ruta ↑</a></div></div>`}
+ return`<div class="seguir"><span>Siguiente paso de la ruta: <b>${esc(c.t)}</b> <span class="chip g">${esc((!sample&&DONDE_IA[c.k])||DONDE[c.k]||"")}</span></span><div class="fila">${acc.map(b=>btnRuta(p.id,b)).join("")}<a href="#" class="btn sec peq" data-acc="verRuta" data-id="${p.id}">Ver la ruta ↑</a></div></div>`}
 function vRuta(p){const r=ruta(p);if(!r.pasos.length)return"";
  if(r.cerrado)return`<section class="panel ruta" aria-label="Ruta del proyecto"><div class="ruta-cab"><h3>Ruta del proyecto</h3>${chipEtapa(p.etapa)}</div><p class="ayuda" style="margin:0">Este proyecto está cerrado (${esc(ETQ[p.etapa]||"vigencia terminada")}). Si lo retoma, cambie la etapa y la ruta volverá a mostrar el siguiente paso.</p></section>`;
  const s0=(ui.rutaSel||{})[p.id];let sel=s0&&r.pasos.find(s=>s.k===s0.k);if(sel&&sel.hecho&&!s0.hecho){delete ui.rutaSel[p.id];sel=null}sel=sel||r.cur||r.pasos[0];
@@ -828,17 +1202,17 @@ function vRuta(p){const r=ruta(p);if(!r.pasos.length)return"";
  const sug=etapaRuta(p,r);
  const mientras=sel.k==="tramite"&&!sel.hecho&&!r.pasos.find(s=>s.k==="licenciar").hecho?`<p class="ayuda" style="margin:8px 0 0">Mientras la SIC decide, puede avanzar en <a href="#" data-acc="rutaSel" data-id="${p.id}" data-k="licenciar">licenciar o vender</a>.</p>`:"";
  return`<section class="panel ruta" aria-label="Ruta del proyecto">
- <div class="ruta-cab"><h3>Ruta del proyecto</h3><div class="fila"><span class="chip ${hechos>=tot?"v":""}">${Math.min(hechos,tot)} de ${tot} pasos</span><button class="btn sec peq" data-acc="claude" data-tarea="consulta" data-id="${p.id}">Consultar a Claude</button></div></div>
+ <div class="ruta-cab"><h3>Ruta del proyecto</h3><div class="fila"><span class="chip ${hechos>=tot?"v":""}">${Math.min(hechos,tot)} de ${tot} pasos</span><button class="btn sec peq" data-acc="claude" data-tarea="consulta" data-id="${p.id}">${sample?"Consultar a Claude":"Consultar a su asistente de IA"}</button></div></div>
  <ol class="pasos">${r.pasos.map((s,i)=>`<li><button type="button" class="paso${s.hecho&&!s.continuo?" ok":""}${s===r.cur?" act":""}${s===sel?" sel":""}" data-acc="rutaSel" data-id="${p.id}" data-k="${s.k}" aria-current="${s===sel}"><span class="n">${s.hecho&&!s.continuo?"✓":i+1}</span>${esc(s.t)}</button></li>`).join("")}</ol>
  <div class="sig ${sel.hecho&&!sel.continuo?"hecho":""}">
-  <div class="fila" style="justify-content:space-between;align-items:baseline"><h4><span class="chip ${sel.hecho&&!sel.continuo?"v":sel===r.cur?"":"g"}">${etq}</span> ${esc(sel.t)} ${DONDE[sel.k]?`<span class="chip g">Se hace: ${esc(DONDE[sel.k])}</span>`:""}</h4>${sel.prog?`<span class="ayuda">${esc(sel.prog)}</span>`:""}</div>
+  <div class="fila" style="justify-content:space-between;align-items:baseline"><h4><span class="chip ${sel.hecho&&!sel.continuo?"v":sel===r.cur?"":"g"}">${etq}</span> ${esc(sel.t)} ${DONDE[sel.k]?`<span class="chip g">Se hace: ${esc((!sample&&DONDE_IA[sel.k])||DONDE[sel.k])}</span>`:""}</h4>${sel.prog?`<span class="ayuda">${esc(sel.prog)}</span>`:""}</div>
   <p style="margin:6px 0 2px">${esc(sel.que)}</p>${sel.por?`<p class="ayuda" style="margin:0">Por qué: ${esc(sel.por)}</p>`:""}
   ${ev?`<p style="margin:8px 0 0"><b>Vence: ${fFecha(ev.vence)}</b> ${chipEv(ev)}${ev.norma?` <span class="chip g">${esc(ev.norma)}</span>`:""}</p>`:""}
   ${sel.plazo?`<p class="ayuda" style="margin:8px 0 0;color:var(--rojo)"><b>Radique antes del ${fFecha(sel.plazo.vence)}</b> para no perder la novedad (ya mostró el invento).</p>`:""}
   <div class="fila" style="margin-top:12px">${acc.map(b=>btnRuta(p.id,b)).join("")}${ev?btnRuta(p.id,{e:"Ya lo hice",a:"rutaEv",clave:ev.clave,cls:"acc"}):""}</div>
   ${t?`<p class="ayuda" style="margin:8px 0 0"><span class="chip a">Tarea creada · vence ${fFecha(t.vence)}</span> La verá en Trámites y plazos.</p>`:""}
   ${sel.salto?`<p class="ayuda" style="margin:8px 0 0">Se da por superado porque la solicitud ya está radicada.</p>`:sel.auto?`<p class="ayuda" style="margin:8px 0 0">✓ Patent-IA lo detectó por lo que ya registró.</p>`:sel.sinMarcar?"":`<div style="margin-top:10px"><button class="btn ${sel.hecho?"sec":"acc"} peq" data-acc="rutaHecho" data-id="${p.id}" data-k="${sel.k}">${sel.hecho?"Desmarcar este paso":"Marcar este paso como hecho"}</button></div>`}
-  ${CHAT[sel.k]&&!(sel.hecho&&!sel.continuo)?`<p class="ayuda" style="margin:10px 0 0">💬 ${esc(CHAT[sel.k])} <a href="#" data-acc="claude" data-tarea="consulta" data-id="${p.id}">Consultar a Claude</a></p>`:""}
+  ${CHAT[sel.k]&&!(sel.hecho&&!sel.continuo)?`<p class="ayuda" style="margin:10px 0 0">💬 ${esc(sample?CHAT[sel.k]:CHAT[sel.k].replace(/consulte a Claude en la conversación y a su agente/g,"consulte a su agente de propiedad industrial").replace(/consulte a Claude en la conversación/g,"consulte a su asistente de IA o a un agente de propiedad industrial").replace(/siga con Claude en la conversación/g,"apóyese en su asistente de IA o en un agente").replace(/pídalos a Claude en la conversación/g,"pídalos a un dibujante o a su asistente de IA").replace(/prepárelo con Claude en la conversación/g,"prepárelo con su asistente de IA").replace(/consulte a Claude antes de seguir/g,"revise antes de seguir"))} <a href="#" data-acc="claude" data-tarea="consulta" data-id="${p.id}">${sample?"Consultar a Claude":"Copiar el resumen para su asistente de IA"}</a></p>`:""}
   ${mientras}
  </div>
  ${sug?`<div class="aviso fila" style="justify-content:space-between;margin-top:12px"><span>Con lo que lleva, la etapa debería ser <b>${esc(ETQ[sug])}</b>.</span><button class="btn sec peq" data-acc="etapaSug" data-id="${p.id}" data-etapa="${sug}">Actualizar etapa</button></div>`:""}
@@ -846,13 +1220,13 @@ function vRuta(p){const r=ruta(p);if(!r.pasos.length)return"";
 
 function vProyecto(){
  const p=proy(proyActual);if(!p)return`<div class="vacio">Este proyecto ya no existe. <a href="#" data-vista-l="proyectos">Volver al banco</a></div>`;
- const st=[["ficha","Ficha"],["evaluacion","Evaluación"],["redaccion","Redacción"],["dibujos","Dibujos"],["bitacora","Bitácora y archivos"],["expediente","Expediente SIC"],["documentos","Documentos"],["costos","Costos"],["licencias","Licencias"]];
+ const st=[["ficha","Ficha"],["evaluacion","Evaluación"],["redaccion","Redacción"],["dibujos","Dibujos"],["bitacora","Bitácora y archivos"],["expediente","Expediente SIC"],["documentos","Documentos"],["costos","Costos"],["licencias","Licencias"]].filter(([k])=>(k!=="costos"||modOn("costos"))&&(k!=="licencias"||modOn("licencias")));if(!st.some(x=>x[0]===subtab)&&subtab!=="tramites")subtab="ficha";
  const body=({ficha:pFicha,evaluacion:pEval,redaccion:pRed,dibujos:pDib,bitacora:pBit,expediente:pExp,tramites:pExp,documentos:pDocs,costos:pCostos,licencias:pLic}[subtab]||pFicha)(p);
  return`<div><a href="#" data-vista-l="proyectos" class="ayuda">← Banco de proyectos</a></div>
  <div class="cab"><div><span class="cod">${esc(p.codigo)}</span><h1>${esc(p.titulo||"Sin título")}</h1><p>${esc(p.modalidad||"")}${p.sector?" · "+esc(p.sector):""}${grupo(p.grupoId)?` · Grupo <a href="#" data-vista-l="grupos">${esc(cortoG(grupo(p.grupoId)))}</a>`:""}</p></div>
  <label class="c" style="min-width:200px">Etapa<select id="f-etapa" data-campo="etapa" data-id="${p.id}">${ETAPAS.map(([k,v])=>`<option value="${k}" ${p.etapa===k?"selected":""}>${v}</option>`).join("")}</select></label></div>
  ${vRuta(p)}
- ${REMOTO&&!sample&&["evaluacion","redaccion","dibujos","licencias"].includes(subtab)?`<div class="aviso">Lo que hace la inteligencia artificial se hace con Claude, sin costo adicional: pulse un botón verde <b>“…con Claude (copiar y pegar)”</b>, pegue el pedido en Claude y luego pegue aquí la respuesta.</div>`:""}
+ ${!sample&&["evaluacion","redaccion","dibujos","licencias"].includes(subtab)?(puenteGratis()?`<div class="aviso">Patent-IA le ayuda sin costo con asistentes guiados y plantillas. Si usted usa un asistente de IA (Claude, ChatGPT u otro), también puede pulsar <b>“…con su asistente de IA (copiar y pegar)”</b>.</div>`:`<div class="aviso fila" style="justify-content:space-between"><span>Patent-IA le ayuda con asistentes guiados y plantillas. Con <b>créditos de IA</b>, la inteligencia artificial evalúa, redacta y dibuja por usted.</span><button class="btn sec peq" data-acc="iaOfrecer">Ver créditos de IA</button></div>`):""}
  <div class="subtabs" role="tablist">${st.map(([k,l])=>`<button data-sub="${k}" aria-current="${subtab===k}">${l}</button>`).join("")}</div>${TAB_AYUDA[subtab]?`<p class="ayuda tab-ayuda">${TAB_AYUDA[subtab]}</p>`:""}${body}${vSeguir(p)}`;
 }
 
@@ -867,7 +1241,7 @@ function pFicha(p){return`<section class="panel"><div class="campos">
  <p class="ayuda ancho" style="margin:0">Las fechas legales (radicación, publicación, concesión…) van en la pestaña Expediente SIC.</p>
  <label class="c ancho">Notas del inventor (su aporte, pruebas, observaciones)<textarea id="f-notas" data-campo="notas" data-id="${p.id}">${esc(p.notas)}</textarea></label>
  </div></section>
- ${pMin(p)}
+ ${modOn("grupos")?pMin(p):""}
  <div class="fila" style="justify-content:space-between"><span class="ayuda">Los cambios se guardan solos.</span><button class="btn peligro peq" data-acc="borrarProy" data-id="${p.id}">Eliminar proyecto</button></div>`}
 
 function pEval(p){const e=p.evaluacion;const oc=ui.ocupado["eval"+p.id];
@@ -969,12 +1343,12 @@ function vLicencias(){const ing=S.movimientos.filter(m=>m.tipo==="ingreso").redu
  <div class="grid g4">${ETAPAS_LIC.map(([k,l])=>`<div class="kpi"><span class="l">${l}</span><span class="v">${S.licencias.filter(x=>x.etapa===k).length}</span></div>`).join("")}</div>
  ${S.licencias.length?`<div class="tabla-w"><table><thead><tr><th>Empresa</th><th>Proyecto</th><th>Acuerdo</th><th>Etapa</th><th>Valor</th><th></th></tr></thead><tbody>${S.licencias.map(x=>filaLic(x,true)).join("")}</tbody></table></div>`:`<div class="vacio">Sin negociaciones. Agregue empresas aquí o desde cada proyecto.</div>`}
  ${S.proyectos.length?formLic(""):""}
- <section class="panel"><div class="cab"><h3>Ingresos y gastos</h3><span class="ayuda">Ingresos ${cop(ing)} · Gastos ${cop(gas)} · <b>Balance ${cop(ing-gas)}</b></span></div>
+ ${!modOn("costos")?upsell("costos","Lleve aquí los ingresos y gastos de cada proyecto."):`<section class="panel"><div class="cab"><h3>Ingresos y gastos</h3><span class="ayuda">Ingresos ${cop(ing)} · Gastos ${cop(gas)} · <b>Balance ${cop(ing-gas)}</b></span></div>
  ${movs.length?`<div class="tabla-w"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Proyecto</th><th>Tipo</th><th>Valor</th><th></th></tr></thead><tbody>${movs.map(m=>`<tr><td>${fFecha(m.fecha)}</td><td>${esc(m.concepto)}</td><td>${esc(proy(m.proyectoId)?.titulo||"General")}</td><td><span class="chip ${m.tipo==="ingreso"?"v":"a"}">${m.tipo==="ingreso"?"Ingreso":"Gasto"}</span></td><td class="num">${cop(m.valor)}</td><td><button class="btn peligro peq" data-acc="borrarMov" data-id="${m.id}" aria-label="Eliminar">×</button></td></tr>`).join("")}</tbody></table></div>`:`<div class="vacio">Registre aquí regalías, pagos de licencias, tasas de la SIC, prototipos y honorarios.</div>`}
  <div class="campos" style="margin-top:14px"><label class="c">Fecha<input type="date" id="m-fecha" value="${hoyISO()}"></label><label class="c">Tipo<select id="m-tipo"><option value="gasto">Gasto</option><option value="ingreso">Ingreso</option></select></label>
  <label class="c">Proyecto<select id="m-proy"><option value="">General</option>${S.proyectos.map(p=>`<option value="${p.id}">${esc(p.codigo)} · ${esc(p.titulo)}</option>`).join("")}</select></label>
  <label class="c">Valor (COP)<input type="number" id="m-valor" min="0" step="1000"></label><label class="c ancho">Concepto<input type="text" id="m-concepto" placeholder="Ej.: tasa de solicitud modelo de utilidad, impresión 3D del prototipo"></label></div>
- <div class="fila" style="margin-top:10px"><button class="btn acc" data-acc="agregarMov">Registrar</button></div></section>`}
+ <div class="fila" style="margin-top:10px"><button class="btn acc" data-acc="agregarMov">Registrar</button></div></section>`}`}
 
 /* ---------- Bitácora y archivos ---------- */
 const TIPOS_BIT=["Idea o concepto","Decisión técnica","Cambio de diseño","Prueba o ensayo","Resultado","Reunión","Otro"];
@@ -985,7 +1359,7 @@ function pBit(p){const L=S.bitacora.filter(b=>b.proyectoId===p.id).sort((a,b)=>(
  <div class="campos"><label class="c">Fecha<input type="date" id="b-fecha" value="${hoyISO()}"></label><label class="c">Tipo<select id="b-tipo">${TIPOS_BIT.map(t=>`<option>${t}</option>`).join("")}</select></label><label class="c">Autor<input type="text" id="b-autor" value="${esc((p.inventores||"").split(",")[0])}"></label>
  <label class="c ancho">Qué aportó o decidió<textarea id="b-texto" placeholder="Ej.: decidí que las cavidades tengan igual área y distinta profundidad para que el niño vea siempre la misma forma"></textarea></label></div>
  <div class="fila" style="margin-top:10px"><button class="btn acc" data-acc="agregarBit" data-id="${p.id}">Registrar en la bitácora</button></div>
- ${L.length?`<div class="lista" style="margin-top:12px">${L.map(b=>`<div class="it" style="${b.anulada?"opacity:.55":""}"><div style="min-width:0"><div class="d">${fFecha(b.fecha)} · ${esc(b.tipo)} · ${esc(b.autor||"")}${b.anulada?` · <b>Anulada</b>`:""}</div><div style="${b.anulada?"text-decoration:line-through":""};white-space:pre-wrap">${esc(b.texto)}</div><div class="d">Registrada el ${esc(new Date(b.creado).toLocaleString("es-CO"))}</div></div>${b.anulada?"":`<button class="btn sec peq" data-acc="anularBit" data-id="${b.id}">Anular</button>`}</div>`).join("")}</div>`:`<div class="vacio" style="margin-top:12px">Aún no hay entradas. Registre la primera: de dónde salió la idea.</div>`}</section>
+ ${L.length?`<div class="lista" style="margin-top:12px">${L.map(b=>`<div class="it" style="${b.anulada?"opacity:.55":""}"><div style="min-width:0"><div class="d">${fFecha(b.fecha)} · ${esc(b.tipo)} · ${esc(b.autor||"")}${b.anulada?` · <b>Anulada</b>${b.motivoAnulacion||b.motivo?`: ${esc(b.motivoAnulacion||b.motivo)}`:""}`:""}</div><div style="${b.anulada?"text-decoration:line-through":""};white-space:pre-wrap">${esc(b.texto)}</div><div class="d">Registrada el ${esc(new Date(b.creado).toLocaleString("es-CO"))}</div></div>${b.anulada?"":`<button class="btn sec peq" data-acc="anularBit" data-id="${b.id}">Anular</button>`}</div>`).join("")}</div>`:`<div class="vacio" style="margin-top:12px">Aún no hay entradas. Registre la primera: de dónde salió la idea.</div>`}</section>
  <section class="panel"><h3>Archivos del proyecto</h3>
  <p class="ayuda" style="margin-top:-6px">Fotos del prototipo, oficios de la SIC, comprobantes y contratos firmados. ${assets?"Súbalos aquí (imágenes, PDF o video de hasta 20 MB; los de Word como PDF) o guárdelos en Google Drive y pegue el enlace.":"Guárdelos en Google Drive (o similar) y pegue aquí el enlace para compartir."}</p>
  <div class="campos"><label class="c">Tipo de archivo<select id="a-cat">${CAT_ARCH.map(t=>`<option>${t}</option>`).join("")}</select></label>
@@ -1005,7 +1379,7 @@ async function subirArchivo(pid){const f=$("#a-file")?.files?.[0];if(!f){toast("
 /* ---------- Documentos legales y ficha comercial ---------- */
 const TIPOS_DOC=[["nda","Acuerdo de confidencialidad"],["cesion","Cesión de derechos del inventor"],["licencia","Contrato de licencia"],["ficha","Ficha comercial (para empresas)"]];
 const B="__________";
-function datosBase(p){const d=new Date();return{tit:p.titulo||B,mod:p.modalidad||"",sol:p.solicitante&&!/por definir/i.test(p.solicitante)?p.solicitante:"SKYNET GENESIS S.A.S.",inv:p.inventores||B,exp:p.expediente||B,rad:p.fechaRadicacion?fFecha(p.fechaRadicacion):"sin radicar",ciudad:"Santa Marta",hoy:d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"})}}
+function datosBase(p){const d=new Date();return{tit:p.titulo||B,mod:p.modalidad||"",sol:p.solicitante&&!/por definir/i.test(p.solicitante)?p.solicitante:(esSkynet()?"SKYNET GENESIS S.A.S.":(ORG&&ORG.nombre?String(ORG.nombre).toUpperCase():B)),inv:p.inventores||B,exp:p.expediente||B,rad:p.fechaRadicacion?fFecha(p.fechaRadicacion):"sin radicar",ciudad:esSkynet()?"Santa Marta":B,hoy:d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"})}}
 function plantilla(tipo,p,c){const d=datosBase(p);c=c||{};const emp=c.empresa||B,nit=c.nit||B,rep=c.representante||B;
  const objeto=`${d.mod.toLowerCase()} titulada «${d.tit}»${p.fechaRadicacion?`, radicada ante la Superintendencia de Industria y Comercio (SIC) el ${d.rad} con el expediente ${d.exp}`:", aún no radicada ante la Superintendencia de Industria y Comercio (SIC)"}`;
  if(tipo==="nda")return`# ACUERDO DE CONFIDENCIALIDAD
@@ -1207,12 +1581,12 @@ function pCostos(p){const c=costos(p);const T=tarifas();const vacias=TARIFAS.fil
 
 /* ---------- Bitácora: descarga ---------- */
 function bajarBitacora(pid){const p=proy(pid);const L=S.bitacora.filter(b=>b.proyectoId===pid).sort((a,b)=>(a.fecha+a.creado).localeCompare(b.fecha+b.creado));
- const txt=`# BITÁCORA DEL INVENTOR\n\nProyecto: ${p.titulo} (${p.codigo}) · ${p.modalidad}\nInventor(es): ${p.inventores||""}\n\n`+L.map(b=>`## ${fFecha(b.fecha)} — ${b.tipo}${b.anulada?" (ANULADA)":""}\n${b.texto}\nAutor: ${b.autor||""} · Registrada el ${new Date(b.creado).toLocaleString("es-CO")}`).join("\n\n");
+ const txt=`# BITÁCORA DEL INVENTOR\n\nProyecto: ${p.titulo} (${p.codigo}) · ${p.modalidad}\nInventor(es): ${p.inventores||""}\n\n`+L.map(b=>`## ${fFecha(b.fecha)} — ${b.tipo}${b.anulada?" (ANULADA)":""}\n${b.texto}\nAutor: ${b.autor||""} · Registrada el ${new Date(b.registradoEl||b.creado).toLocaleString("es-CO")}${b.registradoPor?` por ${b.registradoPor}`:""}${b.anulada?`\nANULADA el ${b.anuladaEl?new Date(b.anuladaEl).toLocaleString("es-CO"):""}${b.anuladaPor?` por ${b.anuladaPor}`:""}. Motivo: ${b.motivoAnulacion||b.motivo||"(sin motivo)"}`:""}`).join("\n\n");
  bajar(`${p.codigo}_bitacora.html`,textoAHtml(txt,p,false).replace("MODELO PARA REVISIÓN DE UN ABOGADO ANTES DE FIRMAR","REGISTRO CONFIDENCIAL DEL INVENTOR"))}
 
 /* ---------- Acciones ---------- */
 function nuevoCodigo(){const y=new Date().getFullYear();const n=S.proyectos.filter(p=>(p.codigo||"").startsWith("PIA-"+y)).map(p=>+p.codigo.split("-")[2]||0);return`PIA-${y}-${String((n.length?Math.max(...n):0)+1).padStart(3,"0")}`}
-async function crearProyecto(extra={}){const id=uid();const p={codigo:nuevoCodigo(),titulo:"Nuevo proyecto",modalidad:"Modelo de utilidad",sector:SECTORES[0],etapa:"idea",problema:"",solucion:"",inventores:"Ricardo Londoño González",solicitante:"SkyNet Genesis",notas:"",borrador:{},creado:new Date().toISOString(),...extra};local("proyectos",id,p);await guardar("proyectos",id,p);ir("proyecto",id);setTimeout(()=>$("#f-titulo")?.focus(),50)}
+async function crearProyecto(extra={}){const id=uid();const p={codigo:nuevoCodigo(),titulo:"Nuevo proyecto",modalidad:"Modelo de utilidad",sector:SECTORES[0],etapa:"idea",problema:"",solucion:"",inventores:esSkynet()?"Ricardo Londoño González":(YO&&YO.nombre||""),solicitante:esSkynet()?"SkyNet Genesis":(ORG&&ORG.nombre||""),notas:"",borrador:{},creado:new Date().toISOString(),...extra};local("proyectos",id,p);await guardar("proyectos",id,p);ir("proyecto",id);setTimeout(()=>$("#f-titulo")?.focus(),50)}
 
 let tCampo={};const pendCampo={};
 function vaciarPendientes(){for(const k in pendCampo){clearTimeout(tCampo[k]);const f=pendCampo[k];delete pendCampo[k];f()}}
@@ -1224,7 +1598,7 @@ function campoCambia(el){const id=el.dataset.id;const k=el.dataset.campo,b=el.da
 const aTexto=x=>typeof x==="string"?x:(x==null?"":String(x));
 const aLista=x=>Array.isArray(x)?x.filter(v=>v!=null&&typeof v!=="object").map(String):(typeof x==="string"&&x.trim()?[x]:[]);
 const a15=x=>{const v=Math.round(+x);return v>=1&&v<=5?v:0};
-async function conIA(clave,fn){if(!sample){toast("Claude no está disponible en esta vista. Abra la app desde Claude.");return}ui.ocupado[clave]=true;render();try{await fn()}catch(e){toast(errIA(e))}finally{delete ui.ocupado[clave];render()}}
+async function conIA(clave,fn){if(!sample){if(MODO!=="claude"){ofrecerIA();return}toast("Claude no está disponible en esta vista. Abra la app desde Claude.");return}ui.ocupado[clave]=true;render();try{await fn()}catch(e){toast(errIA(e))}finally{delete ui.ocupado[clave];render()}}
 
 async function evaluar(id){const p=proy(id);await conIA("eval"+id,async()=>{
  const r=await sample.json(`${BASE}\n\nEvalúa la patentabilidad y el potencial comercial de este desarrollo.\n\n${contextoProy(p)}\nResponde SOLO con un objeto JSON con estas claves: "novedad","nivelInventivo","aplicacionIndustrial","mercado","fabricacion" (enteros 1 a 5), "modalidadRecomendada" (una de: ${MODALIDADES.join(", ")}), "resumen" (3-4 frases), "mejoras" (lista de 3-5 cambios concretos que harían el invento más fuerte o más difícil de copiar), "riesgos" (lista de 2-4), "palabrasClave_es" (5 términos), "palabrasClave_en" (5 términos técnicos en inglés para buscar patentes), "cpc" (1-3 códigos CPC probables).`,{modelTier:"default"});
@@ -1237,7 +1611,7 @@ async function redactar(id,sec){const p=proy(id);const s=SECCIONES.find(x=>x[0]=
  let txt=r.text.trim();if(sec==="titulo")txt=txt.replace(/^["“]|["”]$/g,"");
  if(!proy(id))return;const pat={borrador:{[sec]:txt}};if(p.etapa==="idea"||p.etapa==="evaluacion")pat.etapa="redaccion";if(!await parchear("proyectos",id,pat))throw{code:"guardado"};if(r.truncated)toast("El texto quedó cortado. Pulse Reescribir para completarlo.")}
 
-async function redactarTodo(id){if(!sample){toast("Claude no está disponible en esta vista.");return}ui.ocupado["todo"+id]=true;render();
+async function redactarTodo(id){if(!sample){if(MODO!=="claude"){ofrecerIA();return}toast("Claude no está disponible en esta vista.");return}ui.ocupado["todo"+id]=true;render();
  try{for(const[k]of SECCIONES){const p=proy(id);if(!p)break;if((p.borrador||{})[k])continue;ui.ocupado[k+id]=true;render();try{await redactar(id,k)}finally{delete ui.ocupado[k+id]}}toast("Borrador completo")}catch(e){toast(errIA(e))}finally{delete ui.ocupado["todo"+id];render()}}
 
 async function dibujar(id){const p=proy(id);const pedido=($("#dib-pedido")?.value||"").trim()||"vista principal del invento";await conIA("dib"+id,async()=>{
@@ -1277,16 +1651,27 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
  switch(a){
   case"nuevo":crearProyecto();break;
   case"restaurar":restaurarRespaldo();break;
-  case"salir":try{localStorage.removeItem("patentia_token")}catch(e){}location.reload();break;
+  case"salir":if(esDemo()){$("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true"><h2>¿Le gustó Patent-IA?</h2><p style="margin:0">Cree la cuenta de su empresa: pruébela gratis ${DIAS_PRUEBA} días y luego paga solo ${cop0(PRECIOS.mensual)} al mes, con usuarios ilimitados.</p><div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">Seguir probando</button><button class="btn sec" data-acc="salirDemo">Salir de la demostración</button><button class="btn acc" data-acc="irRegistro">¡Quiero Patent-IA ya!</button></div></div></div>`;break}
+   if(MODO_CONTROL){salirDeControl();break}
+   if(MODO==="servidor"){try{await api("POST","/api/salir",{})}catch(e){}}lsSet("patentia_token",null);lsSet("patentia_token_super",null);location.hash="";location.reload();break;
+  case"salirDemo":location.hash="";location.reload();break;
   case"respaldo":bajar(`Patent-IA_respaldo_${hoyISO()}.json`,JSON.stringify({exportado:new Date().toISOString(),app:"Patent-IA — SkyNet Genesis",...S},null,1));break;
-  case"borrarProy":confirmar(`¿Eliminar el proyecto “${proy(id)?.titulo}” con todo lo suyo (trámites, licencias, bitácora, archivos, documentos, bocetos, gastos e ingresos)? No se puede deshacer.`,async()=>{for(const x of S.tramites.filter(x=>x.proyectoId===id))await borrar("tramites",x.id);for(const x of S.licencias.filter(x=>x.proyectoId===id))await borrar("licencias",x.id);for(const x of S.bitacora.filter(x=>x.proyectoId===id))await borrar("bitacora",x.id);for(const x of S.dibujos.filter(x=>x.proyectoId===id))await borrar("dibujos",x.id);for(const x of S.movimientos.filter(x=>x.proyectoId===id))await borrar("movimientos",x.id);for(const x of S.documentos.filter(x=>x.proyectoId===id))await borrar("documentos",x.id);for(const x of S.archivos.filter(x=>x.proyectoId===id)){try{if(x.assetId)await assets?.delete(x.assetId)}catch(e){}await borrar("archivos",x.id)}await borrar("proyectos",id);ir("proyectos");toast("Proyecto eliminado")});break;
+  case"borrarProy":if(S.bitacora.some(x=>x.proyectoId===id)){$("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true"><h2>Este proyecto no se puede eliminar</h2><p style="margin:0">Tiene entradas en la <b>bitácora del inventor</b>, que es prueba legal de la invención y no se borra. Si ya no va a seguir con él, cambie su etapa a <b>Descartada</b>: deja de contar como activo y conserva el historial.</p><div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">← Volver</button><button class="btn acc" id="desc-si">Marcar como Descartada</button></div></div></div>`;$("#desc-si").onclick=async()=>{if(await parchear("proyectos",id,{etapa:"descartada"})){$("#capa").innerHTML="";toast("Proyecto marcado como Descartado.");render()}};break}
+   confirmar(`¿Eliminar el proyecto “${proy(id)?.titulo}” con todo lo suyo (trámites, licencias, bitácora, archivos, documentos, bocetos, gastos e ingresos)? No se puede deshacer.`,async()=>{for(const x of S.tramites.filter(x=>x.proyectoId===id))await borrar("tramites",x.id);for(const x of S.licencias.filter(x=>x.proyectoId===id))await borrar("licencias",x.id);for(const x of S.dibujos.filter(x=>x.proyectoId===id))await borrar("dibujos",x.id);for(const x of S.movimientos.filter(x=>x.proyectoId===id))await borrar("movimientos",x.id);for(const x of S.documentos.filter(x=>x.proyectoId===id))await borrar("documentos",x.id);for(const x of S.archivos.filter(x=>x.proyectoId===id)){try{if(x.assetId)await assets?.delete(x.assetId)}catch(e){}await borrar("archivos",x.id)}await borrar("proyectos",id);ir("proyectos");toast("Proyecto eliminado")});break;
   case"rutaSel":{ev.preventDefault();ui.rutaSel=ui.rutaSel||{};const st=ruta(proy(id)).pasos.find(x=>x.k===t.dataset.k);ui.rutaSel[id]={k:t.dataset.k,hecho:!!(st&&st.hecho)};render();break}
   case"rutaIr":{subtab=t.dataset.ir;render();const f=t.dataset.foco;if(f)setTimeout(()=>{if(f==="l-empresa"&&$("#det-lic"))$("#det-lic").open=true;const el=$("#"+f);if(el){el.scrollIntoView({block:"center"});el.focus()}},60);else $(".subtabs")?.scrollIntoView({block:"start"});break}
   case"rutaHecho":{const p=proy(id);if(!p)break;const k=t.dataset.k;const v=!(p.ruta||{})[k];await parchear("proyectos",id,{ruta:{[k]:v?hoyISO():false}});if(ui.rutaSel)delete ui.rutaSel[id];render();toast(v?"Paso marcado como hecho":"Paso desmarcado");break}
   case"rutaTarea":{const k=t.dataset.k;if(tareaRuta(id,k)){toast("Esa tarea ya existe.");break}const tid=uid();const x={proyectoId:id,tipo:t.dataset.tipo||"Otro",vence:sumar(hoyISO(),0,+t.dataset.dias||7),valor:0,notas:t.dataset.nota||"",estado:"pendiente",origen:"ruta:"+k,creado:new Date().toISOString()};local("tramites",tid,x);if(await guardar("tramites",tid,x))toast(`Tarea creada para el ${fFecha(x.vence)}. La verá en Trámites y plazos.`);render();break}
   case"rutaDoc":{const p=proy(id);if(!p)break;const tp=t.dataset.tipo;ui.docTipo=tp;ui.docTexto=tp==="ficha"?plantillaFicha(p):plantilla(tp,p,{});ui.docTitulo=(TIPOS_DOC.find(x=>x[0]===tp)||[,"Documento"])[1];subtab="documentos";render();setTimeout(()=>$("#d-texto")?.scrollIntoView({block:"center"}),60);toast("Documento generado. Complete los espacios en blanco y pulse Guardar.");break}
   case"rutaEv":{const cl=t.dataset.clave;const pt={hechos:{[cl]:hoyISO()}};const pp=proy(id);if(cl==="pedir-fondo"&&pp&&!pp.fechaPeticionFondo)pt.fechaPeticionFondo=hoyISO();await parchear("proyectos",id,pt);if(ui.rutaSel)delete ui.rutaSel[id];render();toast("Marcado como hecho");break}
-  case"claude":ev.preventDefault();abrirPuente(t.dataset.tarea,id,t.dataset.sec);break;
+  case"claude":ev.preventDefault();if(puenteGratis()){abrirPuente(t.dataset.tarea,id,t.dataset.sec);break}
+   {const ta=t.dataset.tarea;if(!sample){ofrecerIA();break}
+    if(["consulta","producto","grupos"].includes(ta)){abrirConsultaIA(ta,id);break}
+    if(ta==="evaluar")evaluar(id);else if(ta==="redactar"){if(t.dataset.sec)conIA(t.dataset.sec+id,()=>redactar(id,t.dataset.sec));else redactarTodo(id)}else if(ta==="dibujos")dibujar(id);else if(ta==="lic")sugerirLic(id);else if(ta==="ideas")ideas();break}
+  case"iaOfrecer":ofrecerIA();break;
+  case"iaPreguntar":preguntarIA();break;
+  case"iaGuardarBit":guardarRespuestaIA();break;
+  case"irMarketIA":$("#capa").innerHTML="";vista="empresa";ui.subEmp="market";render();setTimeout(()=>$("#mk-ia")?.scrollIntoView({block:"start"}),60);break;
   case"gruplac":ev.preventDefault();abrirGrupLAC(id);break;
   case"glEstado":$("#capa").innerHTML="";await marcarGL(id,t.dataset.estado);toast(t.dataset.estado==="vinculado"?"Producto vinculado al grupo. Cuenta para el cronograma.":"Registrado en CvLAC. Falta vincularlo al grupo en GrupLAC.");break;
   case"nuevoParaG":{const g=grupo(id);crearProyecto({grupoId:id,lineaId:(g&&g.lineas&&g.lineas[0]?g.lineas[0].id:"")});break}
@@ -1300,11 +1685,52 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
   case"pendAdd":{const tx=($("#gp-nuevo").value||"").trim();if(!tx){toast("Escriba el pendiente.");$("#gp-nuevo").focus();return}const P=[...((cfgG()||{}).pendientes||[]),{id:"p"+uid().slice(-6),texto:tx,hecho:false,creado:hoyISO()}];$("#gp-nuevo").value="";limpiarTmp("gp-");await guardarG({pendientes:P});toast("Pendiente agregado");break}
   case"pendDel":confirmar("¿Quitar este pendiente?",async()=>{await guardarG({pendientes:((cfgG()||{}).pendientes||[]).filter(x=>x.id!==id)})},"Quitar");break;
   case"verRuta":ev.preventDefault();$(".ruta")?.scrollIntoView({block:"start",behavior:"smooth"});break;
-  case"evaluar":evaluar(id);break;
-  case"redactar":conIA(t.dataset.sec+id,()=>redactar(id,t.dataset.sec));break;
-  case"redactarTodo":redactarTodo(id);break;
+  case"cerrarCapa":ev.preventDefault();$("#capa").innerHTML="";break;
+  case"pedirMod":pedirModulo(t.dataset.mod);break;
+  case"mkAgregar":{const m=t.dataset.mod;if(PRECIOS.ia[m]&&esDemo()&&!pedido().some(x=>PRECIOS.modulos[x])){toast("El plan de IA se toma cuando la empresa tiene al menos un módulo. Agregue primero un módulo a su pedido.");break}ponPedido([...pedido(),m]);$("#capa").innerHTML="";if(t.dataset.ir||vista!=="empresa"){vista="empresa";ui.subEmp="market"}render();toast(`${nomItem(m)} agregado a su pedido`);break}
+  case"mkQuitar":ponPedido(pedido().filter(x=>x!==t.dataset.mod));render();break;
+  case"mkPagar":if(esDemo()){irRegistro();break}pagarPlan(planPedido(),1,"mboldzona","Patent-IA · pedido");break;
+  case"pagarMeses":pagarPlan("patent-ia:mensual",1,"pboldzona","Patent-IA · mensualidad");break;
+  case"irPagos":vista="empresa";ui.subEmp="pagos";render();break;
+  case"subEmp":ui.subEmp=t.dataset.k;if(t.dataset.k==="usuarios")ui.usuarios=null;render();break;
+  case"irRegistro":irRegistro();break;
+  case"irDemo":ev.preventDefault();location.hash="demo";location.reload();break;
+  case"accVolver":ev.preventDefault();history.replaceState(null,"",location.pathname);pantallaAcceso("entrar");break;
+  case"accModo":ev.preventDefault();pantallaAcceso(t.dataset.m,null,t.dataset.m==="registro"?{mods:[]}:null);break;
+  case"importar":importarCSV();break;
+  case"regOtra":{const mods=(t.dataset.mods||"").split(",").filter(Boolean);try{await api("POST","/api/salir",{})}catch(e){}TOKEN="";lsSet("patentia_token",null);pantallaAcceso("registro",null,{mods});break}
+  case"regSeguir":{const mods=(t.dataset.mods||"").split(",").filter(Boolean);history.replaceState(null,"",location.pathname);arrancarSesion().then(()=>{if(mods.length){ponPedido([...pedido(),...mods]);vista="empresa";ui.subEmp="market";render()}});break}
+  case"guardarAutoeval":guardarAutoeval(id);break;
+  case"crearDeGuia":{const tt=($("#i-titulo")?.value||"").trim();if(!tt){toast("Escriba el título de su idea.");$("#i-titulo")?.focus();break}ideasForm.problema=($("#i-problema")?.value||"").trim();crearProyecto({titulo:tt,problema:ideasForm.problema,solucion:($("#i-solucion")?.value||"").trim(),sector:$("#i-sector")?.value||SECTORES[0]});break}
+  case"cambiarClave":{const a=$("#mc-actual").value,nn=$("#mc-nueva").value;if(nn!==($("#mc-nueva2")?.value||"")){toast("Las dos claves nuevas no coinciden.");break}try{await api("POST","/api/clave",{actual:a,nueva:nn});$("#mc-actual").value="";$("#mc-nueva").value="";$("#mc-nueva2").value="";toast("Clave cambiada. Las demás sesiones se cerraron.")}catch(e){toast(e.message||"No se pudo cambiar la clave.")}break}
+  case"uInvitar":{const d={nombre:$("#un-nombre").value.trim(),email:$("#un-email").value.trim(),rol:$("#un-rol").value};if(esDemo()){toast("En la demostración no se envían invitaciones.");break}try{const j=await api("POST","/api/usuarios",d);ui.usuarios=null;limpiarTmp("un-");render();toast(`Invitación enviada a ${d.email}`+(j.enlace?" (modo de prueba)":""));if(j.enlace)console.log("enlace",j.enlace)}catch(e){toast(e.message||"No se pudo invitar.")}break}
+  case"uActivo":try{await api("PATCH","/api/usuarios/"+encodeURIComponent(id),{activo:t.dataset.v==="1"});ui.usuarios=null;render()}catch(e){toast(e.message||"No se pudo cambiar.")}break;
+  case"uReenviar":try{await api("POST","/api/usuarios/"+encodeURIComponent(id)+"/reenviar",{});toast("Enlace enviado por correo")}catch(e){toast(e.message||"No se pudo enviar.")}break;
+  case"saVer":try{SUPER.detalle=await api("GET","/api/super/empresa/"+encodeURIComponent(id));render();setTimeout(()=>$("[data-acc=saEntrar]")?.closest("section")?.scrollIntoView({block:"start"}),50)}catch(e){toast(e.message)}break;
+  case"saCerrar":SUPER.detalle=null;render();break;
+  case"saRevisar":{const org=id,pg=t.dataset.pago;$("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="rv-t"><h2 id="rv-t">Entregar un pago para revisar</h2><p style="margin:0">Pago <b>${esc(pg)}</b>: Bold lo aprobó, pero el valor no cubría el pedido. Si decide entregarlo, se activa lo pedido y queda registrado con su motivo.</p><label class="c">Motivo (mínimo 10 letras)<textarea id="rv-mot" rows="2"></textarea></label><div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">← Cancelar</button><button class="btn pri" id="rv-si">Entregar</button></div></div></div>`;
+   $("#rv-si").onclick=async()=>{const m=($("#rv-mot").value||"").trim();if(m.length<10){toast("Escriba el motivo (mínimo 10 letras).");return}try{await api("POST","/api/super/revisar-pago",{empresa:org,pagoId:pg,motivo:m});$("#capa").innerHTML="";toast("Pago entregado y registrado con su motivo.");SUPER.detalle=await api("GET","/api/super/empresa/"+encodeURIComponent(org));cargarSuper()}catch(e){toast(e.message)}};setTimeout(()=>$("#rv-mot")?.focus(),30);break}
+  case"saEntrar":try{const j=await api("POST","/api/super/entrar/"+encodeURIComponent(id),{});lsSet("patentia_token_super",TOKEN);TOKEN=j.token;lsSet("patentia_token",TOKEN);location.reload()}catch(e){toast(e.message)}break;
+  case"saAplicar":{const v=($("#sa-ref")?.value||"").trim();if(!v){toast("Escriba la referencia o el número del pago.");break}try{const r=await api("POST","/api/super/aplicar-pago",/^SG/i.test(v)?{ref:v}:{pago:v});toast(r.repetido?"Ese pago ya estaba aplicado.":r.paraRevisar?"Bold lo confirma, pero el valor no cubre el pedido: quedó para revisar.":"Pago aplicado.");cargarSuper()}catch(e){toast(e.message)}break}
+  case"salirControl":salirDeControl();break;
+  case"manual":{if(MODO!=="servidor"){toast("En la demostración los manuales no se descargan. En su cuenta real están en Mi cuenta → Manual del usuario.");break}const p=t.dataset.p;t.disabled=true;
+   try{const r=await fetch(API+"/api/manual?p="+encodeURIComponent(p),{headers:{Authorization:"Bearer "+TOKEN}});if(!r.ok){let m="No se pudo descargar el manual.";try{m=(await r.json()).error||m}catch(e){}toast(m);break}
+    const u=URL.createObjectURL(await r.blob());const a=document.createElement("a");a.href=u;a.download=`Manual-Patent-IA-${p}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);toast("Manual descargado: búsquelo en su carpeta de Descargas.")}
+   catch(e){toast("No se pudo descargar el manual. Revise su conexión.")}finally{t.disabled=false}break}
+  case"saManual":{const p=t.dataset.p;const inp=document.createElement("input");inp.type="file";inp.accept="application/pdf";inp.onchange=async()=>{const f=inp.files[0];if(!f)return;const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(f)});
+   try{await api("POST","/api/super/manuales/"+p,{pdf:b64});toast("Manual cargado.");cargarSuper()}catch(e){toast(e.message)}};inp.click();break}
+  case"verPlanes":$("#capa").innerHTML="";vista="empresa";ui.subEmp="market";render();window.scrollTo(0,0);break;
+  case"accesoSkynet":pantallaAcceso("entrar","Acceso del Superadministrador de SkyNet Genesis: entre con su correo y su contraseña.");break;
+  case"verClave":{const i=document.getElementById(t.dataset.para);if(i){const v=i.type==="password";i.type=v?"text":"password";t.textContent=v?"Ocultar la clave":"Mostrar la clave";t.setAttribute("aria-pressed",String(v))}break}
+  case"saGuardar":try{const cu={interna:$("#sa-int").checked};await api("POST","/api/super/empresa/"+encodeURIComponent(id),cu);toast("Guardado");SUPER.detalle=await api("GET","/api/super/empresa/"+encodeURIComponent(id));cargarSuper()}catch(e){toast(e.message)}break;
+  case"saSuspender":{const v=t.dataset.v==="1";const go=async(motivo)=>{try{await api("POST","/api/super/empresa/"+encodeURIComponent(id),{suspender:v,motivo});SUPER.detalle=await api("GET","/api/super/empresa/"+encodeURIComponent(id));cargarSuper();toast(v?"Empresa suspendida":"Empresa reactivada")}catch(e){toast(e.message)}};if(v)confirmar("¿Suspender esta empresa? Nadie de ella podrá trabajar hasta reactivarla.",()=>go("Suspendida por SkyNet Genesis"),"Suspender");else go("");break}
+  case"saRespaldo":try{const r=await fetch(API+"/api/super/respaldo",{headers:{Authorization:"Bearer "+TOKEN}});const tx=await r.text();bajar(`respaldo-patent-ia-${hoyISO()}.json`,tx)}catch(e){toast("No se pudo descargar el respaldo.")}break;
+  case"saPrueba":ORG={id:"plataforma",nombre:"SkyNet Genesis"};pagarPlan("patent-ia:prueba",1,"saboldzona","Patent-IA · pago de prueba");break;
+  case"evaluar":if(!sample){abrirAutoeval(id);break}evaluar(id);break;
+  case"redactar":if(!sample){usarPlantilla(id,t.dataset.sec);break}conIA(t.dataset.sec+id,()=>redactar(id,t.dataset.sec));break;
+  case"redactarTodo":if(!sample){usarPlantilla(id);break}redactarTodo(id);break;
   case"exportar":exportar(id);break;
-  case"dibujar":dibujar(id);break;
+  case"dibujar":if(!sample){toast("Haga los planos en su programa de dibujo o pídalos a su asistente de IA, y agregue el enlace en Bitácora y archivos.");break}dibujar(id);break;
   case"bajarSvg":{const p=proy(id);const d=dibujosDe(p).find(x=>x.ref===t.dataset.ref);if(d)bajar(`${p.codigo}_FIG${+t.dataset.i+1}.svg`,limpiarSvg(d.svg)||d.svg);break}
   case"borrarDib":{const ref=t.dataset.ref;confirmar("¿Quitar este boceto?",async()=>{if(ref[0]==="D")await borrar("dibujos",ref.slice(1));else{const p=proy(id);const d=[...(p.dibujos||[])];d.splice(+ref.slice(1),1);await parchear("proyectos",id,{dibujos:d})}render()},"Quitar");break}
   case"etapaSug":await parchear("proyectos",id,{etapa:t.dataset.etapa});render();toast("Etapa actualizada");break;
@@ -1312,14 +1738,15 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
   case"borrarTram":await borrar("tramites",id);break;
   case"agregarLic":{const pid=id||$("#l-proy")?.value;const emp=$("#l-empresa").value.trim();if(!emp){toast("Escriba el nombre de la empresa.");$("#l-empresa").focus();return}const lid=uid();const x={proyectoId:pid,empresa:emp,contacto:$("#l-contacto").value.trim(),tipo:$("#l-tipo").value,valor:+$("#l-valor").value||0,regalia:$("#l-regalia").value,notas:$("#l-notas").value.trim(),etapa:"prospecto",creado:new Date().toISOString()};local("licencias",lid,x);if(await guardar("licencias",lid,x)){limpiarTmp("l-");toast("Empresa agregada")}render();break}
   case"borrarLic":await borrar("licencias",id);break;
-  case"sugLic":sugerirLic(id);break;
+  case"sugLic":if(!sample){sugerirPorSector(id);break}sugerirLic(id);break;
   case"usarSug":{const s=ui.sugLic[id][+t.dataset.i];const det=$("#det-lic");det.open=true;$("#l-empresa").value=s.tipoEmpresa;$("#l-notas").value=`${s.sector}. ${s.modelo}. ${s.porQue}`;$("#l-empresa").focus();$("#l-empresa").select();toast("Reemplace el tipo por el nombre de una empresa real y pulse Agregar");break}
   case"ideas":ideas();break;
   case"crearDeIdea":{const x=ideasRes[+t.dataset.i];crearProyecto({titulo:x.titulo,problema:ideasForm.problema,solucion:x.solucion,modalidad:MODALIDADES.includes(x.modalidad)?x.modalidad:"Modelo de utilidad",sector:ideasForm.sector,notas:`Qué lo hace nuevo: ${x.novedad}\nFabricación: ${x.fabricacion}`});break}
   case"agregarMov":{const v=+$("#m-valor").value;const c=$("#m-concepto").value.trim();if(!v||!c){toast("Escriba el valor y el concepto.");return}const mid=uid();const x={fecha:$("#m-fecha").value||hoyISO(),tipo:$("#m-tipo").value,proyectoId:$("#m-proy").value,valor:v,concepto:c};local("movimientos",mid,x);if(await guardar("movimientos",mid,x)){limpiarTmp("m-");toast("Registrado")}render();break}
   case"borrarMov":await borrar("movimientos",id);break;
   case"agregarBit":{const tx=$("#b-texto").value.trim();if(!tx){toast("Escriba qué aportó o decidió.");$("#b-texto").focus();return}const bid=uid();const x={proyectoId:id,fecha:$("#b-fecha").value||hoyISO(),tipo:$("#b-tipo").value,autor:$("#b-autor").value.trim(),texto:tx,creado:new Date().toISOString()};local("bitacora",bid,x);if(await guardar("bitacora",bid,x)){limpiarTmp("b-");toast("Registrado en la bitácora")}render();break}
-  case"anularBit":confirmar("¿Anular esta entrada? Seguirá visible, tachada, para conservar el historial.",async()=>{await parchear("bitacora",id,{anulada:true,anuladaEl:new Date().toISOString()});render()},"Anular");break;
+  case"anularBit":{$("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true"><h2>Anular una entrada de la bitácora</h2><p style="margin:0">La bitácora es la prueba de cómo y cuándo nació el invento: <b>no se borra</b>. La entrada anulada sigue visible, tachada, con el motivo.</p><label class="c">Motivo de la anulación<textarea id="anu-mot" rows="2" placeholder="Ej.: fecha equivocada; se escribió en el proyecto que no era"></textarea></label><div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">← Cancelar</button><button class="btn pri" id="anu-si">Anular la entrada</button></div></div></div>`;
+   $("#anu-si").onclick=async()=>{const m=($("#anu-mot").value||"").trim();if(m.length<5){toast("Escriba el motivo (mínimo 5 letras).");$("#anu-mot").focus();return}if(await parchear("bitacora",id,MODO==="servidor"?{anulada:true,motivo:m}:{anulada:true,motivo:m,anuladaEl:new Date().toISOString(),anuladaPor:YO?YO.nombre:""})){$("#capa").innerHTML="";toast("Entrada anulada. Sigue visible con el motivo.");render()}};setTimeout(()=>$("#anu-mot")?.focus(),30);break}
   case"bajarBit":bajarBitacora(id);break;
   case"subir":subirArchivo(id);break;
   case"agregarEnlace":{const u=($("#a-url").value||"").trim();const n=($("#a-nombre").value||"").trim();if(!/^https:\/\/[^\s]+$/.test(u)){toast("Pegue un enlace que empiece por https://");$("#a-url").focus();return}const aid=uid();const x={proyectoId:id,url:u,nombre:n||u.replace(/^https:\/\//,"").slice(0,60),categoria:$("#a-cat").value,fecha:hoyISO()};local("archivos",aid,x);if(await guardar("archivos",aid,x)){limpiarTmp("a-");toast("Enlace guardado")}render();break}
@@ -1338,6 +1765,9 @@ document.addEventListener("input",ev=>{const el=ev.target;if(el.dataset.campo||e
  else if(el.id==="d-texto")ui.docTexto=el.value;
  else if(el.id==="i-problema")ideasForm.problema=el.value;else if(el.id==="i-contexto")ideasForm.contexto=el.value});
 document.addEventListener("change",ev=>{const el=ev.target;
+ if(el.dataset.urol){api("PATCH","/api/usuarios/"+encodeURIComponent(el.dataset.urol),{rol:el.value}).then(()=>{ui.usuarios=null;render();toast("Rol cambiado")}).catch(e=>{toast(e.message||"No se pudo cambiar.");ui.usuarios=null;render()});return}
+ if(el.id==="rolDemo"){YO.rol=el.value;ui.rolDemo=el.value;if(vista==="empresa")ui.subEmp=null;render();return}
+
  if(el.dataset.gru){const pid=el.dataset.gru,v=el.value,pp=proy(pid);if(pp&&esProducto(pp)&&v!==pp.grupoId){render();confirmar("Este producto ya está registrado en GrupLAC con su grupo actual. Si lo cambia de grupo, su estado en GrupLAC vuelve a “Sin registrar”. ¿Cambiarlo?",async()=>{await parchear("proyectos",pid,{grupoId:v,lineaId:"",estadoGrupLAC:"",fechaGrupLAC:""});render()},"Cambiar de grupo")}else{parchear("proyectos",pid,{grupoId:v,lineaId:""});render()}}
  else if(el.dataset.gl){marcarGL(el.dataset.gl,el.value)}
  else if(el.dataset.aval){const L=grupos().map(g=>g.id===el.dataset.aval?{...g,aval:el.value}:g);guardarG({lista:L});toast(el.value==="avalado"?"Grupo marcado como avalado":"Grupo marcado sin aval")}
@@ -1369,6 +1799,8 @@ function confirmar(msg,fn,etq="Eliminar"){$("#capa").innerHTML=`<div class="moda
 function estado(cls,txt){const e=$("#estado");e.className="estado "+cls;e.querySelector("span").textContent=txt}
 async function iniciar(){
  if(REMOTO){await iniciarRemoto();return}
+ if(window.PATENTIA_DEMO){downloads=descargasLocales;try{const d=await window.claude?.use?.("downloads");if(d)downloads=d}catch(e){}iniciarDemo();return}
+ MODO="claude";ORG={id:"skynet",nombre:"SkyNet Genesis",modulos:Object.fromEntries(Object.keys(MOD_INFO).map(m=>[m,true])),pago:{estado:"activa"},valor:PRECIOS.mensual,interna:true};YO={id:"local",nombre:"Ricardo Londoño González",email:"rikardolondono@gmail.com",rol:"admin"};
  const c=window.claude;
  const [d,s,dl,as]=await Promise.all([c?.use?.("db"),c?.use?.("sample"),c?.use?.("downloads"),c?.use?.("assets")].map(p=>Promise.resolve(p).catch(()=>null)));
  db=d||null;sample=s||null;downloads=dl||null;assets=as||null;
@@ -1381,41 +1813,20 @@ function suscribir(){let faltan=new Set(COL);let migrado=false;
 
 /* ---------- Versión con servidor (patentes.skynetgenesis.com) ---------- */
 let TOKEN="";try{TOKEN=localStorage.getItem("patentia_token")||""}catch(e){}
-async function api(method,path,body){const r=await fetch(API+path,{method,headers:{"Content-Type":"application/json",...(TOKEN?{Authorization:"Bearer "+TOKEN}:{})},body:body?JSON.stringify(body):undefined});
- const j=await r.json().catch(()=>({}));if(r.status===401&&TOKEN&&!/entrar|recuperar/.test(path)){TOKEN="";try{localStorage.removeItem("patentia_token")}catch(e){}pantallaAcceso("Su sesión venció. Vuelva a entrar.");throw{code:"revoked"}}
- if(!r.ok)throw{code:r.status===413?"invalid_argument":r.status===404?"invalid_argument":r.status===429?"resource_exhausted":"unavailable",message:j.error||"Error del servidor",status:r.status};return j}
-function crearDbRemota(){const subs={};let ver="",cache={},tPoll=null,enCurso=null;
+async function api(method,path,body){let r;try{r=await fetch(API+path,{method,headers:{"Content-Type":"application/json",...(TOKEN?{Authorization:"Bearer "+TOKEN}:{})},body:body?JSON.stringify(body):undefined})}catch(e){throw{code:"unavailable",message:"No hay conexión con el servidor. Revise su internet. Si es temprano en la mañana, el servidor puede tardar hasta un minuto en despertar."}}
+ const j=await r.json().catch(()=>({}));if(r.status===401&&TOKEN&&!/login|restablecer|olvide|registro/.test(path)){const sup=lsGet("patentia_token_super");if(sup&&sup!==TOKEN){lsSet("patentia_token_super",null);TOKEN=sup;lsSet("patentia_token",sup);toast("Terminó el modo administrador. Volviendo al panel del Superadministrador.");setTimeout(()=>location.reload(),1200);throw{code:"revoked"}}TOKEN="";lsSet("patentia_token",null);pantallaAcceso("entrar",j.error||"Su sesión venció. Vuelva a entrar.");throw{code:"revoked"}}
+ if(!r.ok)throw{code:j.code||(r.status===413?"invalid_argument":r.status===429?"resource_exhausted":r.status===402||r.status===423?"bloqueo":r.status===403?"permiso":"unavailable"),message:j.error||"Error del servidor",status:r.status,bloqueo:j.bloqueo,modulo:j.modulo};return j}
+function crearDbRemota(){const subs={};let ver="",cache={},tPoll=null,enCurso=null,detenido=false;
  const entregar=()=>{for(const c in subs){const docs=(cache[c]||[]).map(d=>{const{id,...data}=d;return{id,exists:true,data:()=>data}});for(const f of subs[c])f.next({docs,size:docs.length,empty:!docs.length})}};
- async function sondear(){if(enCurso)return enCurso;enCurso=(async()=>{try{const j=await api("GET","/api/datos?v="+encodeURIComponent(ver));estado("ok","Guardado en el servidor");if(!j.sinCambios){ver=String(j.version);cache=j.datos||{};entregar()}}
-  catch(e){if(e.code!=="revoked"){estado("loc","Sin conexión con el servidor");for(const c in subs)for(const f of subs[c])f.err&&f.err(e)}}finally{enCurso=null}})();return enCurso}
- const programar=(ms)=>{clearTimeout(tPoll);tPoll=setTimeout(async()=>{if(document.visibilityState==="visible"||!ver)await sondear();programar(20000)},ms)};
+ async function sondear(){if(enCurso)return enCurso;enCurso=(async()=>{try{const j=await api("GET","/api/datos?v="+encodeURIComponent(ver));estado("ok","Guardado en el servidor");if(j.org){const cambio=JSON.stringify(j.org)!==JSON.stringify(ORG);ORG=j.org;if(cambio&&j.sinCambios)pedirRender()}if(!j.sinCambios){ver=String(j.version);cache=j.datos||{};entregar()}}
+  catch(e){if(e.code==="bloqueo"){detenido=true;clearTimeout(tPoll);pantallaBloqueo(e);return}if(e.code!=="revoked"){estado("loc","Sin conexión con el servidor");for(const c in subs)for(const f of subs[c])f.err&&f.err(e)}}finally{enCurso=null}})();return enCurso}
+ const programar=(ms)=>{if(detenido)return;clearTimeout(tPoll);tPoll=setTimeout(async()=>{if(document.visibilityState==="visible"||!ver)await sondear();programar(20000)},ms)};
  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")programar(0)});
  const escribir=async(m,col,id,d)=>{const j=await api(m,`/api/doc/${encodeURIComponent(col)}/${encodeURIComponent(id)}`,d);programar(400);return j};
  return{collection(col){return{onSnapshot(next,err){(subs[col]=subs[col]||[]).push({next,err});programar(0);return()=>{}},
   doc(id){return{id,set:d=>escribir("PUT",col,id,d).then(()=>{}),update:d=>escribir("PATCH",col,id,d).then(()=>{}),delete:()=>escribir("DELETE",col,id).then(()=>{}),
    get:async()=>{ver="";await sondear();const x=(cache[col]||[]).find(z=>z.id===id);if(!x)return{id,exists:false,data:()=>undefined};const{id:_,...data}=x;return{id,exists:true,data:()=>data}}}}}}}}
 const descargasLocales={save({filename,data}){const blob=data instanceof Blob?data:new Blob([data]);const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);return Promise.resolve({status:"saved"})}};
-async function iniciarRemoto(){downloads=descargasLocales;sample=null;assets=null;
- if(!TOKEN){pantallaAcceso();return}
- db=crearDbRemota();estado("","Despertando el servidor…");suscribir();
- $("#estado").insertAdjacentHTML("afterend",`<button class="btn sec peq" data-acc="salir" id="btn-salir" style="margin-left:8px">Salir</button>`)}
-async function pantallaAcceso(msg){let hay=true;try{hay=(await api("GET","/api/estado")).administrador}catch(e){$("#main").innerHTML=`<div class="aviso">No se pudo conectar con el servidor. Puede estar despertando: espere un minuto y recargue la página.</div>`;return}
- const modo=pantallaAcceso.modo||(hay?"entrar":"crear");
- $("#nav").innerHTML="";estado("","");
- $("#main").innerHTML=`<section class="panel" style="max-width:440px;margin:6vh auto;width:100%"><h2 style="margin-bottom:6px">${modo==="crear"?"Crear el administrador":modo==="recuperar"?"Recuperar la contraseña":"Entrar a Patent-IA"}</h2>
- ${msg?`<div class="aviso" style="margin:8px 0">${esc(msg)}</div>`:""}<form id="f-acceso" class="campos" style="grid-template-columns:1fr" novalidate>
- ${modo!=="recuperar"?`<label class="c">Correo<input type="text" id="acc-email" autocomplete="username" inputmode="email"></label>`:""}${modo!=="entrar"?`<label class="c">Clave de recuperación (la que guardó en Render)<input type="password" id="acc-codigo" autocomplete="off"></label>`:""}
- <label class="c">${modo==="entrar"?"Contraseña":"Contraseña nueva (mínimo 10 caracteres)"}<input type="password" id="acc-clave" autocomplete="${modo==="entrar"?"current-password":"new-password"}"></label>
- ${modo!=="entrar"?`<label class="c">Repita la contraseña<input type="password" id="acc-clave2" autocomplete="new-password"></label>`:""}
- <button class="btn pri" type="submit">${modo==="crear"?"Crear y entrar":modo==="recuperar"?"Cambiar y entrar":"Entrar"}</button></form>
- ${modo==="entrar"?`<p class="ayuda"><a href="#" id="acc-olvido">¿Olvidó su contraseña?</a></p>`:modo==="recuperar"?`<p class="ayuda"><a href="#" id="acc-volver">Volver</a></p>`:""}</section>`;
- $("#acc-olvido")&&($("#acc-olvido").onclick=e=>{e.preventDefault();pantallaAcceso.modo="recuperar";pantallaAcceso()});
- $("#acc-volver")&&($("#acc-volver").onclick=e=>{e.preventDefault();pantallaAcceso.modo="";pantallaAcceso()});
- $("#f-acceso").onsubmit=async e=>{e.preventDefault();const clave=$("#acc-clave").value;
-  if(modo!=="entrar"&&clave!==$("#acc-clave2").value){toast("Las contraseñas no coinciden.");return}
-  try{const j=modo==="crear"?await api("POST","/api/crear-administrador",{email:$("#acc-email").value.trim(),clave,codigo:$("#acc-codigo").value}):modo==="recuperar"?await api("POST","/api/recuperar",{codigo:$("#acc-codigo").value,clave}):await api("POST","/api/entrar",{email:$("#acc-email").value.trim(),clave});
-   TOKEN=j.token;try{localStorage.setItem("patentia_token",TOKEN)}catch(e){}pantallaAcceso.modo="";iniciarRemoto();render()}
-  catch(er){toast(er.message||"No se pudo entrar.")}}}
 function restaurarRespaldo(){const inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";inp.onchange=async()=>{const f=inp.files[0];if(!f)return;let j;try{j=JSON.parse(await f.text())}catch(e){toast("Ese archivo no es un respaldo de Patent-IA.");return}
  if(!Array.isArray(j.proyectos)){toast("Ese archivo no es un respaldo de Patent-IA.");return}
  confirmar(`Esto reemplaza TODOS los datos actuales por los del respaldo (${j.proyectos.length} proyectos). ¿Continuar?`,async()=>{try{const r=await api("POST","/api/importar",j);toast(`Respaldo restaurado: ${r.importados} registros.`);location.reload()}catch(e){toast(e.message||"No se pudo restaurar.")}},"Restaurar")};inp.click()}
