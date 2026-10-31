@@ -17,6 +17,7 @@ jobs:
         run: |
           URLS="
           https://centinela-sst-api.onrender.com/api/ping
+          https://clinica-ia-ho79.onrender.com/api/ping
           https://diligencia-api.onrender.com/api/ping
           https://enfermeria-api-2ksu.onrender.com/health
           https://patentes-api-1e30.onrender.com/api/ping
