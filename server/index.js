@@ -6,13 +6,18 @@ const express = require("express");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
+require("./motor.js"); const M = globalThis.MotorPI; // motor legal de plazos (el mismo de la pantalla)
 
 const ENV = process.env;
 const PUERTO = ENV.PORT || 3000;
 const APP_URL = (ENV.APP_URL || "https://patent-ia.skynetgenesis.com").replace(/\/$/, "");
 const ORIGENES = (ENV.ORIGENES || ENV.ORIGEN || `${APP_URL},https://patentes.skynetgenesis.com`).split(",").map(s => s.trim()).filter(Boolean);
-const DUENOS = (ENV.DUENO_EMAILS || "superadmin@skynetgenesis.com").toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
+const SA_CORREO = "superadmin.patent@skynetgenesis.com"; // cada app tiene su propio superadministrador (regla del 29 oct 2026)
+const DUENOS = (ENV.DUENO_EMAILS && !/^superadmin@/i.test(ENV.DUENO_EMAILS) ? ENV.DUENO_EMAILS : SA_CORREO).toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
 const ADMIN_SKYNET = (ENV.ADMIN_SKYNET || "rikardolondono@gmail.com").toLowerCase();
+// Los enlaces de clave de las cuentas del dueño (superadministrador y su empresa) le llegan directo a su Gmail, sin reenvíos
+const DUENO_CORREO = (ENV.DUENO_CORREO || "rikardolondono@gmail.com").toLowerCase();
+const DUENO_CUENTAS = new Set([...DUENOS, ADMIN_SKYNET, ...(ENV.DUENO_CUENTAS || "").toLowerCase().split(",").map(s => s.trim()).filter(Boolean)]);
 const BREVO_KEY = ENV.BREVO_API_KEY || "";
 const REMITENTE = ENV.BREVO_REMITENTE || "patent-ia@skynetgenesis.com";
 const LIMITE_CORREOS_DIA = +(ENV.LIMITE_CORREOS_DIA || 100);
@@ -22,11 +27,14 @@ const VERIFICADOR = ENV.BOLD_VERIFICAR || "https://skynetgenesis.com/bold-verifi
 const VALOR_MENSUAL = +(ENV.VALOR_MENSUAL || 99000);
 const MODO_PRUEBA = ENV.MODO_PRUEBA === "1"; // solo en pruebas locales: devuelve los enlaces de clave en la respuesta
 const APP_ID = "patent-ia";
-const MODULOS = { grupos: 60000, licencias: 50000, plantillas: 60000, costos: 30000, importar: 25000 };
-const COLECCIONES = new Set(["proyectos", "tramites", "licencias", "movimientos", "bitacora", "archivos", "documentos", "config", "dibujos"]);
+const MODULOS = { grupos: 60000, licencias: 50000, plantillas: 60000, costos: 30000, importar: 25000, vigilancia: 60000, valoracion: 50000 };
+const COLECCIONES = new Set(["proyectos", "tramites", "licencias", "movimientos", "bitacora", "archivos", "documentos", "config", "dibujos", "vigilancia", "valoraciones"]);
+// Archivos subidos dentro de la app (fotos del prototipo, oficios de la SIC, contratos firmados): guardados en la base, con topes para no llenarla
+const ARCH_MAX = +(ENV.ARCH_MAX_MB || 5) * 1048576, ARCH_TOPE = +(ENV.ARCH_TOPE_MB || 60) * 1048576;
+const ARCH_TIPOS = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp", "image/gif", "text/plain", "text/csv", "video/mp4", "video/webm"]);
 const MAXDOC = 250000;
 const ID_OK = /^[A-Za-z0-9_\-.~:@+]{1,200}$/;
-const ROLES = ["admin", "investigador", "consulta"];
+const ROLES = ["admin", "investigador", "consulta", "cliente"]; // cliente: persona de una empresa cliente de un despacho; solo ve los proyectos de sus titulares y no cambia nada
 const DIAS_PRUEBA = 15; // cuenta gratis: máximo 15 días, sin renovación
 const DIA_CIERRE = 5;   // sin mora: si no ha pagado, el día 5 del mes siguiente se cierra
 /* IA para empresas: créditos prepagados. Solo pueden comprarlos las empresas que ya compraron algún módulo.
@@ -122,7 +130,14 @@ async function preparar() {
   create table if not exists ia_gasto(mes text primary key, usd numeric not null default 0, llamadas int not null default 0);
   alter table sesiones add column if not exists control text;
   create table if not exists manuales(clave text primary key, pdf bytea not null, actualizado timestamptz not null default now());
-  create index if not exists sesiones_u on sesiones(usuario_id);`);
+  create index if not exists sesiones_u on sesiones(usuario_id);
+  alter table usuarios add column if not exists bloqueo_motivo text;
+  alter table usuarios add column if not exists titulares jsonb;
+  create table if not exists archivos_bin(org_id text not null, id text not null, nombre text not null, tipo text not null, bytes int not null, datos bytea not null, creado timestamptz default now(), primary key(org_id,id));
+  create table if not exists correos_hechos(clave text primary key, creado timestamptz default now());`);
+  // superadministrador propio de Patent-IA: se cambia el correo y se conserva la clave
+  if (DUENOS.includes(SA_CORREO)) { const r = await q("update usuarios set email=$1 where email='superadmin@skynetgenesis.com' and org_id='plataforma' and not exists(select 1 from usuarios where email=$1) returning id", [SA_CORREO]); if (r.rowCount) log('Superadministrador cambiado a', SA_CORREO); }
+  await q("delete from usuarios where email='superadmin@skynetgenesis.com' and org_id='plataforma' and exists(select 1 from usuarios where email=$1)", [SA_CORREO]);
   // Empresa SkyNet Genesis con los datos de la versión anterior y su mismo usuario y clave
   const ya = await q("select 1 from orgs where id='skynet'");
   if (!ya.rows.length) {
@@ -135,6 +150,8 @@ async function preparar() {
     await q("insert into usuarios(id,org_id,email,nombre,rol,clave_hash) values($1,'skynet',$2,$3,'admin',$4) on conflict(email) do nothing", ["u-" + crypto.randomBytes(5).toString("hex"), email, "Ricardo Londoño González", hash]);
     log("Empresa SkyNet Genesis lista; administrador", email);
   }
+  // El dueño pidió no recibir correos de plazos de su propia empresa (los ve en pantalla); se puede encender en Mi empresa
+  await q("insert into docs(org_id,col,id,data) select 'skynet','config','avisos',$1 where exists(select 1 from orgs where id='skynet') on conflict do nothing", [{ correo: false, nota: "Apagado por pedido del dueño" }]);
   // Superadministrador: espacio aparte, sin empresa ni datos de trabajo
   const pl = await q("select 1 from orgs where id='plataforma'");
   if (!pl.rows.length) await q("insert into orgs(id,info) values('plataforma',$1)", [{ nombre: "Administración Patent-IA", plataforma: true, interna: true, pagadoHasta: "2099-12-31", modulos: {} }]);
@@ -196,10 +213,12 @@ async function enviarEnlace(email, tipo) {
   const u = rows[0]; const tk = nuevoToken(); const horas = tipo === "invitacion" ? 72 : 1;
   await q("insert into enlaces(token_hash,email,tipo,expira) values($1,$2,$3,now()+($4||' hours')::interval)", [sha(tk), email, tipo, String(horas)]);
   const url = `${APP_URL}/#clave=${tk}&tipo=${tipo}`;
+  const destino = DUENO_CUENTAS.has(email) && email !== DUENO_CORREO ? DUENO_CORREO : email; // cuentas del dueño: el enlace llega a su Gmail
   const titulo = tipo === "invitacion" ? `Bienvenido a Patent-IA, ${u.nombre.split(" ")[0]}` : "Crear una clave nueva";
   const cuerpo = tipo === "invitacion" ? `<p style="margin:0 0 10px">Lo invitaron a trabajar en <b>${escH(u.info.nombre)}</b> con Patent-IA, la fábrica de patentes de SkyNet Genesis. Cree su clave con el botón (el enlace vence en 3 días).</p><p style="margin:0;font-size:14px;color:#5D6B78">Su usuario es: ${escH(email)}</p>`
     : `<p style="margin:0 0 10px">Recibimos una solicitud para cambiar su clave de Patent-IA. El enlace vence en una hora.</p><p style="margin:0;font-size:14px;color:#5D6B78">Si usted no lo pidió, ignore este correo: su clave sigue igual.</p>`;
-  await enviarCorreo(email, u.nombre, titulo, plantillaCorreo(titulo, cuerpo, { url, texto: tipo === "invitacion" ? "Crear mi clave" : "Crear clave nueva" }));
+  const nota = destino !== email ? `<p style="margin:0 0 12px;padding:10px 12px;background:#E8F1FA;border-radius:8px">Este enlace es para la cuenta <b>${escH(email)}</b> (${escH(u.org_id === "plataforma" ? "Superadministrador de Patent-IA" : u.info.nombre)}).</p>` : "";
+  await enviarCorreo(destino, u.nombre, titulo + (destino !== email ? ` · ${email}` : ""), plantillaCorreo(titulo, nota + cuerpo, { url, texto: tipo === "invitacion" ? "Crear mi clave" : "Crear clave nueva" }));
   return MODO_PRUEBA ? url : true;
 }
 async function avisarSA(texto) { await q("insert into avisos_sa(texto) values($1)", [String(texto).slice(0, 400)]).catch(() => {}); }
@@ -211,13 +230,14 @@ app.disable("x-powered-by");
 app.use((req, res, next) => {
   const o = req.headers.origin;
   if (o && (ORIGENES.includes(o) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o))) { res.setHeader("Access-Control-Allow-Origin", o); res.setHeader("Vary", "Origin"); }
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Nombre");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   res.setHeader("X-Content-Type-Options", "nosniff"); res.setHeader("Cache-Control", "no-store"); res.setHeader("Referrer-Policy", "no-referrer");
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
 app.post("/api/bold/aplicar", express.raw({ type: "*/*", limit: "50kb" }), (req, res) => aplicarBold(req, res));
+app.use("/api/super/manuales", express.json({ limit: "14mb" })); // los manuales en PDF con capturas pesan más
 app.use(express.json({ limit: "6mb" }));
 
 // IP del visitante: en Render el último X-Forwarded-For cambia en cada petición; Cloudflare manda la real en CF-Connecting-IP
@@ -243,6 +263,7 @@ async function sesion(req, res, next) {
     const { rows } = await q("select u.*, s.control from sesiones s join usuarios u on u.id=s.usuario_id where s.token_hash=$1 and s.expira>now()", [sha(tk)]);
     if (!rows.length) return err(res, 401, "Su sesión terminó. Vuelva a entrar.");
     const u = rows[0]; if (!u.activo) return err(res, 401, "Su usuario está desactivado.");
+    if (u.bloqueo_motivo) return err(res, 401, "Su usuario está bloqueado por SkyNet Genesis. Escríbanos a contacto@skynetgenesis.com.");
     req.tk = sha(tk);
     if (u.control) { // Superadministrador dentro de una empresa, con funciones de administrador (la sesión, no el usuario, lleva el modo)
       if (!(u.rol === "super" && u.org_id === "plataforma")) return err(res, 401, "Sesión no válida.");
@@ -299,6 +320,7 @@ app.post("/api/login", envolver(async (req, res) => {
     return err(res, quedan > 0 ? 400 : 429, quedan > 0 ? `Correo o clave incorrectos. Le quedan ${quedan} intento(s). Si aún no ha creado su clave, use "¿Olvidó su clave?".` : 'Correo o clave incorrectos. Por seguridad el ingreso quedó bloqueado 15 minutos. Use "¿Olvidó su clave?" si no la recuerda.'); }
   bloqueos.delete(kEm); for (const k of ["ip|" + ip, "em|" + email]) { const b = bloqueos.get(k); if (b) b.n = Math.max(0, b.n - 1); } // un ingreso correcto no cuenta como intento
   if (!rows[0].activo) return err(res, 400, "Este usuario está desactivado. Hable con el administrador de su empresa.");
+  if (rows[0].bloqueo_motivo) return err(res, 403, "Este usuario está bloqueado por SkyNet Genesis. Escríbanos a contacto@skynetgenesis.com o al WhatsApp 304 437 5758.");
   const tk = nuevoToken(); await q("insert into sesiones(token_hash,usuario_id,expira) values($1,$2,now()+interval '30 days')", [sha(tk), rows[0].id]);
   await q("delete from sesiones where usuario_id=$1 and token_hash not in (select token_hash from sesiones where usuario_id=$1 order by expira desc limit 10)", [rows[0].id]);
   res.json({ token: tk });
@@ -351,7 +373,7 @@ app.post("/api/registro", envolver(async (req, res) => {
 }));
 
 app.get("/api/yo", sesion, envolver(async (req, res) => {
-  const base = { usuario: { id: req.u.id, nombre: req.u.nombre, email: req.u.email, rol: req.u.rol }, ...(req.control ? { control: true } : {}) };
+  const base = { usuario: { id: req.u.id, nombre: req.u.nombre, email: req.u.email, rol: req.u.rol, ...(req.u.rol === "cliente" ? { titulares: titularesDe(req.u) } : {}) }, ...(req.control ? { control: true } : {}) };
   if (req.super) { const n = await q("select count(*)::int n from avisos_sa where not leido"); return res.json({ ...base, super: true, avisos: n.rows[0].n, precios: { mensual: VALOR_MENSUAL, modulos: MODULOS, ia: IA_PAQUETES } }); }
   const e = await cargar(req.u.org_id); if (!e) return err(res, 404, "Empresa no encontrada.");
   res.json({ ...base, org: vistaOrg(e, req.u), precios: { mensual: VALOR_MENSUAL, modulos: MODULOS, ia: IA_PAQUETES } });
@@ -362,12 +384,25 @@ app.get("/api/datos", sesion, envolver(empresaActiva), envolver(async (req, res)
   const e = req.org;
   if (String(req.query.v) === String(e.version)) return res.json({ version: e.version, sinCambios: true });
   const datos = {}; for (const c of COLECCIONES) datos[c] = [...e.cols[c]].map(([id, d]) => ({ id, ...d }));
+  if (req.u.rol === "cliente") { const ok = proyectosCliente(e, req.u); for (const c of COLECCIONES) datos[c] = c === "proyectos" ? datos[c].filter(p => ok.has(p.id)) : c === "config" ? datos[c].filter(d => d.id === "titulares") : datos[c].filter(d => d.proyectoId && ok.has(d.proyectoId)); }
   res.json({ version: e.version, datos, org: vistaOrg(e, req.u) });
 }));
+// Titulares de un usuario "cliente" (empresas cliente de un despacho): solo ve los proyectos de esos titulares
+const titularesDe = u => Array.isArray(u.titulares) ? u.titulares.map(t => String(t).toLowerCase().trim()).filter(Boolean) : [];
+function proyectosCliente(e, u) { const T = new Set(titularesDe(u)); return new Set([...e.cols.proyectos].filter(([, p]) => p.titular && T.has(String(p.titular).toLowerCase().trim())).map(([id]) => id)); }
+const FIRMA_OK = /^data:image\/png;base64,[A-Za-z0-9+/=]{100,160000}$/;
+function validarDoc(col, data) { // formas que el servidor exige antes de guardar
+  if (col === "documentos" && data.firmas !== undefined) {
+    if (!Array.isArray(data.firmas) || data.firmas.length > 12) throw Object.assign(new Error("Firmas no válidas."), { status: 400 });
+    data.firmas = data.firmas.map(f => { if (!f || !FIRMA_OK.test(String(f.img || ""))) throw Object.assign(new Error("La firma debe ser un dibujo de la pantalla (imagen PNG)."), { status: 400 });
+      return { nombre: String(f.nombre || "").slice(0, 80), cargo: String(f.cargo || "").slice(0, 80), doc: String(f.doc || "").slice(0, 30), fecha: String(f.fecha || "").slice(0, 30), img: f.img }; });
+  }
+  if (col === "proyectos" && data.titular !== undefined) data.titular = String(data.titular || "").slice(0, 120);
+}
 function puedeEscribir(req, res) {
   const { col, id } = req.params;
   if (!COLECCIONES.has(col) || !ID_OK.test(id)) { err(res, 400, "Ruta no válida."); return false; }
-  if (req.u.rol === "consulta") { err(res, 403, "Su usuario es solo de consulta: no puede hacer cambios."); return false; }
+  if (req.u.rol === "consulta" || req.u.rol === "cliente") { err(res, 403, "Su usuario es solo de consulta: no puede hacer cambios."); return false; }
   if (col === "bitacora") { // la bitácora del inventor es prueba legal: no se borra ni se reescribe; solo se anula con motivo
     if (req.control) { err(res, 403, "En modo Superadministrador no se escribe en la bitácora del inventor de la empresa."); return false; }
     const existe = req.org.cols.bitacora.has(id);
@@ -379,11 +414,13 @@ function puedeEscribir(req, res) {
       req.body = { anulada: true, motivoAnulacion: mot.slice(0, 300), anuladaEl: new Date().toISOString(), anuladaPor: req.u.nombre }; }
   }
   const m = req.org.info.modulos || {};
-  const necesita = col === "licencias" ? "licencias" : col === "movimientos" ? "costos" : col === "config" && id === "grupos" ? "grupos" : null;
+  const necesita = col === "licencias" ? "licencias" : col === "movimientos" ? "costos" : col === "config" && id === "grupos" ? "grupos" : col === "vigilancia" ? "vigilancia" : col === "valoraciones" ? "valoracion" : null;
+  if (col === "config" && ["facturacion", "avisos", "titulares"].includes(id) && req.u.rol !== "admin") { err(res, 403, "Solo el administrador de la empresa cambia esta configuración."); return false; }
   if (necesita && !m[necesita]) { err(res, 403, "Esta función es de un módulo que su empresa no ha activado. Actívelo en el Market.", { modulo: necesita }); return false; }
   return true;
 }
 async function escribir(e, orgId, col, id, data) {
+  validarDoc(col, data);
   if (Buffer.byteLength(JSON.stringify(data)) > MAXDOC) throw Object.assign(new Error("El registro pasa del tamaño máximo (250 KB)."), { status: 413 });
   await q("insert into docs(org_id,col,id,data,actualizado) values($1,$2,$3,$4,now()) on conflict(org_id,col,id) do update set data=excluded.data, actualizado=now()", [orgId, col, id, data]);
   e.cols[col].set(id, data); e.version = Date.now();
@@ -414,7 +451,9 @@ app.patch("/api/doc/:col/:id", sesion, envolver(empresaActiva), envolver(async (
 }));
 app.delete("/api/doc/:col/:id", sesion, envolver(empresaActiva), envolver(async (req, res) => {
   if (!puedeEscribir(req, res)) return;
-  await enCola("docs:" + req.u.org_id, async () => { await q("delete from docs where org_id=$1 and col=$2 and id=$3", [req.u.org_id, req.params.col, req.params.id]); req.org.cols[req.params.col].delete(req.params.id); req.org.version = Date.now(); });
+  await enCola("docs:" + req.u.org_id, async () => { const prev = req.org.cols[req.params.col].get(req.params.id);
+    if (req.params.col === "archivos" && prev && prev.assetId) await q("delete from archivos_bin where org_id=$1 and id=$2", [req.u.org_id, String(prev.assetId)]);
+    await q("delete from docs where org_id=$1 and col=$2 and id=$3", [req.u.org_id, req.params.col, req.params.id]); req.org.cols[req.params.col].delete(req.params.id); req.org.version = Date.now(); });
   res.json({ ok: true, version: req.org.version });
 }));
 // Restaurar un respaldo de la empresa (reemplaza todos sus datos). Solo el administrador.
@@ -426,7 +465,8 @@ app.post("/api/importar", sesion, sinControl, envolver(empresaActiva), soloAdmin
     if (c === "archivos" && data.assetId && !data.url) continue;
     const mods = req.org.info.modulos || {};
     if (c === "bitacora" && !req.org.cols.bitacora.has(String(id))) data.importadoEl = new Date().toISOString(); // lo restaurado queda marcado
-    if ((c === "licencias" && !mods.licencias) || (c === "movimientos" && !mods.costos) || (c === "config" && String(id) === "grupos" && !mods.grupos)) continue;
+    if ((c === "licencias" && !mods.licencias) || (c === "movimientos" && !mods.costos) || (c === "config" && String(id) === "grupos" && !mods.grupos) || (c === "vigilancia" && !mods.vigilancia) || (c === "valoraciones" && !mods.valoracion)) continue;
+    try { validarDoc(c, data); } catch (er) { continue; }
     if (Buffer.byteLength(JSON.stringify(data)) > MAXDOC) return err(res, 413, `El registro ${c}/${id} pasa de 250 KB.`);
     filas.push([c, String(id), data]);
   }
@@ -444,18 +484,62 @@ app.post("/api/importar", sesion, sinControl, envolver(empresaActiva), soloAdmin
   res.json({ ok: true, importados: filas.length });
 }));
 
+/* ---------- archivos subidos dentro de la app (se guardan en la base con topes por archivo y por empresa) ---------- */
+const nombreArchivo = s => String(s || "archivo").replace(/[\u0000-\u001f"\\/]/g, "").slice(0, 120) || "archivo";
+app.get("/api/archivos/uso", sesion, envolver(empresaActiva), envolver(async (req, res) => {
+  const { rows } = await q("select coalesce(sum(bytes),0)::bigint b, count(*)::int n from archivos_bin where org_id=$1", [req.u.org_id]);
+  res.json({ bytes: +rows[0].b, archivos: rows[0].n, tope: ARCH_TOPE, maximo: ARCH_MAX });
+}));
+app.post("/api/archivo", sesion, sinControl, envolver(empresaActiva), express.raw({ type: () => true, limit: ARCH_MAX + 1024 }), envolver(async (req, res) => {
+  if (req.u.rol === "consulta" || req.u.rol === "cliente") return err(res, 403, "Su usuario es solo de consulta: no puede subir archivos.");
+  const tipo = String(req.headers["content-type"] || "").split(";")[0].trim().toLowerCase();
+  if (!ARCH_TIPOS.has(tipo)) return err(res, 415, "Ese tipo de archivo no se admite. Súbalo como PDF o imagen.", { code: "unsupported_type" });
+  const b = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
+  if (!b.length) return err(res, 400, "El archivo llegó vacío.");
+  if (b.length > ARCH_MAX) return err(res, 413, `El archivo pasa de ${Math.round(ARCH_MAX / 1048576)} MB.`, { code: "too_large" });
+  const firmas = { "application/pdf": "%PDF", "image/png": "\x89PNG", "image/jpeg": "\xff\xd8", "image/gif": "GIF8" }; const f = firmas[tipo];
+  if (f && b.subarray(0, f.length).toString("latin1") !== f) return err(res, 415, "El contenido del archivo no coincide con su tipo.", { code: "unsupported_type" });
+  if (tipo === "image/webp" && b.subarray(8, 12).toString("latin1") !== "WEBP") return err(res, 415, "El contenido del archivo no coincide con su tipo.", { code: "unsupported_type" });
+  let nombre = "archivo"; try { nombre = nombreArchivo(decodeURIComponent(String(req.headers["x-nombre"] || "archivo"))); } catch (e) {}
+  const id = "f-" + crypto.randomBytes(9).toString("hex");
+  const ok = await enCola("arch:" + req.u.org_id, async () => {
+    const { rows } = await q("select coalesce(sum(bytes),0)::bigint b from archivos_bin where org_id=$1", [req.u.org_id]);
+    if (+rows[0].b + b.length > ARCH_TOPE) return false;
+    await q("insert into archivos_bin(org_id,id,nombre,tipo,bytes,datos) values($1,$2,$3,$4,$5,$6)", [req.u.org_id, id, nombre, tipo, b.length, b]); return true;
+  });
+  if (!ok) return err(res, 413, `Su empresa llegó al espacio de archivos (${Math.round(ARCH_TOPE / 1048576)} MB). Quite archivos viejos o guarde los grandes en Google Drive y pegue el enlace.`, { code: "quota_exceeded" });
+  res.json({ id, contentType: tipo, sizeBytes: b.length });
+}));
+app.get("/api/archivo/:id", sesion, envolver(empresaActiva), envolver(async (req, res) => {
+  const id = String(req.params.id);
+  if (req.u.rol === "cliente") { const ok = proyectosCliente(req.org, req.u); const a = [...req.org.cols.archivos.values()].find(x => x.assetId === id); if (!a || !ok.has(a.proyectoId)) return err(res, 404, "Archivo no encontrado."); }
+  const { rows } = await q("select nombre,tipo,datos from archivos_bin where org_id=$1 and id=$2", [req.u.org_id, id]);
+  if (!rows.length) return err(res, 404, "Archivo no encontrado.");
+  res.setHeader("Content-Type", rows[0].tipo); res.setHeader("Content-Security-Policy", "sandbox; default-src 'none'; img-src data:; media-src 'self'");
+  res.setHeader("Content-Disposition", `inline; filename*=UTF-8''${encodeURIComponent(rows[0].nombre)}`); res.send(rows[0].datos);
+}));
+app.delete("/api/archivo/:id", sesion, envolver(empresaActiva), envolver(async (req, res) => {
+  if (req.u.rol === "consulta" || req.u.rol === "cliente") return err(res, 403, "Su usuario es solo de consulta.");
+  const usado = [...req.org.cols.archivos.values()].some(x => x.assetId === req.params.id);
+  if (usado) return err(res, 409, "Primero quite el archivo de la lista del proyecto.");
+  await q("delete from archivos_bin where org_id=$1 and id=$2", [req.u.org_id, String(req.params.id)]); res.json({ ok: true });
+}));
+
 /* ---------- usuarios de la empresa (el administrador los maneja; usuarios ilimitados) ---------- */
 app.get("/api/usuarios", sesion, envolver(empresaActiva), soloAdmin, envolver(async (req, res) => {
-  const { rows } = await q("select u.id,u.nombre,u.email,u.rol,u.activo,(u.clave_hash is not null) tiene_clave,a.ultimo from usuarios u left join accesos a on a.usuario_id=u.id where u.org_id=$1 order by u.creado", [req.u.org_id]);
+  const { rows } = await q("select u.id,u.nombre,u.email,u.rol,u.activo,u.titulares,(u.clave_hash is not null) tiene_clave,a.ultimo from usuarios u left join accesos a on a.usuario_id=u.id where u.org_id=$1 order by u.creado", [req.u.org_id]);
   res.json({ usuarios: rows });
 }));
+const limpiarTitulares = t => [...new Set((Array.isArray(t) ? t : []).map(x => String(x || "").trim().slice(0, 120)).filter(Boolean))].slice(0, 30);
 app.post("/api/usuarios", sesion, sinControl, envolver(empresaActiva), soloAdmin, envolver(async (req, res) => {
   const nombre = String(req.body.nombre || "").trim().slice(0, 80), email = String(req.body.email || "").trim().toLowerCase(), rol = ROLES.includes(req.body.rol) ? req.body.rol : "investigador";
   if (nombre.length < 3 || !emailValido(email)) return err(res, 400, "Escriba el nombre y un correo válido.");
   if (!limitar("invitar:" + req.u.org_id, 30, 60)) return err(res, 429, "Ya invitó a muchas personas seguidas. Espere un momento.");
   const ya = await q("select 1 from usuarios where email=$1", [email]); if (ya.rows.length) return err(res, 400, "Ese correo ya tiene cuenta en Patent-IA (quizás en otra empresa).");
   const id = "u-" + crypto.randomBytes(5).toString("hex");
-  await q("insert into usuarios(id,org_id,email,nombre,rol) values($1,$2,$3,$4,$5)", [id, req.u.org_id, email, nombre, rol]);
+  const tit = rol === "cliente" ? limpiarTitulares(req.body.titulares) : null;
+  if (rol === "cliente" && !tit.length) return err(res, 400, "Elija el titular (empresa cliente) cuyos proyectos verá esta persona.");
+  await q("insert into usuarios(id,org_id,email,nombre,rol,titulares) values($1,$2,$3,$4,$5,$6)", [id, req.u.org_id, email, nombre, rol, tit ? JSON.stringify(tit) : null]);
   const enlace = await enviarEnlace(email, "invitacion");
   res.json({ ok: true, id, ...(MODO_PRUEBA && typeof enlace === "string" ? { enlace } : {}) });
 }));
@@ -464,8 +548,11 @@ app.patch("/api/usuarios/:id", sesion, sinControl, envolver(empresaActiva), solo
   const u = rows[0]; const rol = req.body.rol !== undefined ? (ROLES.includes(req.body.rol) ? req.body.rol : u.rol) : u.rol;
   const activo = req.body.activo !== undefined ? !!req.body.activo : u.activo; const nombre = req.body.nombre ? String(req.body.nombre).trim().slice(0, 80) : u.nombre;
   if (u.rol === "admin" && (rol !== "admin" || !activo)) { const n = await q("select count(*)::int n from usuarios where org_id=$1 and rol='admin' and activo and id<>$2", [req.u.org_id, u.id]); if (!n.rows[0].n) return err(res, 400, "La empresa debe tener al menos un administrador activo."); }
-  await q("update usuarios set rol=$1, activo=$2, nombre=$3 where id=$4", [rol, activo, nombre, u.id]);
-  if (!activo || rol !== u.rol) await q("delete from sesiones where usuario_id=$1", [u.id]);
+  const tit = rol === "cliente" ? (req.body.titulares !== undefined ? limpiarTitulares(req.body.titulares) : titularesDe(u)) : null;
+  if (rol === "cliente" && !tit.length) return err(res, 400, "Elija el titular (empresa cliente) cuyos proyectos verá esta persona.");
+  if (u.id === req.u.id && rol !== u.rol) return err(res, 400, "No puede cambiar su propio perfil.");
+  await q("update usuarios set rol=$1, activo=$2, nombre=$3, titulares=$4 where id=$5", [rol, activo, nombre, tit ? JSON.stringify(tit) : null, u.id]);
+  if (!activo || rol !== u.rol || req.body.titulares !== undefined) await q("delete from sesiones where usuario_id=$1", [u.id]);
   res.json({ ok: true });
 }));
 app.post("/api/usuarios/:id/reenviar", sesion, sinControl, envolver(empresaActiva), soloAdmin, envolver(async (req, res) => {
@@ -523,9 +610,30 @@ async function aplicarPago(d, forzar) {
     });
   } catch (er) { await q("delete from pagos_claves where clave = any($1)", [claves]).catch(() => {}); throw er; }
   await q("insert into pagos_bold(pago_id,org_id,plan,valor,resultado) values($1,$2,$3,$4,$5) on conflict do nothing", [pagoId || ref, orgId, plan, valor, resultado]);
+  if (resultado.aplicado) enviarRecibo(orgId, { pagoId: pagoId || ref, plan, valor, pq, resultado }).catch(er => log("recibo", er.message));
   avisarSA(resultado.paraRevisar ? `Pago Bold para revisar en ${e.info.nombre}: $${valor.toLocaleString("es-CO")} no cubre ${plan}.` : `Pago Bold de ${e.info.nombre}: ${plan} por $${valor.toLocaleString("es-CO")}.`);
   log("Pago Bold", orgId, pagoId || ref, JSON.stringify(resultado));
   return { ok: true, ...resultado };
+}
+// Recibo por correo al administrador y factura electrónica pendiente para el superadministrador
+const NOMBRES_MOD = { grupos: "Grupos de investigación", licencias: "Licencias y ventas", plantillas: "Plantillas de redacción", costos: "Costos e ingresos", importar: "Importar desde Excel", vigilancia: "Vigilancia tecnológica", valoracion: "Valoración de patentes" };
+const pesos = n => "$" + Number(n || 0).toLocaleString("es-CO");
+function conceptosPago(info, pq) { const L = [];
+  if (pq.mensual) L.push(["Mensualidad de Patent-IA (usuarios ilimitados)", info.valor || VALOR_MENSUAL]);
+  for (const m of pq.modulos) L.push([`Módulo ${NOMBRES_MOD[m] || m} (pago único)`, MODULOS[m]]);
+  if (pq.ia) L.push([`Plan mensual de ${IA_PAQUETES[pq.ia].creditos} créditos de IA (vencen a los 30 días)`, IA_PAQUETES[pq.ia].valor]); return L; }
+async function enviarRecibo(orgId, { pagoId, valor, pq, resultado }) {
+  const e = await cargar(orgId); if (!e) return;
+  const fac = e.cols.config.get("facturacion") || null; const L = conceptosPago(e.info, pq);
+  await cambiarInfo(orgId, info => { const r = (info.pagos || []).find(x => x.pagoId === pagoId); if (r) r.factura = { estado: "pendiente", desde: new Date().toISOString() }; });
+  avisarSA(`Factura electrónica por emitir: ${e.info.nombre}${fac && fac.nit ? ` (NIT ${fac.nit})` : " (sin datos de facturación)"} · ${pesos(valor)} · pago ${pagoId}.`);
+  const ad = await q("select email,nombre from usuarios where org_id=$1 and rol='admin' and activo and bloqueo_motivo is null", [orgId]);
+  const filas = L.map(([c, v]) => `<tr><td style="padding:6px 0;border-bottom:1px solid #DCE5EE">${escH(c)}</td><td style="padding:6px 0;border-bottom:1px solid #DCE5EE;text-align:right">${pesos(v)}</td></tr>`).join("");
+  const cuerpo = `<p style="margin:0 0 10px">Recibimos el pago de <b>${escH(e.info.nombre)}</b>. Gracias.</p>
+  <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">${filas}<tr><td style="padding:8px 0;font-weight:bold">Total pagado</td><td style="padding:8px 0;text-align:right;font-weight:bold">${pesos(valor)}</td></tr></table>
+  <p style="margin:12px 0 0;font-size:14px">Fecha: ${escH(fechaLarga(hoyCO()))} · Medio: Bold · Pago: ${escH(pagoId)}${resultado.pagadoHasta ? `<br>Su empresa queda al día hasta el <b>${escH(fechaLarga(resultado.pagadoHasta))}</b>.` : ""}${resultado.iaVence ? `<br>Créditos de IA disponibles hasta el ${escH(fechaLarga(resultado.iaVence))}.` : ""}</p>
+  <p style="margin:12px 0 0;font-size:13px;color:#5D6B78">${fac && fac.nit ? "La factura electrónica le llegará al correo de facturación que registró." : "Para recibir la factura electrónica, el administrador debe llenar los datos de facturación en Mi empresa."}</p>`;
+  for (const a of ad.rows) await enviarCorreo(a.email, a.nombre, `Recibo de pago · ${e.info.nombre}`, plantillaCorreo("Recibo de pago", cuerpo, { url: APP_URL, texto: "Entrar a Patent-IA" }));
 }
 // Consulta al verificador central de skynetgenesis.com (no necesita secretos): solo aplica lo que el central confirma
 async function verificarCentral(params) {
@@ -654,7 +762,7 @@ app.post("/api/super/empresa/:id", sesion, soloSuper, envolver(async (req, res) 
   res.json({ ok: true });
 }));
 /* ---------- manuales del usuario (PDF genéricos): cada usuario solo lee el suyo ---------- */
-const MANUALES = { general: "00-Manual-general", admin: "01-Manual-Administrador", investigador: "02-Manual-Investigador", consulta: "03-Manual-Solo-consulta" };
+const MANUALES = { general: "00-Manual-general", admin: "01-Manual-Administrador", investigador: "02-Manual-Investigador", consulta: "03-Manual-Solo-consulta", cliente: "04-Manual-Cliente-del-despacho" };
 app.get("/api/manual", sesion, envolver(async (req, res) => {
   const p = String(req.query.p || "general");
   if (!MANUALES[p]) return err(res, 400, "Manual no válido.");
@@ -702,6 +810,43 @@ app.post("/api/super/entrar/:id", sesion, soloSuper, envolver(async (req, res) =
   avisarSA(`Superadministrador entró como administrador a ${e.info.nombre}.`);
   res.json({ token: tk });
 }));
+app.get("/api/super/cuentas", sesion, soloSuper, envolver(async (req, res) => {
+  const { rows } = await q("select u.id,u.email,u.nombre,u.rol,u.activo,u.bloqueo_motivo,(u.clave_hash is not null) tiene_clave,a.ultimo,u.org_id,o.info->>'nombre' empresa from usuarios u join orgs o on o.id=u.org_id left join accesos a on a.usuario_id=u.id order by o.info->>'nombre', u.nombre");
+  res.json({ cuentas: rows.map(r => ({ ...r, empresa: r.org_id === "plataforma" ? "Superadministrador de Patent-IA" : r.empresa })) });
+}));
+app.post("/api/super/cuentas/:id/enlace", sesion, soloSuper, envolver(async (req, res) => {
+  const { rows } = await q("select email,clave_hash,activo,bloqueo_motivo from usuarios where id=$1", [req.params.id]); if (!rows.length) return err(res, 404, "Cuenta no encontrada.");
+  if (!rows[0].activo || rows[0].bloqueo_motivo) return err(res, 400, "La cuenta está desactivada o bloqueada: primero desbloquéela.");
+  if (!limitar("saenlace:" + req.params.id, 3, 60)) return err(res, 429, "Ya se envió varias veces. Espere una hora.");
+  const enlace = await enviarEnlace(rows[0].email, rows[0].clave_hash ? "recuperar" : "invitacion");
+  avisarSA(`Superadministrador envió un enlace de clave a ${rows[0].email}.`);
+  res.json({ ok: true, destino: DUENO_CUENTAS.has(rows[0].email) && rows[0].email !== DUENO_CORREO ? ocultarCorreo(DUENO_CORREO) : ocultarCorreo(rows[0].email), ...(MODO_PRUEBA && typeof enlace === "string" ? { enlace } : {}) });
+}));
+app.post("/api/super/cuentas/:id/bloquear", sesion, soloSuper, envolver(async (req, res) => {
+  const { rows } = await q("select email,org_id from usuarios where id=$1", [req.params.id]); if (!rows.length) return err(res, 404, "Cuenta no encontrada.");
+  if (rows[0].org_id === "plataforma") return err(res, 400, "No se puede bloquear al Superadministrador.");
+  const bloquear = !!req.body.bloquear, motivo = String(req.body.motivo || "").trim();
+  if (bloquear && motivo.length < 5) return err(res, 400, "Escriba el motivo del bloqueo (mínimo 5 letras).");
+  await q("update usuarios set bloqueo_motivo=$1 where id=$2", [bloquear ? motivo.slice(0, 200) : null, req.params.id]);
+  if (bloquear) await q("delete from sesiones where usuario_id=$1", [req.params.id]);
+  avisarSA(`Superadministrador ${bloquear ? "bloqueó" : "desbloqueó"} la cuenta ${rows[0].email}${bloquear ? `: ${motivo}` : ""}.`);
+  res.json({ ok: true });
+}));
+// Facturas electrónicas por emitir: cada pago de Bold aplicado queda pendiente hasta que se marque emitida (con su número)
+app.get("/api/super/facturas", sesion, soloSuper, envolver(async (req, res) => {
+  const { rows } = await q("select id from orgs where id<>'plataforma'"); const L = [];
+  for (const { id } of rows) { const e = await cargar(id); if (!e) continue; const fac = e.cols.config.get("facturacion") || {};
+    for (const pg of e.info.pagos || []) if (pg.factura) L.push({ empresa: id, nombre: e.info.nombre, pagoId: pg.pagoId, fecha: pg.fecha, valor: pg.valor, plan: pg.plan, factura: pg.factura,
+      comprador: { razon: fac.razon || "", nit: fac.nit || "", dv: fac.dv || "", correo: fac.correo || "", direccion: fac.direccion || "", municipio: fac.municipio || "", telefono: fac.telefono || "" } }); }
+  L.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))); res.json({ facturas: L.slice(0, 300) });
+}));
+app.post("/api/super/facturas/marcar", sesion, soloSuper, envolver(async (req, res) => {
+  const numero = String(req.body.numero || "").trim().slice(0, 40); if (numero.length < 3) return err(res, 400, "Escriba el número de la factura electrónica.");
+  let hallado = false;
+  await cambiarInfo(String(req.body.empresa || ""), info => { const r = (info.pagos || []).find(x => x.pagoId === req.body.pagoId && x.factura); if (r) { r.factura = { ...r.factura, estado: "emitida", numero, emitida: new Date().toISOString() }; hallado = true; } });
+  if (!hallado) return err(res, 404, "No se encontró ese pago.");
+  res.json({ ok: true });
+}));
 app.get("/api/super/avisos", sesion, soloSuper, envolver(async (req, res) => {
   const { rows } = await q("select id,texto,creado,leido from avisos_sa order by id desc limit 100");
   if (req.query.marcar) await q("update avisos_sa set leido=true where not leido");
@@ -710,9 +855,10 @@ app.get("/api/super/avisos", sesion, soloSuper, envolver(async (req, res) => {
 app.get("/api/super/respaldo", sesion, soloSuper, envolver(async (req, res) => {
   const orgs = (await q("select id, info from orgs where id<>'plataforma'")).rows;
   const docs = (await q("select org_id,col,id,data from docs")).rows;
-  const usuarios = (await q("select id,org_id,email,nombre,rol,activo from usuarios")).rows;
-  res.setHeader("Content-Disposition", `attachment; filename="respaldo-patent-ia-${hoyCO()}.json"`);
-  res.json({ fecha: new Date().toISOString(), app: "Patent-IA · SkyNet Genesis", orgs, usuarios, docs });
+  const usuarios = (await q("select id,org_id,email,nombre,rol,activo,titulares,bloqueo_motivo,clave_hash from usuarios")).rows; // claves cifradas: al restaurar cada quien entra con la misma
+  const archivos = req.query.archivos ? (await q("select org_id,id,nombre,tipo,bytes,encode(datos,'base64') datos from archivos_bin")).rows : (await q("select org_id,id,nombre,tipo,bytes from archivos_bin")).rows;
+  res.setHeader("Content-Disposition", `attachment; filename="respaldo-patent-ia-${hoyCO()}${req.query.archivos ? "-con-archivos" : ""}.json"`);
+  res.json({ fecha: new Date().toISOString(), app: "Patent-IA · SkyNet Genesis", orgs, usuarios, docs, archivos });
 }));
 
 /* Correo diario a las empresas en prueba: cuántos días faltan para que se cierre (y uno final el día del cierre) */
@@ -739,6 +885,69 @@ async function correosPrueba() {
   return n;
 }
 
+/* Correos de plazos legales: 30, 7 y 1 día antes y el mismo día, al administrador y a quienes él elija.
+   La empresa puede apagarlos en Mi empresa. Un mismo aviso nunca se manda dos veces (tabla correos_hechos). */
+const UMBRALES_PLAZO = [30, 7, 1, 0];
+function plazosPorAvisar(e, hoy) {
+  const L = []; const lic = [...e.cols.licencias.values()];
+  for (const [pid, p] of e.cols.proyectos) {
+    if (!p || ["cerrado", "descartado"].includes(p.etapa)) continue;
+    let ev = []; try { ev = M.eventos(p); } catch (er) { ev = []; }
+    for (const x of ev) { if (x.hecho || x.info || x.estimado || !M.valida(x.vence)) continue; if (x.clave === "explotacion" && lic.some(l => l.proyectoId === pid && l.etapa === "firmado")) continue;
+      const d = diasEntre(hoy, x.vence); if (UMBRALES_PLAZO.includes(d)) L.push({ clave: `${pid}|${x.clave}|${x.vence}|${d}`, proyecto: p, tipo: x.tipo, vence: x.vence, dias: d, critico: !!x.critico, norma: x.norma || "" }); }
+  }
+  for (const [tid, t] of e.cols.tramites) { if (!t || t.estado === "hecho" || !M.valida(t.vence)) continue; const p = e.cols.proyectos.get(t.proyectoId); if (!p || ["cerrado", "descartado"].includes(p.etapa)) continue;
+    const d = diasEntre(hoy, t.vence); if (UMBRALES_PLAZO.includes(d)) L.push({ clave: `t:${tid}|${t.vence}|${d}`, proyecto: p, tipo: t.tipo || "Tarea", vence: t.vence, dias: d, critico: false, norma: "" }); }
+  return L.sort((a, b) => a.dias - b.dias);
+}
+async function correosPlazos() {
+  const hoy = hoyCO(); let n = 0;
+  const { rows } = await q("select id from orgs where id<>'plataforma'");
+  for (const { id } of rows) {
+    try {
+      const e = await cargar(id); if (!e || e.info.suspendida) continue;
+      const ep = estadoPago(e.info, hoy); if (ep.estado === "bloqueada") continue;
+      const cfg = e.cols.config.get("avisos") || {}; if (cfg.correo === false) continue;
+      const L = []; for (const x of plazosPorAvisar(e, hoy)) { const r = await q("select 1 from correos_hechos where clave=$1", [id + "|" + x.clave]); if (!r.rows.length) L.push(x); }
+      if (!L.length) continue;
+      const extra = Array.isArray(cfg.destinatarios) ? cfg.destinatarios.map(String) : [];
+      const us = await q("select id,email,nombre,rol from usuarios where org_id=$1 and activo and bloqueo_motivo is null and clave_hash is not null and (rol='admin' or id = any($2))", [id, extra]);
+      if (!us.rows.length) continue;
+      const cuando = d => d === 0 ? "<b style=\"color:#C0392B\">vence HOY</b>" : d === 1 ? "<b style=\"color:#C0392B\">vence mañana</b>" : `vence en <b>${d} días</b>`;
+      const filas = L.map(x => `<tr><td style="padding:8px 0;border-bottom:1px solid #DCE5EE"><b>${escH(x.tipo)}</b>${x.critico ? " <span style=\"color:#C0392B\">(si se pasa, la solicitud puede caer)</span>" : ""}<br><span style="font-size:13px;color:#5D6B78">${escH(x.proyecto.codigo || "")} · ${escH(x.proyecto.titulo || "")}${x.norma ? " · " + escH(x.norma) : ""}</span></td><td style="padding:8px 0 8px 10px;border-bottom:1px solid #DCE5EE;text-align:right;white-space:nowrap">${escH(fechaLarga(x.vence))}<br>${cuando(x.dias)}</td></tr>`).join("");
+      const titulo = L.some(x => x.dias <= 1) ? "Plazos que vencen ya" : "Plazos próximos de sus proyectos";
+      const cuerpo = `<p style="margin:0 0 10px">Estos plazos de <b>${escH(e.info.nombre)}</b> se acercan. Entre a Patent-IA, haga el trámite y márquelo como hecho para que no le volvamos a avisar.</p><table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px">${filas}</table><p style="margin:12px 0 0;font-size:12px;color:#5D6B78">Le avisamos 30, 7 y 1 día antes y el día del vencimiento. El administrador puede cambiar quién recibe estos correos en Mi empresa.</p>`;
+      let enviados = 0;
+      for (const u of us.rows) { if (await cuposUsados() >= LIMITE_CORREOS_DIA - 20) break; if (await enviarCorreo(u.email, u.nombre, `${titulo} · ${e.info.nombre}`, plantillaCorreo(titulo, cuerpo, { url: APP_URL + "/#tramites", texto: "Ver mis plazos" }))) enviados++; }
+      if (enviados || (!BREVO_KEY && MODO_PRUEBA)) { for (const x of L) await q("insert into correos_hechos(clave) values($1) on conflict do nothing", [id + "|" + x.clave]); n += enviados; }
+    } catch (er) { log("correo plazos", id, er.message); }
+  }
+  return n;
+}
+/* Aviso de pago a las empresas que ya pagan: 3 días antes de que termine lo pagado, el día siguiente y el día 4 (antes del cierre del día 5) */
+async function correosCobro() {
+  const hoy = hoyCO(); let n = 0;
+  const { rows } = await q("select id from orgs where id<>'plataforma' and not coalesce((info->>'interna')::boolean,false)");
+  for (const { id } of rows) {
+    try {
+      const e = await cargar(id); if (!e || e.info.suspendida) continue; const i = e.info;
+      if (i.prueba && !i.prueba.terminada) continue; // las empresas en prueba reciben su correo diario aparte
+      const ph = i.pagadoHasta; if (!ph) continue; const d = diasEntre(ph, hoy); // negativo: faltan días
+      const tipo = d === -3 ? "antes" : d === 1 ? "vencida" : d === DIA_CIERRE - 1 ? "cierre" : null; if (!tipo) continue;
+      const clave = `${id}|cobro|${ph}|${tipo}`; const ya = await q("select 1 from correos_hechos where clave=$1", [clave]); if (ya.rows.length) continue;
+      const ad = await q("select email,nombre from usuarios where org_id=$1 and rol='admin' and activo and bloqueo_motivo is null", [id]);
+      const cierre = fechaLarga(sumarDias(ph, DIA_CIERRE)); const valor = pesos(i.valor || VALOR_MENSUAL);
+      const titulo = tipo === "antes" ? "Su mensualidad de Patent-IA vence pronto" : tipo === "vencida" ? "Su mensualidad de Patent-IA está pendiente" : "Mañana se cierra el acceso a Patent-IA";
+      const cuerpo = tipo === "antes" ? `<p style="margin:0">La mensualidad de <b>${escH(i.nombre)}</b> está pagada hasta el <b>${escH(fechaLarga(ph))}</b>. Puede pagar desde ya el mes siguiente (${valor}) con tarjeta, PSE o Nequi.</p>`
+        : tipo === "vencida" ? `<p style="margin:0">La mensualidad de <b>${escH(i.nombre)}</b> estaba pagada hasta el ${escH(fechaLarga(ph))}. Pague ${valor} antes del <b>${escH(cierre)}</b> para que su equipo no pierda el acceso. Sus datos siguen guardados.</p>`
+        : `<p style="margin:0">Si la mensualidad de <b>${escH(i.nombre)}</b> no se paga hoy, el acceso se cierra el <b>${escH(cierre)}</b>. Pague ${valor} en Patent-IA y el acceso sigue sin interrupción. Sus datos no se borran.</p>`;
+      let enviados = 0; for (const a of ad.rows) if (await enviarCorreo(a.email, a.nombre, titulo, plantillaCorreo(titulo, cuerpo, { url: APP_URL, texto: "Entrar y pagar" }))) enviados++;
+      if (enviados || (!BREVO_KEY && MODO_PRUEBA)) { await q("insert into correos_hechos(clave) values($1) on conflict do nothing", [clave]); n += enviados; }
+    } catch (er) { log("correo cobro", id, er.message); }
+  }
+  return n;
+}
+
 /* ---------- tareas diarias (las llama cron-job.org) ---------- */
 async function tareasDiarias() {
   await q("delete from sesiones where expira<now()"); await q("delete from enlaces where expira<now() - interval '1 day'");
@@ -747,11 +956,13 @@ async function tareasDiarias() {
   // la clave de Brevo caduca tras 30 días sin uso: una consulta diaria (sin enviar correo) la mantiene viva; sirve con claves de solo "Emails transaccionales"
   if (BREVO_KEY) fetch("https://api.brevo.com/v3/smtp/statistics/aggregatedReport?days=1", { headers: { "api-key": BREVO_KEY, accept: "application/json" } }).then(r => { if (r.status === 401) avisarSA("La clave de Brevo de Patent-IA no es válida (401): revísela en Render."); }).catch(() => {});
   for (const [id, o] of cache) if (Date.now() - (o.usado || 0) > 2 * 36e5) cache.delete(id);
-  return await correosPrueba();
+  await q("delete from correos_hechos where creado < now() - interval '400 days'");
+  const prueba = await correosPrueba(); const cobro = await correosCobro(); const plazos = await correosPlazos();
+  return { prueba, cobro, plazos };
 }
 app.post("/api/cron/diario", envolver(async (req, res) => {
   if (!CLAVE_CRON || req.query.clave !== CLAVE_CRON) return err(res, 403, "No autorizado.");
-  res.json({ ok: true, correosPrueba: await tareasDiarias() });
+  res.json({ ok: true, correos: await tareasDiarias() });
 }));
 /* Tareas diarias automáticas: el despertador de GitHub Actions mantiene el servidor despierto de 5 a. m. a 11 p. m.;
    cada 20 minutos se revisa si ya se hicieron hoy (desde las 7 a. m. de Bogotá). La marca queda en la base, así no se repiten tras un reinicio. */
@@ -760,10 +971,10 @@ async function revisarDiarias() {
     const hora = new Date(Date.now() - 5 * 3600e3).getUTCHours(); if (hora < 7) return;
     const r = await q("insert into contador_correos(dia,n) values($1,0) on conflict(dia) do nothing returning dia", ["cron:" + hoyCO()]);
     if (!r.rows.length) return;
-    const n = await tareasDiarias(); log("Tareas diarias hechas; correos de prueba:", n);
+    const n = await tareasDiarias(); log("Tareas diarias hechas; correos:", JSON.stringify(n));
   } catch (e) { log("tareas diarias", e.message); }
 }
 
 app.use((req, res) => err(res, 404, "No encontrado."));
 if (require.main === module) preparar().then(() => { app.listen(PUERTO, () => log(`Patent-IA servidor en el puerto ${PUERTO}`)); setTimeout(revisarDiarias, 60e3); setInterval(revisarDiarias, 20 * 60e3).unref(); }).catch(e => { console.error("No se pudo iniciar:", e); process.exit(1); });
-module.exports = { estadoPago, interpretarPlan, sumarMesFin, finMes, normEmpresa, IA_PAQUETES, phTrasPago, iaVigentes, temaPatentes, tomarIA, devolverIA, lotesIA };
+module.exports = { plazosPorAvisar, conceptosPago, estadoPago, interpretarPlan, sumarMesFin, finMes, normEmpresa, IA_PAQUETES, phTrasPago, iaVigentes, temaPatentes, tomarIA, devolverIA, lotesIA };
