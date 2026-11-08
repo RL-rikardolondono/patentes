@@ -27,7 +27,7 @@ const VERIFICADOR = ENV.BOLD_VERIFICAR || "https://skynetgenesis.com/bold-verifi
 const VALOR_MENSUAL = +(ENV.VALOR_MENSUAL || 99000);
 const MODO_PRUEBA = ENV.MODO_PRUEBA === "1"; // solo en pruebas locales: devuelve los enlaces de clave en la respuesta
 const APP_ID = "patent-ia";
-const MODULOS = { grupos: 60000, licencias: 50000, plantillas: 60000, costos: 30000, importar: 25000, vigilancia: 60000, valoracion: 50000 };
+const MODULOS = { grupos: 60000, licencias: 50000, plantillas: 60000, costos: 30000, importar: 25000, vigilancia: 170000, valoracion: 190000 };
 const COLECCIONES = new Set(["proyectos", "tramites", "licencias", "movimientos", "bitacora", "archivos", "documentos", "config", "dibujos", "vigilancia", "valoraciones"]);
 // Archivos subidos dentro de la app (fotos del prototipo, oficios de la SIC, contratos firmados): guardados en la base, con topes para no llenarla
 const ARCH_MAX = +(ENV.ARCH_MAX_MB || 5) * 1048576, ARCH_TOPE = +(ENV.ARCH_TOPE_MB || 60) * 1048576;
