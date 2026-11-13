@@ -30,6 +30,7 @@ jobs:
           https://neuroguia-api-bmg2.onrender.com/api/ping
           https://familiasalud-api.onrender.com/api/ping
           https://globaltradefinder.onrender.com/api/ping
+          https://dondeestudiar-ia.onrender.com/api/ping
           "
           for u in $URLS; do ( f=$(mktemp)
             for i in $(seq 1 30); do
