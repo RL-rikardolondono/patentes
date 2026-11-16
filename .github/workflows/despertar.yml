@@ -3,6 +3,9 @@
 # aborta la página de "Application loading" y el servidor no termina de
 # despertar. Este trabajo espera hasta que cada servidor responda de verdad.
 # Horario: cada 30 min de 5:00 a. m. a 10:59 p. m. (hora de Bogotá).
+# 16 nov 2026: se quitó enfermeria-api (suspendido en Render: hacía fallar todo
+# el trabajo) y se agregaron Estrategia-IA, Inventario-IA y Cumple-IA (antes en
+# cron-job.org, que los desactivó por la página de "Application loading").
 name: Despertar servidores
 on:
   schedule:
@@ -19,7 +22,6 @@ jobs:
           https://centinela-sst-api.onrender.com/api/ping
           https://clinica-ia-ho79.onrender.com/api/ping
           https://diligencia-api.onrender.com/api/ping
-          https://enfermeria-api-2ksu.onrender.com/health
           https://patentes-api-1e30.onrender.com/api/ping
           https://agenda-ia-api.onrender.com/api/ping
           https://factura-ia-jf8b.onrender.com/api/ping
@@ -32,12 +34,16 @@ jobs:
           https://globaltradefinder.onrender.com/api/ping
           https://dondeestudiar-ia.onrender.com/api/ping
           https://gobierno-ia.onrender.com/api/ping
+          https://estrategia-ia.skynetgenesis.com/api/ping
+          https://inventario-ia-jag8.onrender.com/api/ping
+          https://cumple-ia.onrender.com/api/ping
           "
           for u in $URLS; do ( f=$(mktemp)
             for i in $(seq 1 30); do
               code=$(curl -s -m 60 -o "$f" -w "%{http_code}" -H "Accept: application/json" -A "SkyNetGenesis-despertador/1.0" "$u" || echo 000)
               tam=$(wc -c < "$f" 2>/dev/null || echo 0)
               if [ "$code" = "200" ] && [ "$tam" -lt 5000 ]; then echo "DESPIERTO $u (intento $i)"; exit 0; fi
+              if grep -qi "suspended" "$f" 2>/dev/null; then echo "SUSPENDIDO EN RENDER $u"; exit 1; fi
               sleep 15
             done
             echo "NO RESPONDIO $u"; exit 1
