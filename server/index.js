@@ -14,9 +14,9 @@ const APP_URL = (ENV.APP_URL || "https://patent-ia.skynetgenesis.com").replace(/
 const ORIGENES = (ENV.ORIGENES || ENV.ORIGEN || `${APP_URL},https://patentes.skynetgenesis.com`).split(",").map(s => s.trim()).filter(Boolean);
 const SA_CORREO = "superadmin.patent@skynetgenesis.com"; // cada app tiene su propio superadministrador (regla del 29 oct 2026)
 const DUENOS = (ENV.DUENO_EMAILS && !/^superadmin@/i.test(ENV.DUENO_EMAILS) ? ENV.DUENO_EMAILS : SA_CORREO).toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
-const ADMIN_SKYNET = (ENV.ADMIN_SKYNET || "rikardolondono@gmail.com").toLowerCase();
+const ADMIN_SKYNET = (ENV.ADMIN_SKYNET || "superadmin.patentes@skynetgenesis.com").toLowerCase();
 // Los enlaces de clave de las cuentas del dueño (superadministrador y su empresa) le llegan directo a su Gmail, sin reenvíos
-const DUENO_CORREO = (ENV.DUENO_CORREO || "rikardolondono@gmail.com").toLowerCase();
+const DUENO_CORREO = (ENV.DUENO_CORREO || "contacto@skynetgenesis.com").toLowerCase();
 const DUENO_CUENTAS = new Set([...DUENOS, ADMIN_SKYNET, ...(ENV.DUENO_CUENTAS || "").toLowerCase().split(",").map(s => s.trim()).filter(Boolean)]);
 const BREVO_KEY = ENV.BREVO_API_KEY || "";
 const REMITENTE = ENV.BREVO_REMITENTE || "patent-ia@skynetgenesis.com";
