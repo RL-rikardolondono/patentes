@@ -1809,7 +1809,7 @@ function estado(cls,txt){const e=$("#estado");e.className="estado "+cls;e.queryS
 async function iniciar(){
  if(REMOTO){await iniciarRemoto();return}
  if(window.PATENTIA_DEMO){downloads=descargasLocales;try{const d=await window.claude?.use?.("downloads");if(d)downloads=d}catch(e){}iniciarDemo();return}
- MODO="claude";ORG={id:"skynet",nombre:"SkyNet Genesis",modulos:Object.fromEntries(Object.keys(MOD_INFO).map(m=>[m,true])),pago:{estado:"activa"},valor:PRECIOS.mensual,interna:true};YO={id:"local",nombre:"Ricardo Londoño González",email:"rikardolondono@gmail.com",rol:"admin"};
+ MODO="claude";ORG={id:"skynet",nombre:"SkyNet Genesis",modulos:Object.fromEntries(Object.keys(MOD_INFO).map(m=>[m,true])),pago:{estado:"activa"},valor:PRECIOS.mensual,interna:true};YO={id:"local",nombre:"Administrador",email:"superadmin.patentes@skynetgenesis.com",rol:"admin"};
  const c=window.claude;
  const [d,s,dl,as]=await Promise.all([c?.use?.("db"),c?.use?.("sample"),c?.use?.("downloads"),c?.use?.("assets")].map(p=>Promise.resolve(p).catch(()=>null)));
  db=d||null;sample=s||null;downloads=dl||null;assets=as||null;
