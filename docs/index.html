@@ -651,12 +651,11 @@ function panelGruposTablero(){const G=grupos();if(!G.length)return"";const av=av
  ${av.proxima?`<p style="margin:8px 0 0">Próxima meta: <b>${fFecha(av.proxima.vence)}</b> · ${esc(cortoG(av.proxima.grupo))}${av.proxima.proy?` · ${esc(av.proxima.proy.titulo)}`:""}</p>`:""}</section>`}
 
 /* ===== Plataforma de venta: empresas, usuarios, Market, pagos Bold, superadministrador y demostración ===== */
-const PRECIOS={mensual:99000,modulos:{grupos:60000,licencias:50000,plantillas:60000,costos:30000,importar:25000,vigilancia:170000,valoracion:190000},ia:{ia100:{creditos:100,valor:60000},ia300:{creditos:300,valor:150000},ia1000:{creditos:1000,valor:400000}}};
+const PRECIOS={mensual:99000,modulos:{grupos:60000,licencias:50000,costos:30000,importar:25000,vigilancia:170000,valoracion:190000},ia:{ia100:{creditos:100,valor:60000},ia300:{creditos:300,valor:150000},ia1000:{creditos:1000,valor:400000}}};
 const DIAS_PRUEBA=15;
 const MOD_INFO={
  grupos:{n:"Grupos de investigación (Minciencias)",d:"Sus grupos y líneas de GrupLAC, cada proyecto como producto, cronograma de productividad y datos listos para CvLAC.",ic:"🎓"},
  licencias:{n:"Licencias y ventas",d:"Empresas interesadas, negociaciones, contratos de licencia, ficha comercial y sugerencias de compradores por sector.",ic:"🤝"},
- plantillas:{n:"Plantillas de redacción de solicitudes",d:"Llena la solicitud de la SIC (descripción, reivindicaciones, resumen…) a partir de la ficha, lista para completar y radicar.",ic:"📝"},
  costos:{n:"Costos e ingresos",d:"Tasas de la SIC, gastos, regalías e ingresos por proyecto, con balance y recomendación de qué conviene proteger.",ic:"💰"},
  importar:{n:"Importar desde Excel",d:"Cargue de una vez su lista de inventos o proyectos desde un archivo de Excel (CSV).",ic:"📥"},
  vigilancia:{n:"Vigilancia tecnológica",d:"Siga las patentes nuevas de su tema y de sus competidores: búsquedas guardadas en Google Patents, Espacenet, Patentscope y la SIC, hallazgos anotados y recordatorio de revisión cada mes.",ic:"🔭"},
@@ -946,7 +945,7 @@ async function guardarAutoeval(id){const p=proy(id);if(!p)return;const v={};for(
  const ev={...v,modalidadRecomendada:mod,resumen,mejoras:bajos.map(x=>MEJORA_EVAL[x]),riesgos:bajos.filter(x=>v[x]<=2).map(x=>RIESGO_EVAL[x]),palabrasClave_es:pal,palabrasClave_en:[],cpc:[],fecha:new Date().toISOString(),guiada:true};
  $("#capa").innerHTML="";if(await parchear("proyectos",id,{evaluacion:ev,etapa:p.etapa==="idea"?"evaluacion":p.etapa}))toast("Evaluación guardada");render()}
 
-/* Plantillas de redacción (módulo del Market) */
+/* Plantillas en blanco (gratis; el asistente de redacción las reemplaza) */
 function plantillaSec(p,k){const t=(p.titulo||"[título]").trim();const tl=t.charAt(0).toLowerCase()+t.slice(1);const sol=String(p.solucion||"").trim();const prob=String(p.problema||"").trim();
  const figs=dibujosDe(p).map((d,i)=>`FIG. ${i+1} — ${d.titulo}`).join("\n");
  return({titulo:t,
@@ -958,7 +957,7 @@ function plantillaSec(p,k){const t=(p.titulo||"[título]").trim();const tl=t.cha
   reivindicaciones:`1. ${t}, que comprende [elemento 10] y [elemento 20], caracterizado porque [la característica técnica nueva que lo diferencia de lo existente].\n2. ${t} según la reivindicación 1, caracterizado porque [una característica adicional].\n3. ${t} según la reivindicación 1 o 2, caracterizado porque [material, forma o variante].\n4. ${t} según cualquiera de las reivindicaciones anteriores, caracterizado porque [otra variante].`,
   resumen:`${t}. ${sol?sol.split(/(?<=\.)\s+/).slice(0,2).join(" "):"[Resuma en qué consiste y cuál es su ventaja principal.]"} [Complete; máximo 150 palabras.]`,
   referencias:"10 — \n11 — \n20 — \n30 — "})[k]||""}
-async function usarPlantilla(id,sec){if(!pedirModulo("plantillas"))return;const p=proy(id);if(!p)return;const b=p.borrador||{};
+async function usarPlantilla(id,sec){const p=proy(id);if(!p)return;const b=p.borrador||{};
  if(sec){const tx=plantillaSec(p,sec);if(String(b[sec]||"").trim()){const si=await new Promise(r=>confirmarArriba("Esta sección ya tiene texto. ¿Lo reemplaza por la plantilla?",r));if(!si)return}
   await parchear("proyectos",id,{borrador:{[sec]:tx}});render();toast("Plantilla puesta. Complete lo que está entre corchetes [ ].");return}
  const nuevo={};for(const[k]of SECCIONES)if(!String(b[k]||"").trim())nuevo[k]=plantillaSec(p,k);
@@ -1081,9 +1080,9 @@ const CAMBIOS_IA=[[/consulte a Claude en la conversación y a su agente/g,"consu
 const ZONA_IA="button,a,label,h1,h2,h3,h4,summary,option,.ayuda,.aviso,.vacio,.chip,.cab p,.seguir";
 function textosIA(){if(MODO==="claude"||puenteGratis())return;for(const raiz of [$("#main"),$("#capa")]){if(!raiz)continue;const w=document.createTreeWalker(raiz,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){if(!n.nodeValue.includes("Claude"))continue;const pa=n.parentElement;if(!pa||pa.closest("textarea,[contenteditable],.dato-usuario")||!pa.closest(ZONA_IA))continue;let v=n.nodeValue;for(const[a,b]of CAMBIOS_IA)v=v.replace(a,b);n.nodeValue=v}
  for(const el of raiz.querySelectorAll("[placeholder*=Claude],[aria-label*=Claude],[title*=Claude]"))for(const at of ["placeholder","aria-label","title"]){const v=el.getAttribute(at);if(v&&v.includes("Claude")){let x=v;for(const[a,b]of CAMBIOS_IA)x=x.replace(a,b);el.setAttribute(at,x)}}}}
-function puentesClaude(){if(sample)return;if(!puenteGratis()){const R={evaluar:"Autoevaluación guiada",redactarTodo:"Plantillas (módulo)",redactar:"Plantilla",sugLic:"Sugerir por sector"};for(const b of document.querySelectorAll("#main .btn.ia[data-acc]"))if(R[b.dataset.acc]&&!b.disabled)b.textContent=R[b.dataset.acc];
+function puentesClaude(){if(sample)return;if(!puenteGratis()){const R={evaluar:"Autoevaluación guiada",redactarTodo:"Plantilla en blanco",redactar:"Plantilla",sugLic:"Sugerir por sector"};for(const b of document.querySelectorAll("#main .btn.ia[data-acc]"))if(R[b.dataset.acc]&&!b.disabled)b.textContent=R[b.dataset.acc];
   for(const b of document.querySelectorAll('#main [data-acc="claude"]')){if(b.dataset.iaOk)continue;b.dataset.iaOk="1";b.textContent=b.dataset.tarea==="ideas"?"Pedir ideas a la IA (créditos)":"Consultar a la IA (créditos)"}return}
- const ETQ_REGLA={evaluar:"Autoevaluación guiada",redactarTodo:"Plantillas (módulo)",redactar:"Plantilla",sugLic:"Sugerir por sector"};
+ const ETQ_REGLA={evaluar:"Autoevaluación guiada",redactarTodo:"Plantilla en blanco",redactar:"Plantilla",sugLic:"Sugerir por sector"};
  for(const b of document.querySelectorAll("#main .btn.ia[data-acc]")){const t=PUENTE_ACC[b.dataset.acc];if(!t||b.nextElementSibling?.classList.contains("puente-btn"))continue;
   if(ETQ_REGLA[b.dataset.acc]&&!b.disabled)b.textContent=ETQ_REGLA[b.dataset.acc];
   const n=document.createElement("button");n.type="button";n.className="btn sec peq puente-btn";n.dataset.acc="claude";n.dataset.tarea=t;if(b.dataset.id)n.dataset.id=b.dataset.id;if(b.dataset.sec)n.dataset.sec=b.dataset.sec;
