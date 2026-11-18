@@ -809,7 +809,7 @@ function pantallaBloqueo(e){const pago=e&&e.bloqueo==="pago";$("#nav").innerHTML
  ${pago&&esAdmin()&&!MODO_CONTROL?`<p style="margin:0">Mensualidad: <b>${cop0(ORG&&ORG.valor||PRECIOS.mensual)}</b>${ORG&&ORG.quedaHasta?`. Con este pago queda al día hasta el <b>${fFecha(ORG.quedaHasta)}</b>`:""}.</p><div id="pboldzona" class="fila" style="margin-top:12px"><button class="btn acc" data-acc="pagarMeses">Pagar la mensualidad</button></div>`:""}
  <div class="fila" style="margin-top:14px">${MODO_CONTROL?`<button class="btn pri" data-acc="salirControl">Salir del modo administrador</button>`:`<a class="btn sec" target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, necesito ayuda con Patent-IA")}">Soporte por WhatsApp</a><button class="btn sec" data-acc="salir">Salir</button>`}</div></section>`}
 
-const LECTURA_OK=new Set(["informeAbrir","informeGen","valBajar","manual","verClave","verPlanes","salirControl","verRuta","rutaSel","respaldo","exportar","bajarDoc","bajarBit","bajarSvg","bajarDocActual","salir","subEmp","cambiarClave","cerrarCapa","claude","gruplac","abrirDoc","irRegistro","salirDemo"]);
+const LECTURA_OK=new Set(["paqPDF","informeAbrir","informeGen","valBajar","manual","verClave","verPlanes","salirControl","verRuta","rutaSel","respaldo","exportar","bajarDoc","bajarBit","bajarSvg","bajarDocActual","salir","subEmp","cambiarClave","cerrarCapa","claude","gruplac","abrirDoc","irRegistro","salirDemo"]);
 /* --- Pantallas de entrada --- */
 function pantallaAcceso(modo,msg,extra){modo=modo||"entrar";$("#nav").innerHTML="";estado("","");document.body.classList.remove("con-sesion");
  const volver=`<p class="ayuda" style="margin:0 0 8px"><a href="#" data-acc="accVolver">← Volver al inicio</a></p>`;
@@ -819,6 +819,7 @@ function pantallaAcceso(modo,msg,extra){modo=modo||"entrar";$("#nav").innerHTML=
   <button class="btn acc" type="submit">Entrar</button></form><p class="ayuda" style="margin:0"><a href="#" data-acc="accModo" data-m="olvide">¿Olvidó su clave?</a></p>
   <hr style="border:0;border-top:1px solid var(--borde);margin:6px 0"><p style="margin:0"><b>¿Aún no tiene Patent-IA?</b></p><div class="fila"><button class="btn acc" data-acc="accModo" data-m="registro">Crear la cuenta de mi empresa</button><button class="btn sec" data-acc="irDemo">Probar la demostración</button></div>`;
  else if(modo==="olvide")h=`${volver}<h2>Crear o recuperar su clave</h2><p class="ayuda" style="margin:0">Escriba su correo. Le enviaremos un enlace para crear una clave nueva.</p><form id="f-acc" class="campos" style="grid-template-columns:1fr" novalidate><label class="c">Correo<input type="text" id="acc-email" inputmode="email" autocomplete="username"></label><div class="fila"><button class="btn acc" type="submit">Enviar enlace</button><button type="button" class="btn sec" data-acc="accVolver">Cancelar</button></div></form>`;
+ else if(modo==="registro"&&REGISTRO_PAUSA)h=`${volver}<h2>Patent-IA está en actualización</h2><p style="margin:0">Estamos mejorando la búsqueda de antecedentes y la redacción de solicitudes. La creación de cuentas nuevas abre de nuevo en pocos días.</p><div class="fila"><a class="btn acc" target="_blank" rel="noopener" href="${WA+encodeURIComponent("Hola, quiero que me avisen cuando Patent-IA abra de nuevo")}">Avisarme por WhatsApp</a><button class="btn sec" data-acc="irDemo">Ver la demostración</button></div>`;
  else if(modo==="registro"){const mods=(extra&&extra.mods)||[];h=`${volver}<h2>Crear la cuenta de mi empresa</h2>
   <p class="ayuda" style="margin:0">Pruébela gratis ${DIAS_PRUEBA} días (una sola vez por empresa, no se renueva). Le llegará un correo para crear su clave y cada día un aviso de cuántos días de prueba le quedan; luego paga la mensualidad (${cop0(PRECIOS.mensual)}, usuarios ilimitados) y los módulos que escoja, en un solo pago.</p>
   ${mods.length?`<div class="aviso">Su pedido: ${mods.map(m=>esc(MOD_INFO[m]?MOD_INFO[m].n:m)).join(", ")}. Lo verá listo en el Market al entrar.</div>`:""}
@@ -1080,9 +1081,9 @@ const CAMBIOS_IA=[[/consulte a Claude en la conversación y a su agente/g,"consu
 const ZONA_IA="button,a,label,h1,h2,h3,h4,summary,option,.ayuda,.aviso,.vacio,.chip,.cab p,.seguir";
 function textosIA(){if(MODO==="claude"||puenteGratis())return;for(const raiz of [$("#main"),$("#capa")]){if(!raiz)continue;const w=document.createTreeWalker(raiz,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){if(!n.nodeValue.includes("Claude"))continue;const pa=n.parentElement;if(!pa||pa.closest("textarea,[contenteditable],.dato-usuario")||!pa.closest(ZONA_IA))continue;let v=n.nodeValue;for(const[a,b]of CAMBIOS_IA)v=v.replace(a,b);n.nodeValue=v}
  for(const el of raiz.querySelectorAll("[placeholder*=Claude],[aria-label*=Claude],[title*=Claude]"))for(const at of ["placeholder","aria-label","title"]){const v=el.getAttribute(at);if(v&&v.includes("Claude")){let x=v;for(const[a,b]of CAMBIOS_IA)x=x.replace(a,b);el.setAttribute(at,x)}}}}
-function puentesClaude(){if(sample)return;if(!puenteGratis()){const R={evaluar:"Autoevaluación guiada",redactarTodo:"Llenar con plantillas",redactar:"Plantilla",sugLic:"Sugerir por sector"};for(const b of document.querySelectorAll("#main .btn.ia[data-acc]"))if(R[b.dataset.acc]&&!b.disabled)b.textContent=R[b.dataset.acc];
+function puentesClaude(){if(sample)return;if(!puenteGratis()){const R={evaluar:"Autoevaluación guiada",redactarTodo:"Plantillas (módulo)",redactar:"Plantilla",sugLic:"Sugerir por sector"};for(const b of document.querySelectorAll("#main .btn.ia[data-acc]"))if(R[b.dataset.acc]&&!b.disabled)b.textContent=R[b.dataset.acc];
   for(const b of document.querySelectorAll('#main [data-acc="claude"]')){if(b.dataset.iaOk)continue;b.dataset.iaOk="1";b.textContent=b.dataset.tarea==="ideas"?"Pedir ideas a la IA (créditos)":"Consultar a la IA (créditos)"}return}
- const ETQ_REGLA={evaluar:"Autoevaluación guiada",redactarTodo:"Llenar con plantillas",redactar:"Plantilla",sugLic:"Sugerir por sector"};
+ const ETQ_REGLA={evaluar:"Autoevaluación guiada",redactarTodo:"Plantillas (módulo)",redactar:"Plantilla",sugLic:"Sugerir por sector"};
  for(const b of document.querySelectorAll("#main .btn.ia[data-acc]")){const t=PUENTE_ACC[b.dataset.acc];if(!t||b.nextElementSibling?.classList.contains("puente-btn"))continue;
   if(ETQ_REGLA[b.dataset.acc]&&!b.disabled)b.textContent=ETQ_REGLA[b.dataset.acc];
   const n=document.createElement("button");n.type="button";n.className="btn sec peq puente-btn";n.dataset.acc="claude";n.dataset.tarea=t;if(b.dataset.id)n.dataset.id=b.dataset.id;if(b.dataset.sec)n.dataset.sec=b.dataset.sec;
@@ -1104,7 +1105,7 @@ function ruta(p){
  const pat=k==="pi"||k==="mu",reg=pat||k==="di"||k==="ma";
  const R=M.valida(p.fechaRadicacion),conc=M.valida(p.fechaConcesion),neg=M.valida(p.fechaNegacion);
  const firmada=S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado");
- const PRE=new Set(["evaluar","antecedentes","redactar","dibujos","requisitos","proteger"]);const L=[];const add=o=>{o.auto=!!o.auto;o.salto=!o.auto&&!man[o.k]&&R&&reg&&PRE.has(o.k);o.hecho=o.auto||!!man[o.k]||o.salto;L.push(o)};
+ const PRE=new Set(["partes","evaluar","antecedentes","redactar","dibujos","requisitos","proteger"]);const L=[];const add=o=>{o.auto=!!o.auto;o.salto=!o.auto&&!man[o.k]&&R&&reg&&PRE.has(o.k);o.hecho=o.auto||!!man[o.k]||o.salto;L.push(o)};
  const lic={k:"licenciar",t:"Licenciar o vender",auto:firmada,
   que:"Prepare la ficha comercial, identifique empresas que lo puedan fabricar o vender y negocie una licencia o la venta.",
   por:"Es donde el desarrollo genera ingresos."+(reg?" Puede ofrecerlo desde que está radicado (“en trámite”), siempre con acuerdo de confidencialidad.":""),
@@ -1114,24 +1115,23 @@ function ruta(p){
   que:k==="ma"?"Escriba el nombre de la marca y qué productos o servicios va a identificar.":k==="ob"?"Escriba el título de la obra, de qué trata y quiénes son los autores.":"Escriba el título, el problema que resuelve, cómo funciona y quiénes son los inventores.",
   por:"Todo lo demás (evaluación, redacción y contratos) sale de esta ficha.",
   acc:[{e:"Completar la ficha",a:"rutaIr",sub:"ficha",foco:"f-problema",cls:"pri"}]});
- if(pat||k==="di")add({k:"evaluar",t:"Evaluar si se puede proteger",auto:!!p.evaluacion,
-  que:k==="di"?"Revise si el diseño es nuevo (distinto de los que ya se conocen) y si tiene mercado.":"Califique la novedad, el nivel inventivo, la aplicación industrial y el mercado, y confirme la modalidad (patente, modelo de utilidad o diseño).",
-  por:"Evita gastar en tasas y redacción de algo que no se podría proteger o no se vendería.",
-  acc:[{e:"Evaluar con Claude",a:"evaluar",ia:1,cls:"pri"},{e:"Ver la evaluación",a:"rutaIr",sub:"evaluacion"}]});
- if(reg)add({k:"antecedentes",t:k==="ma"?"Buscar marcas parecidas":"Buscar antecedentes",auto:lleno(p.antecedentesHallados)||!!(p.checklist||{}).busqueda,
+ if(pat)add({k:"partes",t:"Describir las partes del invento",auto:entrevistaLista(p),que:"En Redacción → Asistente, escriba qué es el invento, cada parte (material y qué hace) y lo que lo hace distinto.",por:"Con esas respuestas Patent-IA compara su invento con lo que ya existe y arma la solicitud.",acc:[{e:"Abrir el asistente",a:"rutaIr",sub:"redaccion",foco:"en-objeto",cls:"pri"}]});
+ if(reg)add({k:"antecedentes",t:k==="ma"?"Buscar marcas parecidas":"Buscar antecedentes",auto:pat?busquedaHecha(p):(lleno(p.antecedentesHallados)||!!(p.checklist||{}).busqueda),
   que:k==="ma"?"Busque marcas iguales o parecidas en la misma clase de productos o servicios.":"Busque patentes y productos parecidos y anote en qué se diferencia el suyo.",
   por:k==="ma"?"Si ya existe una marca parecida, la SIC la niega y se pierde la tasa.":"La novedad es requisito; además, lo encontrado le ayuda a redactar mejor las reivindicaciones.",
-  acc:[...linksBusqueda(p,k),{e:"Anotar lo encontrado",a:"rutaIr",sub:"evaluacion",foco:"f-antec",cls:"pri"},{e:"Generar tarea: búsqueda formal",a:"rutaTarea",tipo:"Búsqueda de antecedentes",dias:10,nota:"Búsqueda formal de antecedentes (bases de datos y SIC)."}]});
+  acc:[...(pat?[{e:"Buscar aquí",a:"rutaIr",sub:"evaluacion",foco:"bq-en0",cls:"pri"}]:[]),...linksBusqueda(p,k),...(pat?[]:[{e:"Anotar lo encontrado",a:"rutaIr",sub:"evaluacion",foco:"f-antec",cls:"pri"}]),{e:"Generar tarea: búsqueda formal",a:"rutaTarea",tipo:"Búsqueda de antecedentes",dias:10,nota:"Búsqueda formal de antecedentes (bases de datos y SIC)."}]});
+ if(pat)add({k:"evaluar",t:"Comprobar que es nuevo",auto:novedadHecha(p)&&novedad(p).estado!=="no_nuevo",que:"Compare su invento, parte por parte, con los documentos parecidos que encontró.",por:"Si un documento ya tiene todas sus características, la SIC niega la solicitud y se pierde la tasa. Lo que lo hace distinto es lo que se protege.",acc:[{e:"Comparar",a:"rutaIr",sub:"evaluacion",foco:"cmp-panel",cls:"pri"},{e:"Evaluar con IA (créditos)",a:"evaluar",ia:1}]});
+ else if(k==="di")add({k:"evaluar",t:"Evaluar si se puede proteger",auto:!!p.evaluacion,que:"Revise si el diseño es nuevo (distinto de los que ya se conocen) y si tiene mercado.",por:"Evita gastar en tasas de algo que no se podría proteger o no se vendería.",acc:[{e:"Evaluar",a:"evaluar",ia:1,cls:"pri"},{e:"Ver la evaluación",a:"rutaIr",sub:"evaluacion"}]});
  if(pat){const n=SECCIONES.filter(([s])=>String(b[s]||"").trim()).length;
-  add({k:"redactar",t:"Redactar la solicitud",auto:n===SECCIONES.length,prog:`${n} de ${SECCIONES.length} partes escritas`,
-  que:"Escriba la descripción, las reivindicaciones, el resumen y las demás partes que pide la SIC.",
+  const nq=calidad(p).filter(q=>q.sec!=="figuras").length;add({k:"redactar",t:"Redactar la solicitud",auto:redaccionLista(p),prog:n===SECCIONES.length?(nq?`${nq} punto(s) por corregir`:"Revisión sin observaciones"):`${n} de ${SECCIONES.length} partes escritas`,
+  que:"Arme la descripción, las reivindicaciones y el resumen con el asistente, y corrija lo que marque la revisión de calidad.",
   por:"Las reivindicaciones definen exactamente lo que queda protegido.",
-  acc:[{e:"Redactar lo que falta con Claude",a:"redactarTodo",ia:1,cls:"pri"},{e:"Abrir la redacción",a:"rutaIr",sub:"redaccion"},{e:"Descargar borrador",a:"exportar"}]})}
+  acc:[{e:"Armar con el asistente",a:"rutaIr",sub:"redaccion",foco:"en-objeto",cls:"pri"},{e:"Redactar con IA (créditos)",a:"redactarTodo",ia:1},{e:"Abrir la redacción",a:"rutaIr",sub:"redaccion"},{e:"Descargar borrador",a:"exportar"}]})}
  if(pat||k==="di"){const nd=dibujosDe(p).length+S.archivos.filter(a=>a.proyectoId===p.id&&a.categoria==="Plano o modelo").length;
   add({k:"dibujos",t:k==="di"?"Preparar las vistas del diseño":"Preparar las figuras",auto:nd>0,prog:nd?`${nd} figura(s)`:"",
   que:k==="di"?"Prepare todas las vistas del diseño (frente, lados, arriba, perspectiva) en líneas continuas.":"Prepare los dibujos con números de referencia que coincidan con la descripción.",
   por:k==="di"?"La SIC exige la representación gráfica del diseño con todas sus vistas.":"Se exigen cuando son necesarios para entender el invento, y casi siempre ayudan a definir lo que se protege.",
-  acc:[{e:"Dibujar con Claude",a:"dibujar",ia:1,cls:"pri"},{e:"Abrir dibujos",a:"rutaIr",sub:"dibujos",foco:"dib-pedido"},{e:"Agregar enlace de un plano (Drive)",a:"rutaIr",sub:"bitacora",foco:"a-url"},{e:"Generar tarea: planos definitivos",a:"rutaTarea",tipo:"Prototipo",dias:15,nota:"Planos o vistas definitivas para la solicitud."}]})}
+  acc:[{e:"Subir boceto y poner números",a:"anotar",cls:"pri"},{e:"Dibujar con IA (créditos)",a:"dibujar",ia:1},{e:"Abrir dibujos",a:"rutaIr",sub:"dibujos",foco:"dib-pedido"},{e:"Agregar enlace de un plano (Drive)",a:"rutaIr",sub:"bitacora",foco:"a-url"},{e:"Generar tarea: planos definitivos",a:"rutaTarea",tipo:"Prototipo",dias:15,nota:"Planos o vistas definitivas para la solicitud."}]})}
  const reqCes=M.requisitos(p).some(r=>r[0]==="cesion");
  if(k!=="ma"&&k!=="ob")add({k:"proteger",t:"Proteger la confidencialidad",auto:docDe(p.id,"nda")&&(!reqCes||docDe(p.id,"cesion")),
   que:"Antes de mostrarlo a fabricantes, inversionistas o compradores, haga firmar un acuerdo de confidencialidad."+(reqCes?" Como el solicitante no es el inventor, firme también la cesión de derechos.":""),
@@ -1141,11 +1141,11 @@ function ruta(p){
   que:k==="ob"?"Registre la obra en la Dirección Nacional de Derecho de Autor (en línea y gratis). Si es un libro, tramite también el ISBN.":"Registre el software en la Dirección Nacional de Derecho de Autor (en línea y gratis).",
   por:"No es obligatorio, pero es la mejor prueba de autoría y fecha.",
   acc:[{e:"Abrir el registro en línea",href:"https://www.derechodeautor.gov.co/"},{e:"Generar tarea: registrar",a:"rutaTarea",tipo:"Otro",dias:15,nota:k==="ob"?"Registro de la obra en la DNDA (y el ISBN si es un libro).":"Registro del software en la DNDA."}]});
- if(reg){const req=M.requisitos(p).filter(r=>r[0]!=="busqueda");const ch=p.checklist||{};const n=req.filter(r=>ch[r[0]]).length;
+ if(reg){const req=M.requisitos(p).filter(r=>r[0]!=="busqueda");const ch=p.checklist||{};const n=req.filter(r=>ch[r[0]]||reqAuto(p,r[0])).length;
   add({k:"requisitos",t:"Reunir los requisitos para radicar",auto:req.length>0&&n===req.length,prog:`${n} de ${req.length} listos`,
   que:`Marque en el Expediente cada requisito a medida que lo tenga: ${req.map(r=>r[1].charAt(0).toLowerCase()+r[1].slice(1)).join("; ")}.`,
   por:"Si falta algo, la SIC le hará un requerimiento y el trámite se demora.",
-  acc:[{e:"Ver la lista de requisitos",a:"rutaIr",sub:"expediente",cls:"pri"},{e:"Ver tasas y trámites de la SIC",href:"https://www.sic.gov.co/propiedad-industrial"},{e:"Generar tarea: pagar la tasa",a:"rutaTarea",tipo:"Pago de tasa",dias:7,nota:"Pagar la tasa de solicitud en la SIC y guardar el comprobante."}]});
+  acc:[{e:"Preparar el paquete para radicar",a:"rutaIr",sub:"expediente",foco:"paq-panel",cls:"pri"},{e:"Ver la lista de requisitos",a:"rutaIr",sub:"expediente"},{e:"Ver tasas y trámites de la SIC",href:"https://www.sic.gov.co/propiedad-industrial"},{e:"Generar tarea: pagar la tasa",a:"rutaTarea",tipo:"Pago de tasa",dias:7,nota:"Pagar la tasa de solicitud en la SIC y guardar el comprobante."}]});
   const div=pat&&M.valida(p.fechaDivulgacion)?M.eventos(p).find(e=>e.clave==="divulgacion"):null;
   add({k:"radicar",t:"Radicar en la SIC",auto:R,sinMarcar:1,plazo:div&&!div.hecho?div:null,
   que:"Radique la solicitud en línea en la SIC y escriba aquí la fecha de radicación y el número de expediente.",
@@ -1191,10 +1191,10 @@ function btnRuta(pid,b){if(b.href)return`<a class="btn sec peq" target="_blank" 
  const oc=b.ia&&(ui.ocupado[(b.a==="evaluar"?"eval":b.a==="redactarTodo"?"todo":b.a==="sugLic"?"lic":"")+pid]);
  return`<button class="btn ${b.cls||"sec"} ${b.ia?"ia":""} peq" data-acc="${b.a}" data-id="${pid}"${d} ${oc?"disabled":""}>${oc?"Trabajando…":esc(b.e)}</button>`}
 
-const DONDE_IA={evaluar:"Aquí (autoevaluación guiada)",redactar:"Aquí, con plantillas",dibujos:"En su programa de dibujo",licenciar:"Aquí"};
-const DONDE={describir:"Aquí en Patent-IA",evaluar:"Con Claude",antecedentes:"En internet y aquí",redactar:"Con Claude",dibujos:"Con Claude",proteger:"Aquí, y se firma en papel",registro:"En la DNDA (en línea)",requisitos:"Aquí y en la SIC",radicar:"En la SIC (en línea)",tramite:"En la SIC y aquí",licenciar:"Aquí y con Claude",mantener:"En la SIC",gruplac:"En CvLAC y GrupLAC (Minciencias)"};
+const DONDE_IA={evaluar:"Aquí, comparando con lo encontrado",redactar:"Aquí, con el asistente",dibujos:"Aquí, sobre su boceto",licenciar:"Aquí",partes:"Aquí (Redacción → Asistente)",antecedentes:"Aquí, en la base mundial de patentes"};
+const DONDE={describir:"Aquí en Patent-IA",partes:"Aquí (Redacción → Asistente)",evaluar:"Aquí, comparando con lo encontrado",antecedentes:"Aquí, en la base mundial de patentes",redactar:"Aquí, con el asistente",dibujos:"Aquí, sobre su boceto",proteger:"Aquí, y se firma en papel",registro:"En la DNDA (en línea)",requisitos:"Aquí y en la SIC",radicar:"En la SIC (en línea)",tramite:"En la SIC y aquí",licenciar:"Aquí y con Claude",mantener:"En la SIC",gruplac:"En CvLAC y GrupLAC (Minciencias)"};
 const CHAT={evaluar:"Si quiere discutir cómo fortalecer el invento o cambiar la modalidad, consulte a Claude en la conversación.",antecedentes:"Si encuentra una patente muy parecida, consulte a Claude antes de seguir: puede ajustar el invento para diferenciarlo.",redactar:"Para afinar las reivindicaciones o el alcance de la protección, siga con Claude en la conversación.",dibujos:"Para planos de precisión, modelos 3D o cambios a los bocetos, pídalos a Claude en la conversación.",tramite:"Si la SIC le envía un requerimiento o una negación, consulte a Claude en la conversación y a su agente.",licenciar:"Para preparar la negociación, el precio o revisar un contrato, consulte a Claude en la conversación.",proteger:"Si la otra parte pide cambios al acuerdo, consulte a Claude en la conversación.",gruplac:"Si el producto necesita un artículo, un capítulo o el manual del software, prepárelo con Claude en la conversación."};
-const TAB_AYUDA={ficha:"Aquí describe el invento: es el primer paso de la ruta.",evaluacion:"Aquí queda la evaluación de Claude y lo que usted encuentre al buscar antecedentes.",redaccion:"Aquí se arma el texto de la solicitud que se radica en la SIC.",dibujos:"Aquí se guardan los bocetos de las figuras de la solicitud.",bitacora:"Diario del inventor y enlaces a fotos, planos y oficios: prueba de autoría y de fechas.",expediente:"Fechas del trámite en la SIC, requisitos para radicar y calendario legal.",documentos:"Contratos y ficha comercial listos para revisar, guardar y descargar.",costos:"Tasas, gastos e ingresos del proyecto.",licencias:"Empresas interesadas y negociaciones de licencia o venta.",valoracion:"Cuánto vale este desarrollo para negociarlo, por tres métodos."};
+const TAB_AYUDA={ficha:"Aquí describe el invento: es el primer paso de la ruta.",evaluacion:"Busque lo que ya existe en la base mundial de patentes y compruebe, parte por parte, que su invento es nuevo.",redaccion:"Responda el asistente: Patent-IA arma la solicitud y la revisión de calidad le dice qué falta.",dibujos:"Suba sus bocetos o fotos y póngales los números de referencia.",bitacora:"Diario del inventor y enlaces a fotos, planos y oficios: prueba de autoría y de fechas.",expediente:"Fechas del trámite en la SIC, requisitos para radicar y calendario legal.",documentos:"Contratos y ficha comercial listos para revisar, guardar y descargar.",costos:"Tasas, gastos e ingresos del proyecto.",licencias:"Empresas interesadas y negociaciones de licencia o venta.",valoracion:"Cuánto vale este desarrollo para negociarlo, por tres métodos."};
 function vSeguir(p){const r=ruta(p);if(!r.cur)return"";const c=r.cur;const acc=c.acc.filter(b=>!b.href&&b.a!=="rutaTarea").slice(0,2);
  return`<div class="seguir"><span>Siguiente paso de la ruta: <b>${esc(c.t)}</b> <span class="chip g">${esc((!sample&&DONDE_IA[c.k])||DONDE[c.k]||"")}</span></span><div class="fila">${acc.map(b=>btnRuta(p.id,b)).join("")}<a href="#" class="btn sec peq" data-acc="verRuta" data-id="${p.id}">Ver la ruta ↑</a></div></div>`}
 function vRuta(p){const r=ruta(p);if(!r.pasos.length)return"";
@@ -1226,7 +1226,7 @@ function vRuta(p){const r=ruta(p);if(!r.pasos.length)return"";
 
 function vProyecto(){
  const p=proy(proyActual);if(!p)return`<div class="vacio">Este proyecto ya no existe. <a href="#" data-vista-l="proyectos">Volver al banco</a></div>`;
- const st=[["ficha","Ficha"],["evaluacion","Evaluación"],["redaccion","Redacción"],["dibujos","Dibujos"],["bitacora","Bitácora y archivos"],["expediente","Expediente SIC"],["documentos","Documentos"],["costos","Costos"],["licencias","Licencias"],["valoracion","Valoración"]].filter(([k])=>(k!=="costos"||modOn("costos"))&&(k!=="licencias"||modOn("licencias"))&&(k!=="valoracion"||modOn("valoracion"))&&(!esCliente()||["ficha","bitacora","expediente","documentos"].includes(k)));if(!st.some(x=>x[0]===subtab)&&subtab!=="tramites")subtab="ficha";
+ const st=[["ficha","Ficha"],["evaluacion","Antecedentes"],["redaccion","Redacción"],["dibujos","Dibujos"],["bitacora","Bitácora y archivos"],["expediente","Expediente SIC"],["documentos","Documentos"],["costos","Costos"],["licencias","Licencias"],["valoracion","Valoración"]].filter(([k])=>(k!=="costos"||modOn("costos"))&&(k!=="licencias"||modOn("licencias"))&&(k!=="valoracion"||modOn("valoracion"))&&(!esCliente()||["ficha","bitacora","expediente","documentos"].includes(k)));if(!st.some(x=>x[0]===subtab)&&subtab!=="tramites")subtab="ficha";
  const body=({ficha:pFicha,evaluacion:pEval,redaccion:pRed,dibujos:pDib,bitacora:pBit,expediente:pExp,tramites:pExp,documentos:pDocs,costos:pCostos,licencias:pLic,valoracion:pVal}[subtab]||pFicha)(p);
  return`<div><a href="#" data-vista-l="proyectos" class="ayuda">← Banco de proyectos</a></div>
  <div class="cab"><div><span class="cod">${esc(p.codigo)}</span><h1>${esc(p.titulo||"Sin título")}</h1><p>${esc(p.modalidad||"")}${p.sector?" · "+esc(p.sector):""}${grupo(p.grupoId)?` · Grupo <a href="#" data-vista-l="grupos">${esc(cortoG(grupo(p.grupoId)))}</a>`:""}</p></div>
@@ -1254,26 +1254,24 @@ function pFicha(p){return`<section class="panel"><div class="campos">
 function pEval(p){const e=p.evaluacion;const oc=ui.ocupado["eval"+p.id];
  const crit=e?[["Novedad",e.novedad],["Nivel inventivo",e.nivelInventivo],["Aplicación industrial",e.aplicacionIndustrial],["Potencial de mercado",e.mercado],["Facilidad de fabricar",e.fabricacion]]:[];
  const kw=e?[...aLista(e.palabrasClave_es),...aLista(e.palabrasClave_en)]:[];const qEn=aLista(e?.palabrasClave_en).slice(0,4).join(" ");
- return`<section class="panel"><div class="cab"><div><h3>Evaluación de patentabilidad</h3><p class="ayuda">Claude revisa novedad, nivel inventivo, aplicación industrial y mercado, y le sugiere la modalidad y las palabras para buscar antecedentes. Es una orientación: la búsqueda formal confirma.</p></div><button class="btn ia" data-acc="evaluar" data-id="${p.id}" ${oc?"disabled":""}>${oc?"Evaluando…":e?"Evaluar de nuevo":"Evaluar con Claude"}</button></div>
+ const patK=["pi","mu"].includes(M.clase(p.modalidad));
+ return`${patK?pBusqueda(p)+pComparacion(p):""}<section class="panel"><div class="cab"><div><h3>${patK?"Evaluación comercial (opcional)":"Evaluación"}</h3><p class="ayuda">${patK?"Mercado y facilidad de fabricar. La novedad se decide arriba, comparando con lo encontrado.":"Revisión de novedad, mercado y fabricación."}</p></div><button class="btn ia" data-acc="evaluar" data-id="${p.id}" ${oc?"disabled":""}>${oc?"Evaluando…":e?"Evaluar de nuevo":"Evaluar con Claude"}</button></div>
  ${e?`<div class="grid g2" style="margin-top:10px"><div class="puntos">${crit.map(([l,v])=>`<div class="r"><span>${l}</span><span class="b"><i style="width:${(+v||0)*20}%"></i></span><b>${+v||0}/5</b></div>`).join("")}<p class="ayuda">Evaluado el ${fFecha((e.fecha||"").slice(0,10))}. Modalidad sugerida: <b>${esc(e.modalidadRecomendada||"")}</b></p></div>
  <div><p style="margin:0 0 8px">${esc(e.resumen||"")}</p>${aLista(e.mejoras).length?`<b>Para fortalecerlo</b><ul>${aLista(e.mejoras).map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`:""}${aLista(e.riesgos).length?`<b>Riesgos</b><ul>${aLista(e.riesgos).map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`:""}</div></div>`:`<div class="vacio" style="margin-top:10px">Complete la ficha (problema y solución) y pulse “Evaluar con Claude”.</div>`}
  </section>
- <section class="panel"><h3>Búsqueda de antecedentes</h3>
- ${kw.length?`<p class="ayuda">Palabras sugeridas: ${kw.map(k=>`<span class="chip g">${esc(k)}</span>`).join(" ")}${aLista(e.cpc).length?` · Clasificación CPC probable: ${aLista(e.cpc).map(c=>`<span class="chip">${esc(c)}</span>`).join(" ")}`:""}</p>
- <div class="fila"><a class="btn sec peq" target="_blank" rel="noopener" href="https://patents.google.com/?q=${encodeURIComponent(qEn||p.titulo||"")}">Buscar en Google Patents ↗</a><a class="btn sec peq" target="_blank" rel="noopener" href="https://worldwide.espacenet.com/patent/search?q=${encodeURIComponent(qEn||p.titulo||"")}">Buscar en Espacenet ↗</a><a class="btn sec peq" target="_blank" rel="noopener" href="https://www.sic.gov.co/propiedad-industrial">Propiedad industrial SIC ↗</a></div>`:`<p class="ayuda">Al evaluar, Claude le sugiere palabras de búsqueda y enlaces directos.</p>`}
- <label class="c" style="margin-top:12px">Antecedentes encontrados (pegue números y en qué se diferencian)<textarea id="f-antec" class="larga" data-campo="antecedentesHallados" data-id="${p.id}">${esc(p.antecedentesHallados)}</textarea></label></section>`}
+ ${patK?"":`<section class="panel"><h3>Búsqueda de antecedentes</h3><div class="fila">${linksBusqueda(p,M.clase(p.modalidad)).map(b=>`<a class="btn sec peq" target="_blank" rel="noopener" href="${esc(b.href)}">${esc(b.e)} ↗</a>`).join("")}</div><label class="c" style="margin-top:12px">Antecedentes encontrados (números y en qué se diferencian)<textarea id="f-antec" class="larga" data-campo="antecedentesHallados" data-id="${p.id}">${esc(p.antecedentesHallados)}</textarea></label></section>`}`}
 
 function pRed(p){const b=p.borrador||{};const oc=ui.ocupado["todo"+p.id];
- return`<section class="panel"><div class="cab"><div><h3>Taller de redacción</h3><p class="ayuda">Borrador de la solicitud con la estructura que pide la SIC. Revise y corrija cada parte: su criterio técnico es su aporte como inventor.</p></div>
+ return`${["pi","mu"].includes(M.clase(p.modalidad))?pAsistente(p)+pCalidad(p):""}<section class="panel"><div class="cab"><div><h3>Texto de la solicitud</h3><p class="ayuda">Lo que arma el asistente queda aquí. Puede corregir cualquier parte: la revisión de calidad se actualiza sola.</p></div>
  <div class="fila"><button class="btn ia" data-acc="redactarTodo" data-id="${p.id}" ${oc?"disabled":""}>${oc?"Redactando…":"Redactar lo que falta"}</button><button class="btn sec" data-acc="exportar" data-id="${p.id}">Descargar borrador</button></div></div>
  ${SECCIONES.map(([k,l,a])=>{const o=ui.ocupado[k+p.id];return`<div class="sec-red"><div class="h"><b>${l}</b><button class="btn ia peq" data-acc="redactar" data-sec="${k}" data-id="${p.id}" ${o?"disabled":""}>${o?"Escribiendo…":b[k]?"Reescribir":"Redactar"}</button></div><span class="ayuda">${a}</span><textarea id="r-${k}" class="${["descripcion","reivindicaciones","antecedentes"].includes(k)?"larga":""}" data-bor="${k}" data-id="${p.id}">${esc(b[k])}</textarea></div>`}).join("")}
  </section>`}
 
 function pDib(p){const d=dibujosDe(p);const oc=ui.ocupado["dib"+p.id];
- return`<section class="panel"><div class="cab"><div><h3>Bocetos de figuras</h3><p class="ayuda">Claude dibuja un boceto en líneas negras con números de referencia, como los de una solicitud. Para planos definitivos o modelos 3D, pídalos en el chat con el código ${esc(p.codigo)}.</p></div></div>
+ return`<section class="panel"><div class="cab"><div><h3>Figuras de la solicitud</h3><p class="ayuda">Haga el dibujo a mano (o tome una foto del prototipo), súbalo y póngale los números de referencia de sus partes. Patent-IA lo deja en blanco y negro, con líneas guía, listo para el paquete de la SIC.</p></div><button class="btn acc" data-acc="anotar" data-id="${p.id}">Subir boceto y poner números</button></div>
  <div class="campos"><label class="c ancho">¿Qué figura necesita?<input type="text" id="dib-pedido" placeholder="Ej.: vista superior del plato sin tapa, con todos los compartimentos numerados"></label></div>
  <div class="fila" style="margin-top:10px"><button class="btn ia" data-acc="dibujar" data-id="${p.id}" ${oc?"disabled":""}>${oc?"Dibujando…":"Dibujar con Claude"}</button></div></section>
- ${d.length?`<div class="grid g2">${d.map((x,i)=>`<div class="dibujo"><img alt="${esc(x.titulo)}" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(x.svg)}"><b>FIG. ${i+1} — ${esc(x.titulo)}</b><div class="fila"><button class="btn sec peq" data-acc="bajarSvg" data-id="${p.id}" data-ref="${x.ref}" data-i="${i}">Descargar SVG</button><button class="btn peligro peq" data-acc="borrarDib" data-id="${p.id}" data-ref="${x.ref}">Quitar</button></div></div>`).join("")}</div>`:`<div class="vacio">Aún no hay bocetos para este proyecto.</div>`}`}
+ ${d.length?`<div class="grid g2">${d.map((x,i)=>`<div class="dibujo"><img alt="${esc(x.titulo)}" src="${imgDib(x)}"><b>FIG. ${i+1} — ${esc(x.titulo)}</b><div class="fila"><button class="btn sec peq" data-acc="bajarSvg" data-id="${p.id}" data-ref="${x.ref}" data-i="${i}">Descargar</button><button class="btn peligro peq" data-acc="borrarDib" data-id="${p.id}" data-ref="${x.ref}">Quitar</button></div></div>`).join("")}</div>`:`<div class="vacio">Aún no hay bocetos para este proyecto.</div>`}`}
 
 function filaEv(e,conProy){let chk;
  if(e.vig)chk=`<input type="checkbox" aria-label="Marcar como revisada" data-vigrev="${e.vig}">`;
@@ -1294,7 +1292,7 @@ function campoCheck(p,k,l){return`<label class="ck"><input type="checkbox" id="x
 function pExp(p){const k=M.clase(p.modalidad);const H=hoyISO();
  if(k==="da"||k==="si"||k==="ob")return`<section class="panel"><h3>${esc(p.modalidad)}</h3><p>${k==="ob"?"La obra escrita (libro, capítulo o artículo) se protege con derecho de autor desde que se crea. El registro ante la DNDA es voluntario y gratuito. Para Minciencias, un libro o capítulo necesita ISBN y un artículo debe publicarse en una revista con ISSN. No tiene plazos de la SIC.":k==="da"?"El software se protege con derecho de autor desde que se crea. El registro ante la Dirección Nacional de Derecho de Autor (DNDA) es voluntario, gratuito y sirve como prueba. No tiene plazos de la SIC.":"El secreto industrial no se registra: se protege mientras se mantenga en reserva, con acuerdos de confidencialidad y medidas de seguridad (art. 260 D. 486). No tiene plazos de la SIC."}</p></section>
  <section class="panel"><h3>Trámites y tareas</h3>${manuales(p.id).length?tablaEv(manuales(p.id),false):`<div class="vacio">Sin tareas todavía.</div>`}</section>${formTram(p.id)}`;
- const A=M.alertas(p,H,S.licencias);let sug=M.etapaSugerida(p,H);if(sug==="concedida"&&S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado"))sug="licenciada";const req=M.requisitos(p);const ch=p.checklist||{};const hechosReq=req.filter(r=>ch[r[0]]).length;
+ const A=M.alertas(p,H,S.licencias);let sug=M.etapaSugerida(p,H);if(sug==="concedida"&&S.licencias.some(l=>l.proyectoId===p.id&&l.etapa==="firmado"))sug="licenciada";const req=M.requisitos(p);const ch=p.checklist||{};const hechosReq=req.filter(r=>ch[r[0]]||reqAuto(p,r[0])).length;
  const ev=[...eventosProy(p),...eventosLic().filter(e=>e.proyectoId===p.id),...manuales(p.id)].sort((a,b)=>(a.vence||"9").localeCompare(b.vence||"9"));
  const pat=k==="pi"||k==="mu";
  return`${A.length?`<div class="alerta" role="alert"><b>Revise esto</b><ul>${A.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
@@ -1312,7 +1310,7 @@ function pExp(p){const k=M.clase(p.modalidad);const H=hoyISO();
  ${campoFecha(p,"fechaConcesion","Concesión (resolución)")}
  ${campoFecha(p,"fechaNegacion","Notificación de la negación","Desde aquí corren los 10 días hábiles del recurso")}
  </div><div class="fila" style="margin-top:10px;gap:18px">${campoCheck(p,"prorrogaForma","Pedí prórroga del requerimiento de forma")}${pat?campoCheck(p,"prorrogaFondo","Pedí prórroga del requerimiento de fondo"):""}${campoCheck(p,"agente","Actúo por medio de agente o abogado")}</div></section>
- <section class="panel"><div class="cab"><h3>Requisitos para radicar</h3><span class="chip ${hechosReq===req.length?"v":"a"}">${hechosReq} de ${req.length}</span></div><div class="lista">${req.map(([key,l,n])=>`<label class="it ck" style="justify-content:flex-start"><input type="checkbox" data-req="${p.id}|${key}" ${ch[key]?"checked":""}> <span>${esc(l)} <span class="ayuda">· ${esc(n)}</span></span></label>`).join("")}</div></section>
+ ${pPaquete(p)}<section class="panel"><div class="cab"><h3>Requisitos para radicar</h3><span class="chip ${hechosReq===req.length?"v":"a"}">${hechosReq} de ${req.length}</span></div><div class="lista">${req.map(([key,l,n])=>`<label class="it ck" style="justify-content:flex-start"><input type="checkbox" data-req="${p.id}|${key}" ${ch[key]||reqAuto(p,key)?"checked":""} ${reqAuto(p,key)?'disabled title="Se marca solo cuando está completo"':""}> <span>${esc(l)} <span class="ayuda">· ${esc(n)}</span></span></label>`).join("")}</div></section>
  <section class="panel"><h3>Calendario legal</h3>${ev.length?tablaEv(ev,false):`<div class="vacio">Escriba la fecha de radicación${pat?" (o la de divulgación, si ya mostró el invento)":""} y Patent-IA calculará todos los plazos.</div>`}
  <p class="ayuda">Plazos calculados con la Decisión 486 de la CAN: los meses en calendario y los días en días hábiles de Colombia (sin fines de semana ni festivos); si un plazo termina en día no hábil, pasa al siguiente. Los términos de un requerimiento corren desde su notificación. Confírmelos siempre con el oficio de la SIC o con su agente.</p></section>
  ${formTram(p.id)}`}
@@ -1390,13 +1388,13 @@ const TIPOS_DOC=[["nda","Acuerdo de confidencialidad"],["cesion","Cesión de der
 const B="__________";
 function datosBase(p){const d=new Date();return{tit:p.titulo||B,mod:p.modalidad||"",sol:p.solicitante&&!/por definir/i.test(p.solicitante)?p.solicitante:(esSkynet()?"SKYNET GENESIS S.A.S.":(ORG&&ORG.nombre?String(ORG.nombre).toUpperCase():B)),inv:p.inventores||B,exp:p.expediente||B,rad:p.fechaRadicacion?fFecha(p.fechaRadicacion):"sin radicar",ciudad:esSkynet()?"Santa Marta":B,hoy:d.toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"})}}
 function plantilla(tipo,p,c){const d=datosBase(p);c=c||{};const emp=c.empresa||B,nit=c.nit||B,rep=c.representante||B;
- const objeto=`${d.mod.toLowerCase()} titulada «${d.tit}»${p.fechaRadicacion?`, radicada ante la Superintendencia de Industria y Comercio (SIC) el ${d.rad} con el expediente ${d.exp}`:", aún no radicada ante la Superintendencia de Industria y Comercio (SIC)"}`;
+ const og=artMod(d.mod)==="el"?"o":"a";const objeto=`${d.mod.toLowerCase()} titulad${og} «${d.tit}»${p.fechaRadicacion?`, radicad${og} ante la Superintendencia de Industria y Comercio (SIC) el ${d.rad} con el expediente ${d.exp}`:`, aún no radicad${og} ante la Superintendencia de Industria y Comercio (SIC)`}`;
  if(tipo==="nda")return`# ACUERDO DE CONFIDENCIALIDAD
 
 Entre ${d.sol}, en adelante LA PARTE REVELADORA, y ${emp}, identificada con NIT ${nit}, representada por ${rep}, en adelante LA PARTE RECEPTORA, se celebra este acuerdo, regido por las siguientes cláusulas:
 
 ## PRIMERA. Objeto
-LA PARTE REVELADORA compartirá con LA PARTE RECEPTORA información técnica y comercial relacionada con la ${objeto}, con el único fin de evaluar un posible acuerdo de licencia, fabricación o compra (en adelante, EL PROPÓSITO).
+LA PARTE REVELADORA compartirá con LA PARTE RECEPTORA información técnica y comercial relacionada con ${artMod(d.mod)} ${objeto}, con el único fin de evaluar un posible acuerdo de licencia, fabricación o compra (en adelante, EL PROPÓSITO).
 
 ## SEGUNDA. Información confidencial
 Es confidencial toda información entregada por cualquier medio: descripciones, dibujos, planos, prototipos, muestras, fórmulas, datos de pruebas, costos y planes comerciales. No es confidencial la información que (a) ya sea pública sin culpa de LA PARTE RECEPTORA, (b) esta demuestre haber conocido antes por escrito, o (c) deba entregarse por orden de autoridad, caso en el que avisará de inmediato a LA PARTE REVELADORA.
@@ -1431,7 +1429,7 @@ ${rep} — ${emp}`;
 Yo, ${d.inv}, mayor de edad, identificado con cédula de ciudadanía número ${B}, en mi calidad de inventor, en adelante EL CEDENTE, declaro:
 
 ## PRIMERO. Invención
-Que soy el inventor de la ${objeto}, cuyo contenido técnico consta en la descripción, reivindicaciones y dibujos preparados para la solicitud.
+Que soy el inventor ${artMod(d.mod)==="el"?"del":"de la"} ${objeto}, cuyo contenido técnico consta en la descripción, reivindicaciones y dibujos preparados para la solicitud.
 
 ## SEGUNDO. Cesión
 Que, de conformidad con el artículo 22 de la Decisión 486 de la Comunidad Andina, cedo a ${d.sol}, identificada con NIT ${B}, en adelante EL CESIONARIO, todos los derechos sobre dicha invención, incluido el derecho a solicitar y obtener la ${d.mod.toLowerCase()} en Colombia y en cualquier otro país, y a invocar la prioridad correspondiente.
@@ -1461,7 +1459,7 @@ Representante legal de ${d.sol}`;
 Entre ${d.sol}, en adelante EL LICENCIANTE, y ${emp}, identificada con NIT ${nit}, representada por ${rep}, en adelante EL LICENCIATARIO, se celebra este contrato:
 
 ## PRIMERA. Objeto
-EL LICENCIANTE concede a EL LICENCIATARIO una licencia ${excl?"exclusiva":"no exclusiva"} para fabricar, usar, ofrecer en venta, vender e importar productos que incorporen la ${objeto} (en adelante, LOS PRODUCTOS).
+EL LICENCIANTE concede a EL LICENCIATARIO una licencia ${excl?"exclusiva":"no exclusiva"} para fabricar, usar, ofrecer en venta, vender e importar productos que incorporen ${artMod(d.mod)} ${objeto} (en adelante, LOS PRODUCTOS).
 
 ## SEGUNDA. Territorio y plazo
 La licencia rige en ${c.territorio||"la República de Colombia"} por ${c.plazo||B} años desde la firma, sin exceder la vigencia de la protección.${excl?" Durante ese plazo EL LICENCIANTE no otorgará otras licencias en el territorio.":""}
@@ -1473,7 +1471,7 @@ EL LICENCIATARIO pagará: (a) un pago inicial de ${ini} a la firma; (b) una rega
 Con cada pago, EL LICENCIATARIO entregará un informe de unidades vendidas, precios y ventas netas. EL LICENCIANTE podrá revisar, una vez al año y con aviso de 15 días, los registros contables que soporten esos informes.
 
 ## QUINTA. Calidad y marcado
-LOS PRODUCTOS cumplirán las normas técnicas y sanitarias aplicables y llevarán la indicación de la ${d.mod.toLowerCase()} y su número cuando se conceda.
+LOS PRODUCTOS cumplirán las normas técnicas y sanitarias aplicables y llevarán la indicación ${artMod(d.mod)==="el"?"del":"de la"} ${d.mod.toLowerCase()} y su número cuando se conceda.
 
 ## SEXTA. Mejoras
 Las mejoras que EL LICENCIATARIO desarrolle sobre la invención se comunicarán a EL LICENCIANTE, que tendrá derecho preferente a licenciarlas.
@@ -1545,7 +1543,7 @@ function textoAHtml(txt,p,ficha,firmas){const L=String(txt).split("\n");let h=""
  for(const raw of L){const t=raw.trimEnd();if(t.startsWith("- ")){if(!enLista){h+="<ul>";enLista=true}h+=`<li>${esc(t.slice(2))}</li>`;continue}if(enLista){h+="</ul>";enLista=false}
   if(t.startsWith("# "))h+=`<h1>${esc(t.slice(2))}</h1>`;else if(t.startsWith("## "))h+=`<h2>${esc(t.slice(3))}</h2>`;else if(t.trim())h+=`<p>${esc(t)}</p>`}
  if(enLista)h+="</ul>";
- const fig=ficha&&dibujosDe(p)[0]?`<div class="fig"><img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(dibujosDe(p)[0].svg)}"></div>`:"";
+ const fig=ficha&&dibujosDe(p)[0]?`<div class="fig"><img alt="" src="${imgDib(dibujosDe(p)[0])}"></div>`:"";
  const css=ficha?`body{font-family:"Public Sans",Arial,sans-serif;max-width:760px;margin:24px auto;padding:0 22px;color:#1C2B39;line-height:1.5}h1{font-family:"Barlow Condensed",Arial Narrow,sans-serif;color:#0B4F8A;font-size:34px;margin:0 0 6px}h2{font-family:"Barlow Condensed",Arial Narrow,sans-serif;color:#0E8571;font-size:19px;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 4px;border-bottom:2px solid #E3F6F2}.fig{text-align:center;margin:10px 0}.fig img{max-height:260px}ul{margin:4px 0;padding-left:20px}.top{height:6px;background:linear-gradient(90deg,#0B4F8A,#14A38B);margin-bottom:18px}`
   :`body{font-family:Arial,sans-serif;max-width:760px;margin:30px auto;padding:0 22px;line-height:1.6;color:#000}h1{font-size:18px;text-align:center}h2{font-size:14px;margin:16px 0 4px}p{text-align:justify;white-space:pre-wrap;margin:0 0 8px}.c{border:1px solid #000;padding:6px;text-align:center;font-size:12px;font-weight:bold}`;
  return`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc((L.find(x=>x.startsWith("# "))||"#  Documento").slice(2))}</title><style>${css}.pie{margin-top:36px;border-top:1px solid #DCE5EE;font-size:11px;text-align:center;padding-top:6px;color:#5D6B78}</style></head><body>${ficha?`<div class="top"></div>`:`<div class="c">MODELO PARA REVISIÓN DE UN ABOGADO ANTES DE FIRMAR</div>`}${ficha?h.replace("</h1>","</h1>"+fig):h}${firmasHtml(firmas)}<div class="pie">Generado con Patent-IA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758 · ${new Date().toLocaleDateString("es-CO")}</div></body></html>`}
@@ -1645,7 +1643,7 @@ function exportar(id){const p=proy(id);const b=p.borrador||{};
  const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(b.titulo||p.titulo)}</title><style>body{font-family:Arial,sans-serif;max-width:760px;margin:30px auto;padding:0 20px;line-height:1.55;color:#000}h1{font-size:20px;text-align:center}h2{font-size:14px;text-transform:uppercase;margin-top:24px}.c{border:1px solid #000;padding:6px;text-align:center;font-weight:bold;font-size:12px}p,pre{white-space:pre-wrap;font-family:inherit;text-align:justify}.m{text-align:center;font-size:13px}.fig{text-align:center;margin:20px 0;page-break-inside:avoid}.fig img{max-width:100%}.pie{margin-top:40px;border-top:1px solid #000;font-size:11px;text-align:center;padding-top:6px}</style></head><body>
 <div class="c">BORRADOR CONFIDENCIAL — NO DIVULGAR ANTES DE RADICAR</div><h1>${esc(b.titulo||p.titulo)}</h1><div class="m">${esc(p.modalidad)} · ${esc(p.codigo)}<br>Inventor(es): ${esc(p.inventores)} · Solicitante: ${esc(p.solicitante)}${p.expediente?"<br>Expediente SIC: "+esc(p.expediente):""}</div>
 ${SECCIONES.filter(([k])=>k!=="titulo"&&b[k]).map(([k,l])=>`<h2>${l}</h2><pre>${esc(b[k])}</pre>`).join("")}
-${dibujosDe(p).length?`<h2>Dibujos</h2>${dibujosDe(p).map((d,i)=>`<div class="fig"><img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(d.svg)}"><div><b>FIG. ${i+1}</b></div></div>`).join("")}`:""}
+${dibujosDe(p).length?`<h2>Dibujos</h2>${dibujosDe(p).map((d,i)=>`<div class="fig"><img alt="" src="${imgDib(d)}"><div><b>FIG. ${i+1}</b></div></div>`).join("")}`:""}
 <div class="pie">Generado con Patent-IA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 3044375758 · ${new Date().toLocaleDateString("es-CO")}</div></body></html>`;
  bajar(`${p.codigo}_borrador.html`,html)}
 async function bajar(nombre,data){if(!downloads){toast("Las descargas no están disponibles en esta vista.");return}try{await downloads.save({filename:nombre,data});toast("Archivo listo")}catch(e){if(e&&e.code==="declined")return;toast("No se pudo descargar el archivo.")}}
@@ -1740,7 +1738,7 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest("button,a
   case"redactarTodo":if(!sample){usarPlantilla(id);break}redactarTodo(id);break;
   case"exportar":exportar(id);break;
   case"dibujar":if(!sample){toast("Haga los planos en su programa de dibujo o pídalos a su asistente de IA, y agregue el enlace en Bitácora y archivos.");break}dibujar(id);break;
-  case"bajarSvg":{const p=proy(id);const d=dibujosDe(p).find(x=>x.ref===t.dataset.ref);if(d)bajar(`${p.codigo}_FIG${+t.dataset.i+1}.svg`,limpiarSvg(d.svg)||d.svg);break}
+  case"bajarSvg":{const p=proy(id);const d=dibujosDe(p).find(x=>x.ref===t.dataset.ref);if(d&&d.img){fetch(d.img).then(r=>r.blob()).then(bl=>bajar(`${p.codigo}_FIG${+t.dataset.i+1}.jpg`,bl));break}if(d)bajar(`${p.codigo}_FIG${+t.dataset.i+1}.svg`,limpiarSvg(d.svg)||d.svg);break}
   case"borrarDib":{const ref=t.dataset.ref;confirmar("¿Quitar este boceto?",async()=>{if(ref[0]==="D")await borrar("dibujos",ref.slice(1));else{const p=proy(id);const d=[...(p.dibujos||[])];d.splice(+ref.slice(1),1);await parchear("proyectos",id,{dibujos:d})}render()},"Quitar");break}
   case"etapaSug":await parchear("proyectos",id,{etapa:t.dataset.etapa});render();toast("Etapa actualizada");break;
   case"agregarTram":{const pid=id||$("#t-proy")?.value;const vence=$("#t-vence").value;if(!pid){toast("Elija un proyecto.");return}const tid=uid();const x={proyectoId:pid,tipo:$("#t-tipo").value,vence,valor:+$("#t-valor").value||0,notas:$("#t-notas").value.trim(),estado:"pendiente",creado:new Date().toISOString()};local("tramites",tid,x);if(await guardar("tramites",tid,x)){limpiarTmp("t-");toast("Trámite agregado")}render();break}
@@ -1809,7 +1807,7 @@ function estado(cls,txt){const e=$("#estado");e.className="estado "+cls;e.queryS
 async function iniciar(){
  if(REMOTO){await iniciarRemoto();return}
  if(window.PATENTIA_DEMO){downloads=descargasLocales;try{const d=await window.claude?.use?.("downloads");if(d)downloads=d}catch(e){}iniciarDemo();return}
- MODO="claude";ORG={id:"skynet",nombre:"SkyNet Genesis",modulos:Object.fromEntries(Object.keys(MOD_INFO).map(m=>[m,true])),pago:{estado:"activa"},valor:PRECIOS.mensual,interna:true};YO={id:"local",nombre:"Administrador",email:"superadmin.patentes@skynetgenesis.com",rol:"admin"};
+ MODO="claude";ORG={id:"skynet",nombre:"SkyNet Genesis",modulos:Object.fromEntries(Object.keys(MOD_INFO).map(m=>[m,true])),pago:{estado:"activa"},valor:PRECIOS.mensual,interna:true};YO={id:"local",nombre:"Ricardo Londoño González",email:"contacto@skynetgenesis.com",rol:"admin"};
  const c=window.claude;
  const [d,s,dl,as]=await Promise.all([c?.use?.("db"),c?.use?.("sample"),c?.use?.("downloads"),c?.use?.("assets")].map(p=>Promise.resolve(p).catch(()=>null)));
  db=d||null;sample=s||null;downloads=dl||null;assets=as||null;
@@ -2078,6 +2076,279 @@ document.addEventListener("change",ev=>{const el=ev.target;
  if(el.id==="filtroTit"){ui.filtroTit=el.value;render();return}
  if(el.id==="sa-veremit"){ui.verEmitidas=el.checked;render();return}},true);
 document.addEventListener("input",ev=>{const el=ev.target;if(el.id==="sa-busca"){const q=el.value.toLowerCase().trim();for(const r of document.querySelectorAll("#sa-cuentas tbody tr"))r.hidden=!!q&&!r.dataset.busca.includes(q)}});
+
+/* ===== v5: ayuda real para inventar y radicar ===== */
+/* Gramática básica para armar textos técnicos en español */
+const FEM_EXC=new Set(["sistema","problema","mapa","día","dia","programa","esquema","tema","diagrama","prisma","clima","idioma","planeta","poema","aroma","cometa"]);
+function genAuto(w){const x=String(w||"").trim().toLowerCase().split(/\s+/)[0]||"";if(FEM_EXC.has(x))return"m";return/(a|ión|ion|dad|tad|tud|umbre|sis)$/.test(x)?"f":"m"}
+const artD=g=>g==="f"?"la":"el",artI=g=>g==="f"?"una":"un",unido=g=>g==="f"?"unida":"unido";
+const minI=s=>{s=String(s||"").trim();return s?s.charAt(0).toLowerCase()+s.slice(1):""},mayI=s=>{s=String(s||"").trim();return s?s.charAt(0).toUpperCase()+s.slice(1):""};
+const sinPunto=s=>String(s||"").trim().replace(/[.;,\s]+$/,"");
+function enumerar(L){L=L.filter(Boolean);return L.length<2?(L[0]||""):L.slice(0,-1).join(", ")+" y "+L[L.length-1]}
+const lineas=t=>String(t||"").split("\n").map(x=>x.trim()).filter(Boolean);
+function artMod(m){return/^(modelo|diseño|derecho|secreto)/i.test(String(m||""))?"el":"la"}
+
+/* --- Entrevista del invento (base de la redacción y de la comparación) --- */
+const ent=p=>p.entrevista||{};
+const elems=p=>(ent(p).elementos||[]).map((e,i)=>({...e,n:e.n||10*(i+1),gen:e.gen||genAuto(e.nombre)})).filter(e=>String(e.nombre||"").trim());
+const refE=e=>`${artD(e.gen)} ${e.nombre.trim()} (${e.n})`;
+function elemPorId(p,id){return elems(p).find(e=>e.id===id)}
+function rasgosNuevos(p){const R=lineas(ent(p).rasgos);if(R.length)return R.map(sinPunto);return elems(p).filter(e=>e.nuevo).map(e=>`${refE(e)} ${sinPunto(e.funcion)||"está presente"}`)}
+function rasgosComparar(p){/* características que se comparan contra cada documento encontrado */
+ const hayR=lineas(ent(p).rasgos).length;const L=elems(p).filter(e=>e.esencial!==false&&!(hayR&&e.nuevo)).map(e=>({k:"e"+e.id,t:`${mayI(e.nombre)}${e.funcion?` que ${sinPunto(minI(e.funcion))}`:""}`}));
+ lineas(ent(p).rasgos).forEach((r,i)=>L.push({k:"r"+i,t:mayI(sinPunto(r)),nuevo:1}));return L}
+function entrevistaLista(p){const E=ent(p);return!!(String(E.objeto||"").trim()&&elems(p).length>=2)}
+
+function armarSolicitud(p){const E=ent(p),k=M.clase(p.modalidad),og=E.gen||genAuto(E.objeto),obj=sinPunto(E.objeto),uso=sinPunto(E.uso),objU=`${obj}${uso?" "+uso:""}`;
+ const Ls=elems(p),es=Ls.filter(e=>e.esencial!==false),R=rasgosNuevos(p);const quien=k==="mu"?"El presente modelo de utilidad":k==="di"?"El presente diseño industrial":"La presente invención";
+ const docs=docsParecidos(p);
+ const campo=`${quien} se refiere ${E.campo?`al campo de ${sinPunto(minI(E.campo))}, y más particularmente a`:"a"} ${artI(og)} ${objU}.`;
+ let ant;if(docs.length){ant=`En el estado de la técnica se conocen soluciones para el problema que aquí se resuelve. `+docs.map(d=>{const r=revis(p,d.numero);return`El documento ${d.numero}${d.solicitante?` (${d.solicitante})`:""} ${r.queHace?`describe ${sinPunto(minI(r.queHace))}`:`se titula «${d.tituloEs||d.titulo}»`}${r.diferencia?`; sin embargo, ${sinPunto(minI(r.diferencia))}`:""}.`}).join(" ")+(R.length?` Ninguno de estos documentos describe ${artI(og)} ${obj} en ${og==="f"?"la":"el"} que ${sinPunto(minI(R[0]))}.`:"")}
+ else ant="";
+ const prob=`${sinPunto(p.problema)}.`;
+ const figs=dibujosDe(p),figPlan=lineas(E.figuras);const nf=figs.length||figPlan.length;
+ const dibDesc=(figs.length?figs.map((f,i)=>`FIG. ${i+1}: ${sinPunto(f.titulo)||"vista de "+artD(og)+" "+obj}.`):figPlan.map((f,i)=>`FIG. ${i+1}: ${sinPunto(f)}.`)).join("\n");
+ const P=[];
+ P.push(`${nf?`Con referencia a las figuras, ${artD(og)}`:mayI(artD(og))} ${objU} comprende ${enumerar(es.map(e=>`${artI(e.gen)} ${e.nombre.trim()} (${e.n})`))}.`);
+ for(const e of Ls){let s=`${mayI(refE(e))}`;const parts=[];if(e.material)parts.push(`es de ${sinPunto(e.material)}`);if(e.funcion)parts.push(sinPunto(minI(e.funcion)));
+  if(parts.length)P.push(`${s} ${parts.join(" y ")}.`);
+  const u=e.unidoA&&elemPorId(p,e.unidoA);if(u)P.push(`${s} está ${unido(e.gen)} a ${refE(u)}${e.union?` ${sinPunto(minI(e.union))}`:""}.`)}
+ if(R.length)P.push(`Una característica de ${artD(og)} ${obj} es que ${enumerar(R.map(minI))}.`);
+ const pasos=lineas(E.pasos);if(pasos.length)P.push(`En funcionamiento, ${pasos.map((x,i)=>(i===0?"primero, ":i===pasos.length-1?"finalmente, ":"luego, ")+sinPunto(minI(x))).join("; ")}.`);
+ const vent=lineas(E.ventajas);if(vent.length)P.push(`Gracias a esta configuración, ${enumerar(vent.map(x=>sinPunto(minI(x))))}.`);
+ const vars=lineas(E.variantes);vars.forEach(v=>P.push(`En otra forma de realización, ${sinPunto(minI(v))}.`));
+ P.push(`La descripción anterior corresponde a una forma preferida de realización. Los materiales, formas y dimensiones pueden variar sin apartarse del alcance definido por las reivindicaciones.`);
+ const titC=mayI(objU);const cl=[];
+ cl.push(`1. ${titC}, que comprende: ${es.map(e=>`${artI(e.gen)} ${e.nombre.trim()} (${e.n})${e.funcion?` que ${sinPunto(minI(e.funcion))}`:""}`).join("; ")}; caracterizad${og==="f"?"a":"o"} porque ${R.length?R.map(minI).join("; y porque "):"[falta la característica nueva]"}.`);
+ const objC=mayI(obj);vars.forEach(v=>cl.push(`${cl.length+1}. ${objC} según la reivindicación 1, caracterizad${og==="f"?"a":"o"} porque ${sinPunto(minI(v))}.`));
+ Ls.filter(e=>e.material).slice(0,6).forEach(e=>cl.push(`${cl.length+1}. ${objC} según cualquiera de las reivindicaciones anteriores, caracterizad${og==="f"?"a":"o"} porque ${refE(e)} es de ${sinPunto(e.material)}.`));
+ let res=`${titC}, que comprende ${enumerar(es.map(e=>`${artI(e.gen)} ${e.nombre.trim()} (${e.n})`))}${R.length?`, en ${og==="f"?"la":"el"} que ${sinPunto(minI(R[0]))}`:""}. ${vent.length?`Con esto, ${sinPunto(minI(vent[0]))}. `:""}Resuelve el siguiente problema: ${sinPunto(minI(p.problema))}.`;
+ const w=res.split(/\s+/);if(w.length>150)res=w.slice(0,148).join(" ").replace(/[,;]$/,"")+".";
+ const cx=t=>String(t).replace(/(^|[\s(])a el /g,"$1al ").replace(/(^|[\s(])de el /g,"$1del ").replace(/(^|[\s(])A el /g,"$1Al ").replace(/(^|[\s(])De el /g,"$1Del ");
+ return{titulo:p.titulo,campo:cx(campo),antecedentes:cx(ant),problema:prob,descripcion:cx(P.join("\n\n")),dibujosDesc:dibDesc,reivindicaciones:cx(cl.join("\n\n")),resumen:cx(res),referencias:Ls.map(e=>`${e.n} — ${e.nombre.trim()}`).join("\n")}}
+
+/* --- Revisión de calidad: ningún paso queda "hecho" con huecos --- */
+function calidad(p){const b=p.borrador||{},k=M.clase(p.modalidad),Q=[];const add=(sec,msg)=>Q.push({sec,msg});
+ if(!(k==="pi"||k==="mu"))return Q;
+ for(const[s,l]of SECCIONES){const t=String(b[s]||"").trim();if(!t)add(s,`Falta la sección «${l}».`);else if(/\[[^\]]*\]/.test(t)||/_{4,}/.test(t))add(s,`«${l}» todavía tiene espacios en blanco entre corchetes [ ].`)}
+ const rv=String(b.reivindicaciones||"");if(rv.trim()){if(!/^\s*1\./.test(rv))add("reivindicaciones","Las reivindicaciones deben empezar por la número 1.");
+  const c1=rv.split(/\n\s*\n|\n(?=\s*2\.)/)[0];if(!/caracterizad[oa]s?\s+porque/i.test(c1))add("reivindicaciones","La reivindicación 1 no tiene la parte «caracterizado porque» con lo que es nuevo.");
+  const nums=[...rv.matchAll(/(?:^|\n)\s*(\d+)\./g)].map(m=>+m[1]);nums.forEach((n,i)=>{if(n!==i+1)add("reivindicaciones",`La numeración de las reivindicaciones salta en la ${n}.`)});
+  for(const m of rv.matchAll(/reivindicaci[oó]n(?:es)?\s+(\d+)/gi))if(+m[1]>nums.length)add("reivindicaciones",`Se cita la reivindicación ${m[1]}, que no existe.`)}
+ const ref=new Set([...String(b.referencias||"").matchAll(/(?:^|\n)\s*(\d{1,3})\s*[—\-–:]/g)].map(m=>m[1]));
+ const enDesc=new Set([...String(b.descripcion||"").matchAll(/\((\d{1,3})\)/g)].map(m=>m[1]));
+ const enRei=new Set([...rv.matchAll(/\((\d{1,3})\)/g)].map(m=>m[1]));
+ for(const n of enDesc)if(ref.size&&!ref.has(n))add("referencias",`El número (${n}) de la descripción no está en la lista de referencias.`);
+ for(const n of ref)if(!enDesc.has(n))add("descripcion",`La referencia ${n} no aparece en la descripción.`);
+ for(const n of enRei)if(!enDesc.has(n))add("reivindicaciones",`El número (${n}) de las reivindicaciones no está en la descripción.`);
+ const pr=String(b.resumen||"").trim().split(/\s+/).filter(Boolean).length;if(pr>150)add("resumen",`El resumen tiene ${pr} palabras; el máximo es 150.`);
+ if(/[®™©]/.test(String(b.titulo||"")))add("titulo","El título no puede llevar marcas registradas.");
+ if(String(b.titulo||"").split(/\s+/).length>20)add("titulo","El título es muy largo: déjelo técnico y corto.");
+ if(!docsParecidos(p).length&&!busquedaHecha(p))add("antecedentes","Haga la búsqueda de antecedentes: la sección «Antecedentes» debe citar lo que ya existe.");
+ const figs=dibujosDe(p);if(!figs.length)add("figuras",k==="mu"?"El modelo de utilidad necesita al menos una figura.":"Agregue las figuras (casi siempre son necesarias para entender el invento).");
+ const fd=(String(b.dibujosDesc||"").match(/FIG\.\s*\d+/gi)||[]).length;if(figs.length&&fd!==figs.length)add("dibujosDesc",`La descripción de las figuras menciona ${fd} figura(s), pero hay ${figs.length}.`);
+ for(const[i,f]of figs.entries())for(const n of (f.numeros||[]))if(ref.size&&!ref.has(String(n)))add("figuras",`La FIG. ${i+1} tiene el número ${n}, que no está en las referencias.`);
+ return Q}
+const redaccionLista=p=>{const b=p.borrador||{};return SECCIONES.every(([s])=>String(b[s]||"").trim())&&!calidad(p).some(q=>q.sec!=="figuras")};
+
+/* --- Búsqueda de antecedentes --- */
+const bq=p=>p.busqueda||{};
+const revis=(p,num)=>(bq(p).revisados||{})[num]||{};
+function docsRevisados(p){return Object.entries(bq(p).revisados||{}).map(([numero,r])=>({numero,...(r.doc||{}),...r}))}
+const docsParecidos=p=>docsRevisados(p).filter(d=>d.rel==="parecido");
+function busquedaHecha(p){const B0=bq(p);return(B0.hechas||0)>=1&&(docsRevisados(p).length>=Math.min(3,B0.vistos||3)||(B0.hechas>=2&&!B0.vistos))}
+function conceptos(p){const C=bq(p).conceptos;if(Array.isArray(C)&&C.length)return C;
+ const w=[...new Set(String(p.titulo||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").split(/[^a-z0-9ñ]+/).filter(x=>x.length>3&&!STOP.has(x)))].slice(0,4);return w.map(x=>({es:x,en:""}))}
+function cqlDe(C,cpc){const g=C.map(c=>String(c.en||"").split(/[,;]/).map(x=>x.trim().toLowerCase().replace(/[^a-z0-9 \-*]/g,"").trim()).filter(x=>x.length>1).slice(0,4)).filter(x=>x.length);
+ return g.map(x=>"("+x.map(t=>t.includes(" ")?`ta="${t}"`:`ta=${t}`).join(" OR ")+")").join(" AND ")+(cpc?` AND cpc=${cpc}`:"")}
+function gpDe(C){return C.map(c=>String(c.en||"").split(/[,;]/).map(x=>x.trim()).filter(Boolean)).filter(x=>x.length).map(x=>"("+x.map(t=>t.includes(" ")?`"${t}"`:t).join(" OR ")+")").join(" ")}
+function pBusqueda(p){const B0=bq(p),C=conceptos(p);const res=ui.bqRes&&ui.bqRes.pid===p.id?ui.bqRes:null;const cql=cqlDe(C,B0.cpc);const rv=B0.revisados||{};
+ const fila=(d,lista)=>{const r=rv[d.numero]||{};return`<div class="it" style="align-items:flex-start;flex-wrap:wrap"><div style="flex:1;min-width:240px"><div class="t"><a href="${esc(d.enlace||("https://worldwide.espacenet.com/patent/search?q=pn%3D"+encodeURIComponent(d.numero)))}" target="_blank" rel="noopener">${esc(d.numero)}</a> · ${esc(d.titulo||d.tituloEs||"")}</div><div class="d">${esc(d.solicitante||"")}${d.fecha?` · ${fFecha(d.fecha)}`:""}${(d.cpc||[]).length?` · CPC ${esc(d.cpc.join(", "))}`:""}</div>${d.resumen?`<details><summary class="ayuda" style="cursor:pointer">Ver resumen</summary><p class="ayuda" style="margin:4px 0">${esc(d.resumen)}</p></details>`:""}</div>
+  <div class="fila">${r.rel?`<span class="chip ${r.rel==="parecido"?"a":"v"}">${r.rel==="parecido"?"Parecido":"Distinto"}</span>`:""}<button class="btn ${r.rel==="parecido"?"acc":"sec"} peq" data-acc="bqMarca" data-id="${p.id}" data-num="${esc(d.numero)}" data-rel="parecido" data-lista="${lista}">Parecido</button><button class="btn ${r.rel==="distinto"?"acc":"sec"} peq" data-acc="bqMarca" data-id="${p.id}" data-num="${esc(d.numero)}" data-rel="distinto" data-lista="${lista}">Distinto</button></div></div>`};
+ return`<section class="panel" id="bq-panel"><div class="cab"><div><h3>1. Buscar lo que ya existe</h3><p class="ayuda">Escriba las ideas clave de su invento (conceptos) y, para cada una, las palabras en inglés con sinónimos separados por comas: la mayoría de las patentes del mundo están en inglés. Patent-IA arma la búsqueda profesional (cada concepto con sus sinónimos) y busca en la base mundial de patentes de la Oficina Europea (más de 140 millones de documentos, incluidos los de Colombia).</p></div></div>
+ <div class="tabla-w"><table><thead><tr><th>Concepto (en español)</th><th>Palabras en inglés y sinónimos</th><th></th></tr></thead><tbody>${C.map((c,i)=>`<tr><td><input type="text" id="bq-es${i}" value="${esc(c.es)}" aria-label="Concepto ${i+1}"></td><td><input type="text" id="bq-en${i}" value="${esc(c.en)}" placeholder="ej.: vest, jacket, garment" aria-label="Inglés ${i+1}"></td><td><button class="btn sec peq" data-acc="bqQuitar" data-id="${p.id}" data-i="${i}" aria-label="Quitar concepto">×</button></td></tr>`).join("")}</tbody></table></div>
+ <div class="campos" style="margin-top:8px"><label class="c">Clasificación CPC (opcional)<input type="text" id="bq-cpc" value="${esc(B0.cpc||"")}" placeholder="ej.: A61H"></label></div>
+ <div class="fila" style="margin-top:10px"><button class="btn sec peq" data-acc="bqAgregar" data-id="${p.id}">+ Concepto</button>${MODO==="servidor"?`<button class="btn sec peq" data-acc="bqTraducir" data-id="${p.id}">Sugerir palabras en inglés</button>`:""}<button class="btn acc" data-acc="bqBuscar" data-id="${p.id}">${MODO==="servidor"?"Buscar aquí":"Guardar los conceptos"}</button>
+ ${cql?`<a class="btn sec peq" target="_blank" rel="noopener" href="https://worldwide.espacenet.com/patent/search?q=${encodeURIComponent(cql)}">Abrir en Espacenet ↗</a><a class="btn sec peq" target="_blank" rel="noopener" href="https://patents.google.com/?q=${encodeURIComponent(gpDe(C))}">Abrir en Google Patents ↗</a>`:""}<a class="btn sec peq" target="_blank" rel="noopener" href="https://sipi.sic.gov.co/">SIC (SIPI) ↗</a></div>
+ ${cql?`<p class="ayuda" style="margin:6px 0 0">Búsqueda armada: <code style="overflow-wrap:anywhere">${esc(cql)}</code></p>`:""}
+ ${res?`<h4 style="margin:14px 0 6px">${res.total?`${res.total.toLocaleString("es-CO")} documento(s) encontrados · se muestran ${res.docs.length}`:"No se encontraron documentos con esas palabras. Pruebe con sinónimos o quite un concepto."}</h4>${res.docs.length?`<p class="ayuda" style="margin:0 0 6px">Abra los que se parezcan y márquelos: <b>Parecido</b> si resuelve el mismo problema de forma similar, <b>Distinto</b> si no.</p><div class="lista">${res.docs.map(d=>fila(d,"res")).join("")}</div>${res.docs.length>=25&&res.desde<76?`<button class="btn sec peq" data-acc="bqMas" data-id="${p.id}" style="margin-top:8px">Ver 25 más</button>`:""}`:""}`:""}
+ <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;color:var(--azul)">+ Agregar un documento encontrado en otra parte</summary><div class="campos" style="margin-top:8px"><label class="c">Número<input type="text" id="bq-mnum" placeholder="ej.: US2019123456A1"></label><label class="c ancho">Título<input type="text" id="bq-mtit"></label><label class="c">Solicitante<input type="text" id="bq-msol"></label><label class="c ancho">Qué describe<input type="text" id="bq-mres"></label></div><div class="fila" style="margin-top:8px"><button class="btn acc peq" data-acc="bqManual" data-id="${p.id}">Agregar como parecido</button></div></details>
+ ${Object.keys(rv).length?`<details ${res?"":"open"} style="margin-top:14px"><summary style="cursor:pointer;font-weight:600">Documentos revisados (${Object.keys(rv).length})</summary><div class="lista">${docsRevisados(p).map(d=>fila(d,"rev")).join("")}</div></details>`:""}</section>`}
+
+/* --- Comparación: ¿es nuevo frente a lo encontrado? --- */
+function novedad(p){const F=rasgosComparar(p),D=docsParecidos(p);if(!busquedaHecha(p))return{estado:"sin_busqueda"};if(!F.length)return{estado:"sin_partes"};
+ if(!D.length)return{estado:"nuevo",F,D,dist:F,txt:`No se marcó ningún documento parecido entre los ${docsRevisados(p).length} revisados.`};
+ const falta=D.filter(d=>!d.comparado);if(falta.length)return{estado:"pendiente",F,D,falta};
+ const cub=d=>F.filter(f=>(d.rasgos||{})[f.k]);const igual=D.find(d=>cub(d).length===F.length);
+ if(igual)return{estado:"no_nuevo",F,D,doc:igual};
+ const cerca=D.reduce((a,d)=>cub(d).length>cub(a).length?d:a,D[0]);const dist=F.filter(f=>!(cerca.rasgos||{})[f.k]);
+ const combinado=D.length>1&&dist.every(f=>D.some(d=>d!==cerca&&(d.rasgos||{})[f.k]));
+ return{estado:combinado?"combinacion":"nuevo",F,D,cerca,dist}}
+const novedadHecha=p=>["nuevo","combinacion","no_nuevo"].includes(novedad(p).estado);
+function pComparacion(p){const n=novedad(p),F=rasgosComparar(p),D=docsParecidos(p);
+ let h=`<section class="panel" id="cmp-panel"><h3>2. ¿Es nuevo? Compare su invento con lo encontrado</h3>`;
+ if(n.estado==="sin_partes")return h+`<div class="aviso">Primero describa las partes de su invento en <button class="btn sec peq" data-acc="rutaIr" data-ir="redaccion" data-foco="en-objeto" data-id="${p.id}">Ir a Redacción → Asistente</button>: la comparación se hace parte por parte.</div></section>`;
+ if(n.estado==="sin_busqueda")return h+`<div class="aviso">Haga primero la búsqueda (arriba) y marque al menos 3 documentos como parecidos o distintos.</div></section>`;
+ h+=`<p class="ayuda" style="margin-top:-6px">Para cada documento parecido, marque las características de su invento que ese documento <b>también tiene</b>. La ley exige que ningún documento tenga todas a la vez (novedad, Art. 16 D. 486).</p>`;
+ if(D.length)h+=`<div class="tabla-w"><table><thead><tr><th>Característica de su invento</th>${D.map(d=>`<th style="min-width:110px">${esc(d.numero)}</th>`).join("")}</tr></thead><tbody>${F.map(f=>`<tr><td>${esc(f.t)}${f.nuevo?` <span class="chip g">la nueva</span>`:""}</td>${D.map(d=>`<td style="text-align:center"><input type="checkbox" aria-label="${esc(d.numero)} tiene ${esc(f.t)}" data-cmp="${p.id}|${esc(d.numero)}|${f.k}" ${(d.rasgos||{})[f.k]?"checked":""}></td>`).join("")}</tr>`).join("")}
+  <tr><td><b>Ya revisé este documento</b></td>${D.map(d=>`<td style="text-align:center"><input type="checkbox" aria-label="Comparado ${esc(d.numero)}" data-cmpok="${p.id}|${esc(d.numero)}" ${d.comparado?"checked":""}></td>`).join("")}</tr></tbody></table></div>
+  <div class="campos" style="margin-top:10px">${D.map(d=>{const r=revis(p,d.numero);return`<label class="c ancho">${esc(d.numero)}: qué describe (una frase, para los antecedentes)<input type="text" id="cmpq-${esc(d.numero)}" data-cmpq="${p.id}|${esc(d.numero)}" value="${esc(r.queHace||"")}" placeholder="ej.: un chaleco con bolsillos de peso fijo"></label><label class="c ancho">En qué falla o se diferencia del suyo<input type="text" id="cmpd-${esc(d.numero)}" data-cmpd="${p.id}|${esc(d.numero)}" value="${esc(r.diferencia||"")}" placeholder="ej.: la presión no se puede graduar"></label>`}).join("")}</div>`;
+ const V={nuevo:["v","Es nuevo frente a lo encontrado."],combinacion:["a","Es nuevo, pero lo que lo distingue aparece repartido en otros documentos."],no_nuevo:["r","NO es nuevo: un documento ya tiene todas sus características."],pendiente:["a","Falta terminar la comparación."]}[n.estado]||["g",""];
+ h+=`<div class="${n.estado==="no_nuevo"?"alerta":"aviso"}" style="margin-top:12px"><b>Resultado: ${V[1]}</b> `;
+ if(n.estado==="pendiente")h+=`Marque «Ya revisé este documento» en: ${esc(n.falta.map(d=>d.numero).join(", "))}.`;
+ else if(n.estado==="no_nuevo")h+=`El documento ${esc(n.doc.numero)} tiene todo lo que usted describe. Para poder protegerlo, agregue o cambie una característica técnica que ese documento no tenga y vuelva a comparar. Si radica así, la SIC lo negará y se pierde la tasa.`;
+ else if(n.estado==="nuevo")h+=`${n.txt?esc(n.txt)+" ":""}${n.cerca?`Lo más parecido es ${esc(n.cerca.numero)}. `:""}Lo que lo hace distinto: <b>${esc(enumerar(n.dist.map(f=>minI(f.t))))}</b>. Eso es lo que debe ir después de «caracterizado porque» en la reivindicación 1. ${M.clase(p.modalidad)==="mu"?"Como modelo de utilidad, basta con que sea nuevo y útil.":"Para patente de invención además debe no ser obvio para un técnico (nivel inventivo): si lo distinto es un cambio menor, considere modelo de utilidad."}`;
+ else if(n.estado==="combinacion")h+=`Lo más parecido es ${esc(n.cerca.numero)}, y lo que falta en él está en otros documentos. Un examinador podría decir que combinarlos es obvio (falta de nivel inventivo). <b>Recomendación: modelo de utilidad</b> (solo exige novedad), o agregue una mejora técnica que ninguno tenga.`;
+ return h+`</div></section>`}
+
+/* --- Asistente de redacción por entrevista --- */
+function pAsistente(p){const E=ent(p),L=(E.elementos&&E.elementos.length?E.elementos:[{id:uid()},{id:uid()},{id:uid()}]);const og=E.gen||genAuto(E.objeto);
+ const opc=(sel)=>`<option value="">—</option>`+L.filter(e=>String(e.nombre||"").trim()).map((e,i)=>`<option value="${esc(e.id)}" ${sel===e.id?"selected":""}>${esc(e.nombre)}</option>`).join("");
+ return`<section class="panel" id="en-panel"><div class="cab"><div><h3>Asistente de redacción</h3><p class="ayuda">Responda en palabras sencillas. Patent-IA arma con sus respuestas la descripción numerada, las reivindicaciones, el resumen y la lista de referencias, con el lenguaje que pide la SIC. Usted pone el conocimiento técnico; la app pone la forma.</p></div></div>
+ <div class="campos"><label class="c">¿Qué es? (nombre genérico, sin marca)<input type="text" id="en-objeto" value="${esc(E.objeto||"")}" placeholder="ej.: chaleco"></label>
+ <label class="c">Se dice<select id="en-gen"><option value="m" ${og==="m"?"selected":""}>el (masculino)</option><option value="f" ${og==="f"?"selected":""}>la (femenino)</option></select></label>
+ <label class="c ancho">¿Para qué sirve?<input type="text" id="en-uso" value="${esc(E.uso||"")}" placeholder="ej.: para aplicar presión profunda graduable en el tronco de un niño"></label>
+ <label class="c ancho">Campo técnico<input type="text" id="en-campo" value="${esc(E.campo||"")}" placeholder="ej.: los dispositivos de estimulación sensorial terapéutica"></label></div>
+ <h4 style="margin:14px 0 6px">Partes del invento</h4><p class="ayuda" style="margin:0 0 6px">Una fila por parte. Escriba qué hace como una frase que siga a «que…» (ej.: «cubre el tronco del niño»). Marque <b>Esencial</b> si sin esa parte el invento no funciona, y <b>Nueva</b> si es lo que lo hace distinto.</p>
+ <div class="tabla-w"><table><thead><tr><th>N.º</th><th>Parte</th><th>Material</th><th>Qué hace</th><th>Unida a</th><th>Cómo se une</th><th>Esencial</th><th>Nueva</th><th></th></tr></thead><tbody>${L.map((e,i)=>`<tr data-en-fila="${esc(e.id)}"><td class="cod">${10*(i+1)}</td><td><input type="text" id="en-n-${esc(e.id)}" value="${esc(e.nombre||"")}" placeholder="${i===0?"cuerpo":i===1?"cámara de aire":"válvula"}" aria-label="Parte ${10*(i+1)}"></td><td><input type="text" id="en-m-${esc(e.id)}" value="${esc(e.material||"")}" aria-label="Material ${10*(i+1)}"></td><td><input type="text" id="en-f-${esc(e.id)}" value="${esc(e.funcion||"")}" aria-label="Qué hace ${10*(i+1)}"></td><td><select id="en-u-${esc(e.id)}" aria-label="Unida a">${opc(e.unidoA)}</select></td><td><input type="text" id="en-c-${esc(e.id)}" value="${esc(e.union||"")}" placeholder="mediante costuras" aria-label="Cómo se une"></td><td style="text-align:center"><input type="checkbox" id="en-e-${esc(e.id)}" ${e.esencial===false?"":"checked"} aria-label="Esencial"></td><td style="text-align:center"><input type="checkbox" id="en-v-${esc(e.id)}" ${e.nuevo?"checked":""} aria-label="Nueva"></td><td><button class="btn sec peq" data-acc="enQuitar" data-id="${p.id}" data-e="${esc(e.id)}" aria-label="Quitar parte">×</button></td></tr>`).join("")}</tbody></table></div>
+ <div class="fila" style="margin-top:6px"><button class="btn sec peq" data-acc="enAgregar" data-id="${p.id}">+ Parte</button></div>
+ <div class="campos" style="margin-top:12px">
+ <label class="c ancho">Lo que lo hace distinto (una frase por línea, usando los números)<textarea id="en-rasgos" placeholder="ej.: cada cámara de aire (20) se infla por separado mediante la perilla (30)">${esc(E.rasgos||"")}</textarea></label>
+ <label class="c ancho">Cómo se usa (un paso por línea)<textarea id="en-pasos">${esc(E.pasos||"")}</textarea></label>
+ <label class="c ancho">Ventajas (una por línea)<textarea id="en-ventajas" placeholder="ej.: el terapeuta gradúa la presión para cada niño">${esc(E.ventajas||"")}</textarea></label>
+ <label class="c ancho">Otras formas de hacerlo que también quiere proteger (una por línea)<textarea id="en-variantes" placeholder="ej.: el número de cámaras está entre cuatro y ocho">${esc(E.variantes||"")}</textarea></label>
+ <label class="c ancho">Figuras que va a presentar (una por línea)<textarea id="en-figuras" placeholder="Vista frontal del chaleco&#10;Vista posterior con las cámaras de aire">${esc(E.figuras||"")}</textarea></label></div>
+ <div class="fila" style="margin-top:12px"><button class="btn sec" data-acc="enGuardar" data-id="${p.id}">Guardar respuestas</button><button class="btn acc" data-acc="enArmar" data-id="${p.id}">Armar la solicitud con mis respuestas</button></div></section>`}
+function leerEntrevista(p){const E={...ent(p)};const filas=[...document.querySelectorAll("[data-en-fila]")].map(tr=>tr.dataset.enFila);const v=id=>($("#"+CSS.escape(id))?.value||"").trim();
+ E.objeto=v("en-objeto");E.gen=$("#en-gen")?.value||genAuto(E.objeto);E.uso=v("en-uso");E.campo=v("en-campo");
+ E.elementos=filas.map(id=>({id,nombre:v("en-n-"+id).slice(0,80),material:v("en-m-"+id).slice(0,80),funcion:v("en-f-"+id).slice(0,240),unidoA:$("#"+CSS.escape("en-u-"+id))?.value||"",union:v("en-c-"+id).slice(0,160),esencial:!!$("#"+CSS.escape("en-e-"+id))?.checked,nuevo:!!$("#"+CSS.escape("en-v-"+id))?.checked}));
+ for(const k of["rasgos","pasos","ventajas","variantes","figuras"])E[k]=v("en-"+k).slice(0,3000);
+ /* números fijos por orden: se guardan para que la descripción y las figuras coincidan */
+ E.elementos=E.elementos.map((e,i)=>({...e,n:10*(i+1),gen:genAuto(e.nombre)}));
+ return E}
+
+/* --- Figuras: subir un boceto o foto y ponerle los números --- */
+function imgDib(d){return d.img?d.img:`data:image/svg+xml;charset=utf-8,${encodeURIComponent(d.svg||"")}`}
+function abrirAnotador(pid){const p=proy(pid);if(!p)return;const L=elems(p);
+ $("#capa").innerHTML=`<div class="modal-f"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="an-t" style="max-width:980px;width:100%"><h2 id="an-t">Figura con números de referencia</h2>
+ <p class="ayuda" style="margin:0">1) Elija un dibujo a mano escaneado o una foto del prototipo. 2) Toque la parte del dibujo y luego el lugar donde va el número: queda una línea guía con el número. La SIC pide líneas negras sobre fondo blanco: use «Pasar a blanco y negro» si es una foto.</p>
+ <div class="campos"><label class="c">Imagen<input type="file" id="an-file" accept="image/png,image/jpeg,image/webp"></label><label class="c">Número a poner<select id="an-num">${L.map(e=>`<option value="${e.n}">${e.n} — ${esc(e.nombre)}</option>`).join("")}<option value="">Otro (escribirlo)</option></select></label><label class="c">Otro número<input type="number" id="an-otro" min="1" max="999"></label><label class="c ancho">Título de la figura<input type="text" id="an-tit" placeholder="Vista frontal del ${esc(sinPunto(ent(p).objeto)||"invento")}"></label></div>
+ <div class="fila"><button class="btn sec peq" id="an-bn">Pasar a blanco y negro</button><button class="btn sec peq" id="an-deshacer">Deshacer el último número</button><span class="ayuda" id="an-estado">Elija la imagen.</span></div>
+ <div style="overflow:auto;max-height:60vh;border:1px solid var(--borde);border-radius:10px;background:#fff"><canvas id="an-lienzo" width="900" height="600" style="width:100%;height:auto;touch-action:none;cursor:crosshair"></canvas></div>
+ <div class="fila" style="justify-content:flex-end"><button class="btn sec" data-acc="cerrarCapa">Cancelar</button><button class="btn acc" id="an-ok">Guardar la figura</button></div></div></div>`;
+ const c=$("#an-lienzo"),g=c.getContext("2d");let base=null,marcas=[],pend=null;
+ const dibujar=()=>{g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);if(base)g.putImageData(base,0,0);g.strokeStyle="#000";g.fillStyle="#000";g.lineWidth=1.6;g.font="bold 22px Arial";
+  for(const m of marcas){g.beginPath();g.moveTo(m.x1,m.y1);g.lineTo(m.x2,m.y2);g.stroke();const w=g.measureText(m.n).width;g.fillStyle="#fff";g.fillRect(m.x2-w/2-3,m.y2-13,w+6,26);g.fillStyle="#000";g.fillText(m.n,m.x2-w/2,m.y2+8)}
+  if(pend){g.beginPath();g.arc(pend.x,pend.y,4,0,7);g.fill()}};
+ $("#an-file").onchange=async()=>{const f=$("#an-file").files[0];if(!f)return;const im=new Image();im.onload=()=>{const W=Math.min(1100,im.width),H=Math.round(im.height*W/im.width);c.width=W;c.height=H;g.fillStyle="#fff";g.fillRect(0,0,W,H);g.drawImage(im,0,0,W,H);base=g.getImageData(0,0,W,H);marcas=[];dibujar();$("#an-estado").textContent="Toque la parte y luego dónde va el número.";URL.revokeObjectURL(im.src)};im.src=URL.createObjectURL(f)};
+ $("#an-bn").onclick=()=>{if(!base)return;const d=base.data;for(let i=0;i<d.length;i+=4){const y=.3*d[i]+.59*d[i+1]+.11*d[i+2];const v=y<150?0:255;d[i]=d[i+1]=d[i+2]=v}dibujar()};
+ $("#an-deshacer").onclick=()=>{marcas.pop();pend=null;dibujar()};
+ const pt=e=>{const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height}};
+ c.onpointerdown=e=>{if(!base)return;e.preventDefault();const q=pt(e);if(!pend){pend=q;$("#an-estado").textContent="Ahora toque dónde va el número.";dibujar();return}
+  const n=String($("#an-num").value||$("#an-otro").value||"").trim();if(!n){toast("Elija o escriba el número.");return}marcas.push({x1:pend.x,y1:pend.y,x2:q.x,y2:q.y,n});pend=null;$("#an-estado").textContent=`${marcas.length} número(s) puestos.`;dibujar()};
+ $("#an-ok").onclick=async()=>{if(!base){toast("Elija primero la imagen.");return}const tit=($("#an-tit").value||"").trim();if(tit.length<3){toast("Escriba el título de la figura.");$("#an-tit").focus();return}
+  pend=null;dibujar();let q=.85,img=c.toDataURL("image/jpeg",q);while(img.length>190000&&q>.35){q-=.1;img=c.toDataURL("image/jpeg",q)}
+  if(img.length>190000){const s=Math.sqrt(190000/img.length)*.95,t=document.createElement("canvas");t.width=Math.round(c.width*s);t.height=Math.round(c.height*s);t.getContext("2d").drawImage(c,0,0,t.width,t.height);img=t.toDataURL("image/jpeg",.7)}
+  const did=uid();const x={proyectoId:pid,titulo:tit.slice(0,140),img,numeros:[...new Set(marcas.map(m=>m.n))],creado:new Date().toISOString()};local("dibujos",did,x);if(await guardar("dibujos",did,x)){$("#capa").innerHTML="";toast("Figura guardada.");render()}}}
+
+/* --- Paquete para radicar en la SIC --- */
+const TASAS_REF={anio:2026,nota:"Valores de referencia de 2026 por el canal electrónico. Confirme el valor exacto en sic.gov.co/tasas-patentes antes de pagar: cambian cada año (para 2027 ya hay resolución nueva).",
+ pi:[["Solicitud de patente de invención",118000],["Examen de patentabilidad (se pide hasta 6 meses después de la publicación)",1830000]],
+ mu:[["Solicitud de modelo de utilidad",104500],["Examen de patentabilidad",1034000]],di:[["Solicitud de diseño industrial",942500]]};
+const pet=p=>p.petitorio||{};
+function petitorioListo(p){const x=pet(p);return!!(x.solicitante&&x.idNum&&x.direccion&&x.ciudad&&x.correo&&lineas(x.inventores).length)}
+function reqAuto(p,k){if(k==="descripcion"||k==="reivindicaciones"||k==="resumen")return redaccionLista(p);if(k==="dibujos")return dibujosDe(p).length>0&&!calidad(p).some(q=>q.sec==="figuras");if(k==="petitorio")return petitorioListo(p);if(k==="busqueda")return busquedaHecha(p);if(k==="cesion")return S.documentos.some(d=>d.proyectoId===p.id&&d.tipo==="cesion"&&(d.firmas||[]).length);return false}
+function pPaquete(p){const k=M.clase(p.modalidad);if(!(k==="pi"||k==="mu"||k==="di"))return"";const x=pet(p);const T=TASAS_REF[k]||[];const Q=calidad(p);
+ const ca=(id,l,o={})=>`<label class="c${o.ancho?" ancho":""}">${l}<input type="${o.t||"text"}" id="pt-${id}" value="${esc(x[id]||o.def||"")}" ${o.ph?`placeholder="${esc(o.ph)}"`:""}></label>`;
+ return`<section class="panel" id="paq-panel"><h3>Paquete para radicar en la SIC</h3><p class="ayuda" style="margin-top:-6px">Con estos datos y su redacción, Patent-IA prepara los documentos en PDF y la hoja con lo que debe escribir en el formulario de la SIC.</p>
+ <h4 style="margin:10px 0 6px">Datos del solicitante (dueño de la patente)</h4><div class="campos">${ca("solicitante","Nombre o razón social",{ancho:1,def:p.solicitante})}<label class="c">Tipo<select id="pt-tipo"><option value="juridica" ${x.tipo!=="natural"?"selected":""}>Empresa (persona jurídica)</option><option value="natural" ${x.tipo==="natural"?"selected":""}>Persona natural</option></select></label>${ca("idNum","NIT o cédula")}${ca("direccion","Dirección")}${ca("ciudad","Ciudad")}${ca("pais","País",{def:"Colombia"})}${ca("correo","Correo para notificaciones",{t:"email"})}${ca("telefono","Teléfono")}
+ <label class="c">¿Tiene derecho a tarifa reducida?<select id="pt-reducida"><option value="">No / no sé</option>${[["mipyme","Sí: es micro, pequeña o mediana empresa"],["natural","Sí: persona natural sin medios económicos"],["ies","Sí: institución de educación superior"],["esal","Sí: entidad sin ánimo de lucro de investigación"]].map(([v,l])=>`<option value="${v}" ${x.reducida===v?"selected":""}>${l}</option>`).join("")}</select></label></div>
+ <label class="c ancho" style="margin-top:8px">Inventores (uno por línea: nombre; cédula; nacionalidad; ciudad)<textarea id="pt-inventores" placeholder="Ana Pérez; 1.234.567; colombiana; Santa Marta">${esc(x.inventores||(p.inventores?p.inventores.split(/[,;]\s*/).filter(Boolean).map(n=>n+"; ; colombiana; ").join("\n"):""))}</textarea></label>
+ <div class="fila" style="margin-top:8px"><button class="btn sec" data-acc="ptGuardar" data-id="${p.id}">Guardar datos</button></div>
+ <h4 style="margin:14px 0 6px">Cuánto se paga</h4><div class="lista">${T.map(([l,v])=>`<div class="it"><span>${esc(l)}</span><b>${cop(v)}</b></div>`).join("")}</div><p class="ayuda" style="margin:6px 0 0">${esc(TASAS_REF.nota)} La tarifa reducida (mipymes, personas naturales sin medios, universidades y entidades de investigación sin ánimo de lucro) se acredita al momento de pagar. <a href="https://www.sic.gov.co/tasas-patentes" target="_blank" rel="noopener">Ver tasas en la SIC ↗</a></p>
+ <h4 style="margin:14px 0 6px">Revisión antes de radicar</h4>${Q.length?`<div class="alerta"><b>Corrija esto antes de radicar (${Q.length}):</b><ul>${Q.slice(0,15).map(q=>`<li>${esc(q.msg)}</li>`).join("")}</ul></div>`:`<div class="aviso"><b>La redacción pasó la revisión.</b> Igual hágala leer por su agente o abogado antes de radicar.</div>`}
+ <div class="fila" style="margin-top:10px"><button class="btn acc" data-acc="paqPDF" data-id="${p.id}" data-parte="todo">Descargar el paquete completo (PDF)</button><button class="btn sec peq" data-acc="paqPDF" data-id="${p.id}" data-parte="descripcion">Solo descripción</button><button class="btn sec peq" data-acc="paqPDF" data-id="${p.id}" data-parte="reivindicaciones">Solo reivindicaciones</button><button class="btn sec peq" data-acc="paqPDF" data-id="${p.id}" data-parte="resumen">Solo resumen</button><button class="btn sec peq" data-acc="paqPDF" data-id="${p.id}" data-parte="figuras">Solo figuras</button></div>
+ <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600;color:var(--azul)">Paso a paso para radicar en línea</summary><ol style="margin:8px 0 0;padding-left:20px;line-height:1.7">
+ <li>Entre al Sistema de Propiedad Industrial de la SIC (SIPI) en <a href="https://sipi.sic.gov.co/" target="_blank" rel="noopener">sipi.sic.gov.co</a> y cree su usuario con el correo de notificaciones (si ya lo tiene, entre).</li>
+ <li>Elija el trámite de nueva solicitud de ${k==="mu"?"modelo de utilidad":k==="di"?"diseño industrial":"patente de invención"} y llene el formulario con la <b>hoja de datos</b> del paquete (solicitante, inventores, título).</li>
+ <li>Si tiene derecho a tarifa reducida, márquelo y adjunte el soporte (por ejemplo, el certificado de mipyme).</li>
+ <li>Adjunte los PDF de descripción, reivindicaciones, resumen y figuras${S.documentos.some(d=>d.proyectoId===p.id&&d.tipo==="cesion")?", y la cesión del inventor firmada":""}.</li>
+ <li>Pague la tasa en línea (PSE) y radique. Guarde el comprobante y el número de expediente (por ejemplo NC2026/0012345).</li>
+ <li>Vuelva aquí y escriba la fecha de radicación y el número en «Fechas del expediente»: Patent-IA calcula todos los plazos y le avisa por correo.</li></ol>
+ <p class="ayuda">Los nombres de las pantallas del SIPI pueden cambiar. Si tiene dudas, la SIC atiende en sus canales y en los Centros de Apoyo a la Tecnología y la Innovación.</p></details></section>`}
+async function pdfSIC(p,parte){const J=await cargarJsPDF();const d=new J({unit:"mm",format:"letter"});const W=d.internal.pageSize.getWidth(),H=d.internal.pageSize.getHeight(),mx=25,an=W-2*mx;let y=25,par=0;const b=p.borrador||{};const k=M.clase(p.modalidad);
+ const nueva=()=>{d.addPage();y=25};const hay=h=>{if(y+h>H-22)nueva()};
+ const tit=t=>{hay(14);d.setFont("helvetica","bold");d.setFontSize(12);d.text(pdfTxt(t).toUpperCase(),W/2,y,{align:"center"});y+=10};
+ const sub=t=>{hay(10);d.setFont("helvetica","bold");d.setFontSize(11);d.text(pdfTxt(t),mx,y);y+=7};
+ const parr=(t,num)=>{d.setFont("helvetica","normal");d.setFontSize(11);for(const bl of String(t||"").split(/\n\s*\n|\n/).map(s=>s.trim()).filter(Boolean)){const pre=num?`[${String(++par).padStart(4,"0")}] `:"";const L=d.splitTextToSize(pdfTxt(pre+bl),an);for(const l of L){hay(7);d.text(l,mx,y);y+=6.2}y+=2.5}};
+ const seccion=(nombre,fn)=>{if(y>25)nueva();fn()};
+ const partes=parte==="todo"?["hoja","descripcion","reivindicaciones","resumen","figuras"]:[parte];let primera=true;
+ for(const s of partes){if(!primera)nueva();primera=false;
+  if(s==="hoja"){const x=pet(p);d.setFont("helvetica","bold");d.setFontSize(13);d.text(pdfTxt("Hoja de datos para el formulario de la SIC"),mx,y);y+=6;d.setFont("helvetica","normal");d.setFontSize(9);d.setTextColor(93,107,120);d.text(pdfTxt("Uso interno: no se adjunta a la solicitud. Copie estos datos en el formulario del SIPI."),mx,y);d.setTextColor(0);y+=9;
+   const filas=[["Modalidad",p.modalidad],["Título",b.titulo||p.titulo],["Solicitante",x.solicitante||p.solicitante],["Tipo",x.tipo==="natural"?"Persona natural":"Persona jurídica"],["NIT o cédula",x.idNum],["Dirección",[x.direccion,x.ciudad,x.pais].filter(Boolean).join(", ")],["Correo de notificaciones",x.correo],["Teléfono",x.telefono],["Tarifa reducida",x.reducida?{mipyme:"Mipyme",natural:"Persona natural",ies:"Institución de educación superior",esal:"Entidad sin ánimo de lucro"}[x.reducida]:"No"],["Prioridad invocada",p.fechaPrioridad?fFecha(p.fechaPrioridad):"No"],["Divulgación previa",p.fechaDivulgacion?fFecha(p.fechaDivulgacion)+" (verifique el plazo de gracia de 12 meses)":"No"],["Número de reivindicaciones",String((String(b.reivindicaciones||"").match(/(?:^|\n)\s*\d+\./g)||[]).length)],["Número de figuras",String(dibujosDe(p).length)]];
+   for(const[a,v]of filas){const L=d.splitTextToSize(pdfTxt(v||"—"),an-55);hay(L.length*5.5+2);d.setFont("helvetica","bold");d.setFontSize(10);d.text(pdfTxt(a),mx,y);d.setFont("helvetica","normal");d.text(L,mx+55,y);y+=L.length*5.5+2}
+   y+=3;sub("Inventores");parr(lineas(x.inventores).join("\n")||p.inventores||"—");
+   sub("Tasas (referencia)");parr((TASAS_REF[k]||[]).map(([l,v])=>`${l}: ${cop(v)}`).join("\n")+"\n"+TASAS_REF.nota);
+   const Q=calidad(p);sub("Revisión de calidad");parr(Q.length?Q.map(q=>"Pendiente: "+q.msg).join("\n"):"Sin observaciones. Hágalo revisar por su agente o abogado antes de radicar.");
+   d.setFontSize(8);d.setTextColor(93,107,120);d.text(pdfTxt("Preparado con Patent-IA — SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 304 437 5758"),W/2,H-12,{align:"center"});d.setTextColor(0)}
+  if(s==="descripcion"){tit("Descripción");d.setFont("helvetica","bold");d.setFontSize(11);for(const l of d.splitTextToSize(pdfTxt((b.titulo||p.titulo||"").toUpperCase()),an)){d.text(l,W/2,y,{align:"center"});y+=6}y+=4;
+   sub("Campo técnico");parr(b.campo,1);sub("Antecedentes");parr(b.antecedentes,1);sub("Problema técnico");parr(b.problema,1);if(String(b.dibujosDesc||"").trim()){sub("Breve descripción de las figuras");parr(b.dibujosDesc,1)}sub("Descripción detallada");parr(b.descripcion,1);if(String(b.referencias||"").trim()){sub("Lista de números de referencia");parr(b.referencias,0)}}
+  if(s==="reivindicaciones"){tit("Reivindicaciones");parr(b.reivindicaciones,0)}
+  if(s==="resumen"){tit("Resumen");d.setFont("helvetica","bold");d.setFontSize(11);for(const l of d.splitTextToSize(pdfTxt(b.titulo||p.titulo||""),an)){d.text(l,mx,y);y+=6}y+=3;parr(b.resumen,0)}
+  if(s==="figuras"){const F=dibujosDe(p);if(!F.length){tit("Figuras");parr("No hay figuras.")}
+   for(const[i,f]of F.entries()){if(i)nueva();const src=f.img||await svgAPng(f.svg);const im=await new Promise(r=>{const x=new Image();x.onload=()=>r(x);x.onerror=()=>r(null);x.src=src});
+    if(im){const mw=an,mh=H-70;let w=mw,h=im.height*mw/im.width;if(h>mh){h=mh;w=im.width*mh/im.height}d.addImage(src,src.startsWith("data:image/png")?"PNG":"JPEG",(W-w)/2,30,w,h)}d.setFont("helvetica","bold");d.setFontSize(12);d.text(`FIG. ${i+1}`,W/2,H-28,{align:"center"})}}}
+ const n=d.getNumberOfPages();for(let i=1;i<=n;i++){d.setPage(i);d.setFont("helvetica","normal");d.setFontSize(9);d.text(`${i}/${n}`,W-mx,H-12,{align:"right"})}
+ return bajar(`${p.codigo}_${parte==="todo"?"paquete-SIC":parte}.pdf`,d.output("blob"))}
+async function svgAPng(svg){return new Promise(r=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=im.width||800;c.height=im.height||600;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0);r(c.toDataURL("image/png"))};im.onerror=()=>r("");im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg||"")})}
+
+/* --- Acciones v5 --- */
+function leerConceptos(){const C=[];for(let i=0;document.getElementById("bq-es"+i);i++)C.push({es:($("#bq-es"+i).value||"").trim().slice(0,60),en:($("#bq-en"+i).value||"").trim().slice(0,160)});return C.filter(c=>c.es||c.en)}
+async function guardarBusqueda(id,cambios){const p=proy(id);if(!p)return false;return parchear("proyectos",id,{busqueda:{...bq(p),...cambios}})}
+async function buscarOPS(id,desde){const p=proy(id);const C=leerConceptos();const cpc=($("#bq-cpc")?.value||"").trim().toUpperCase().replace(/\s+/g,"");
+ if(!C.some(c=>c.en)){toast("Escriba las palabras en inglés de al menos un concepto (o pulse «Sugerir palabras en inglés»).");return}
+ if(cpc&&!/^[A-H]\d{2}[A-Z]?(\d{1,4}\/\d{1,6})?$/.test(cpc)){toast("La clasificación CPC no es válida. Ejemplo: A61H o A61H9/00.");return}
+ await guardarBusqueda(id,{conceptos:C,cpc});if(MODO!=="servidor"){toast("Conceptos guardados. Use «Abrir en Espacenet» y agregue aquí lo que encuentre.");render();return}
+ const b=$("[data-acc=bqBuscar]");if(b){b.disabled=true;b.textContent="Buscando…"}
+ try{const j=await api("POST","/api/antecedentes/buscar",{conceptos:C.map(c=>c.en),cpc,desde:desde||1});ui.bqRes={pid:id,...j,desde:desde||1,docs:desde>1&&ui.bqRes&&ui.bqRes.pid===id?[...ui.bqRes.docs,...j.docs]:j.docs};
+  const q=proy(id);await guardarBusqueda(id,{hechas:(bq(q).hechas||0)+(desde>1?0:1),vistos:Math.max(bq(q).vistos||0,Math.min(ui.bqRes.docs.length,j.total||0)),ultima:{fecha:new Date().toISOString(),consulta:j.consulta,total:j.total}});render();setTimeout(()=>$("#bq-panel h4")?.scrollIntoView({block:"start"}),60)}
+ catch(e){toast(e.message||"No se pudo buscar.")}finally{const b2=$("[data-acc=bqBuscar]");if(b2){b2.disabled=false;b2.textContent="Buscar aquí"}}}
+document.addEventListener("click",async ev=>{const t=ev.target.closest&&ev.target.closest("button,a");if(!t)return;const a=t.dataset.acc;if(!a)return;const id=t.dataset.id;const p=id?proy(id):null;
+ switch(a){
+  case"bqAgregar":{const C=leerConceptos();if(C.length>=5){toast("Máximo 5 conceptos: más conceptos encuentran menos documentos.");break}C.push({es:"",en:""});await guardarBusqueda(id,{conceptos:C});render();setTimeout(()=>$("#bq-es"+(C.length-1))?.focus(),50);break}
+  case"bqQuitar":{const C=leerConceptos();C.splice(+t.dataset.i,1);await guardarBusqueda(id,{conceptos:C});render();break}
+  case"bqBuscar":buscarOPS(id,1);break;
+  case"bqMas":buscarOPS(id,(ui.bqRes&&ui.bqRes.desde||1)+25);break;
+  case"bqTraducir":{t.disabled=true;t.textContent="Pensando…";try{const j=await api("POST","/api/antecedentes/palabras",{titulo:p.titulo,problema:p.problema,solucion:p.solucion,conceptos:leerConceptos().map(c=>c.es).filter(Boolean)});
+    await guardarBusqueda(id,{conceptos:j.conceptos.slice(0,5),cpc:bq(p).cpc||(j.cpc||[])[0]||""});render();toast("Revise las palabras sugeridas y ajústelas a su invento.")}catch(e){toast(e.message||"No se pudieron sugerir las palabras. Escríbalas usted.")}finally{t.disabled=false}break}
+  case"bqMarca":{const num=t.dataset.num;const r={...(bq(p).revisados||{})};const src=t.dataset.lista==="res"&&ui.bqRes?ui.bqRes.docs.find(d=>d.numero===num):(r[num]||{}).doc;const prev=r[num]||{};
+   r[num]={...prev,rel:t.dataset.rel,doc:src?{titulo:src.titulo,tituloEs:src.tituloEs,solicitante:src.solicitante,fecha:src.fecha,resumen:String(src.resumen||"").slice(0,700),cpc:src.cpc||[],enlace:src.enlace}:prev.doc};
+   if(Object.keys(r).length>60){toast("Ya revisó 60 documentos: quite los que no sirvan.");break}await guardarBusqueda(id,{revisados:r});render();break}
+  case"bqManual":{const num=($("#bq-mnum").value||"").trim().toUpperCase().replace(/\s+/g,"");if(num.length<4){toast("Escriba el número del documento.");$("#bq-mnum").focus();break}const r={...(bq(p).revisados||{})};
+   r[num]={rel:"parecido",doc:{titulo:($("#bq-mtit").value||"").trim().slice(0,300),solicitante:($("#bq-msol").value||"").trim().slice(0,200),resumen:($("#bq-mres").value||"").trim().slice(0,700),enlace:"https://worldwide.espacenet.com/patent/search?q=pn%3D"+encodeURIComponent(num)},queHace:($("#bq-mres").value||"").trim().slice(0,300)};
+   await guardarBusqueda(id,{revisados:r,hechas:Math.max(1,bq(p).hechas||0)});limpiarTmp("bq-");render();toast("Documento agregado como parecido.");break}
+  case"enAgregar":{const E=leerEntrevista(p);if((E.elementos||[]).length>=20){toast("Máximo 20 partes.");break}E.elementos.push({id:uid()});await parchear("proyectos",id,{entrevista:E});render();break}
+  case"enQuitar":{const E=leerEntrevista(p);E.elementos=E.elementos.filter(e=>e.id!==t.dataset.e);await parchear("proyectos",id,{entrevista:E});render();break}
+  case"enGuardar":{const E=leerEntrevista(p);if(await parchear("proyectos",id,{entrevista:E}))toast("Respuestas guardadas.");render();break}
+  case"enArmar":{const E=leerEntrevista(p);await parchear("proyectos",id,{entrevista:E});const q=proy(id);
+   if(!String(E.objeto||"").trim()){toast("Escriba qué es el invento (nombre genérico).");$("#en-objeto")?.focus();break}
+   if(elems(q).length<2){toast("Describa al menos dos partes del invento.");break}
+   if(!rasgosNuevos(q).length){toast("Escriba lo que lo hace distinto, o marque como «Nueva» la parte que lo hace distinto.");$("#en-rasgos")?.focus();break}
+   const b=q.borrador||{};const lleno=SECCIONES.some(([s])=>String(b[s]||"").trim());
+   const go=async()=>{const nb=armarSolicitud(proy(id));const pat={borrador:nb};if(["idea","evaluacion"].includes(q.etapa))pat.etapa="redaccion";await parchear("proyectos",id,pat);render();const n=calidad(proy(id)).length;toast(n?`Solicitud armada. La revisión encontró ${n} punto(s) por completar: véalos abajo.`:"Solicitud armada y sin observaciones. Revísela y ajústela con su criterio.");setTimeout(()=>$("#cal-panel")?.scrollIntoView({block:"start"}),80)};
+   if(lleno)confirmar("Esto reemplaza el texto actual de la solicitud por el que se arma con sus respuestas. ¿Continuar?",go,"Armar de nuevo");else go();break}
+  case"anotar":abrirAnotador(id);break;
+  case"ptGuardar":{const g=k=>($("#pt-"+k)?.value||"").trim();const x={solicitante:g("solicitante").slice(0,160),tipo:g("tipo"),idNum:g("idNum").slice(0,30),direccion:g("direccion").slice(0,160),ciudad:g("ciudad").slice(0,80),pais:g("pais").slice(0,60),correo:g("correo").slice(0,120),telefono:g("telefono").slice(0,40),reducida:g("reducida"),inventores:g("inventores").slice(0,2000)};
+   if(x.correo&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.correo)){toast("Escriba un correo válido.");break}if(await parchear("proyectos",id,{petitorio:x}))toast(petitorioListo(proy(id))?"Datos guardados: el petitorio está completo.":"Datos guardados. Faltan datos para el petitorio.");render();break}
+  case"paqPDF":{t.disabled=true;try{await pdfSIC(p,t.dataset.parte)}catch(e){toast(e&&e.message||"No se pudo preparar el PDF.")}finally{t.disabled=false}break}
+ }});
+document.addEventListener("change",ev=>{const el=ev.target;if(!el.dataset)return;
+ if(el.dataset.cmp){const[pid,num,fk]=el.dataset.cmp.split("|");const p=proy(pid);const r={...(bq(p).revisados||{})};r[num]={...(r[num]||{}),rasgos:{...((r[num]||{}).rasgos||{}),[fk]:el.checked}};guardarBusqueda(pid,{revisados:r}).then(()=>render());return}
+ if(el.dataset.cmpok){const[pid,num]=el.dataset.cmpok.split("|");const p=proy(pid);const r={...(bq(p).revisados||{})};r[num]={...(r[num]||{}),comparado:el.checked};guardarBusqueda(pid,{revisados:r}).then(()=>render());return}
+ if(el.dataset.cmpq||el.dataset.cmpd){const[pid,num]=(el.dataset.cmpq||el.dataset.cmpd).split("|");const p=proy(pid);const r={...(bq(p).revisados||{})};r[num]={...(r[num]||{}),[el.dataset.cmpq?"queHace":"diferencia"]:el.value.trim().slice(0,300)};guardarBusqueda(pid,{revisados:r});return}});
+function pCalidad(p){const Q=calidad(p);const b=p.borrador||{};if(!SECCIONES.some(([s])=>String(b[s]||"").trim()))return"";
+ return`<section class="panel" id="cal-panel"><h3>Revisión de calidad</h3>${Q.length?`<div class="alerta"><b>${Q.length} punto(s) por completar antes de radicar:</b><ul>${Q.map(q=>`<li>${esc(q.msg)}</li>`).join("")}</ul></div>`:`<div class="aviso"><b>Sin observaciones.</b> La forma cumple lo que pide la SIC. Revise el contenido técnico con su agente o abogado.</div>`}</section>`}
+const REGISTRO_PAUSA=true;
 
 render();iniciar();
 })();
