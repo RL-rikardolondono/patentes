@@ -14,10 +14,12 @@ const APP_URL = (ENV.APP_URL || "https://patent-ia.skynetgenesis.com").replace(/
 const ORIGENES = (ENV.ORIGENES || ENV.ORIGEN || `${APP_URL},https://patentes.skynetgenesis.com`).split(",").map(s => s.trim()).filter(Boolean);
 const SA_CORREO = "superadmin.patent@skynetgenesis.com"; // cada app tiene su propio superadministrador (regla del 29 oct 2026)
 const DUENOS = (ENV.DUENO_EMAILS && !/^superadmin@/i.test(ENV.DUENO_EMAILS) ? ENV.DUENO_EMAILS : SA_CORREO).toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
-const ADMIN_SKYNET = (ENV.ADMIN_SKYNET || "superadmin.patentes@skynetgenesis.com").toLowerCase();
-// Los enlaces de clave de las cuentas del dueño (superadministrador y su empresa) le llegan directo a su Gmail, sin reenvíos
-const DUENO_CORREO = (ENV.DUENO_CORREO || "contacto@skynetgenesis.com").toLowerCase();
-const DUENO_CUENTAS = new Set([...DUENOS, ADMIN_SKYNET, ...(ENV.DUENO_CUENTAS || "").toLowerCase().split(",").map(s => s.trim()).filter(Boolean)]);
+// Los correos personales del dueño viven solo en las variables de Render (ADMIN_SKYNET, DUENO_CORREO), nunca en el código
+const ADMIN_SKYNET = (ENV.ADMIN_SKYNET || ENV.DUENO_CORREO || "").toLowerCase().trim();
+// Los enlaces de clave de las cuentas del dueño (superadministrador y su empresa) le llegan directo a su correo personal, sin reenvíos
+const DUENO_CORREO = (ENV.DUENO_CORREO || "").toLowerCase().trim();
+const DUENO_CUENTAS = new Set([...DUENOS, ADMIN_SKYNET, ...(ENV.DUENO_CUENTAS || "").toLowerCase().split(",").map(s => s.trim()).filter(Boolean)].filter(Boolean));
+const aDueno = email => !!DUENO_CORREO && DUENO_CUENTAS.has(email) && email !== DUENO_CORREO;
 const BREVO_KEY = ENV.BREVO_API_KEY || "";
 const REMITENTE = ENV.BREVO_REMITENTE || "patent-ia@skynetgenesis.com";
 const LIMITE_CORREOS_DIA = +(ENV.LIMITE_CORREOS_DIA || 100);
@@ -147,7 +149,7 @@ async function preparar() {
     if (t.rows[0].r) { const n = await q("insert into docs(org_id,col,id,data,actualizado) select 'skynet',col,id,data,actualizado from docs_v1 on conflict do nothing"); log("Migrados", n.rowCount, "documentos a SkyNet Genesis"); }
     let email = ADMIN_SKYNET, hash = null;
     if (t.rows[0].u) { const u = await q("select email,hash from usuario limit 1"); if (u.rows.length) { email = u.rows[0].email.toLowerCase(); hash = u.rows[0].hash; } }
-    await q("insert into usuarios(id,org_id,email,nombre,rol,clave_hash) values($1,'skynet',$2,$3,'admin',$4) on conflict(email) do nothing", ["u-" + crypto.randomBytes(5).toString("hex"), email, "Ricardo Londoño González", hash]);
+    if (email) await q("insert into usuarios(id,org_id,email,nombre,rol,clave_hash) values($1,'skynet',$2,$3,'admin',$4) on conflict(email) do nothing", ["u-" + crypto.randomBytes(5).toString("hex"), email, ENV.ADMIN_SKYNET_NOMBRE || "Administrador SkyNet Genesis", hash]);
     log("Empresa SkyNet Genesis lista; administrador", email);
   }
   // El dueño pidió no recibir correos de plazos de su propia empresa (los ve en pantalla); se puede encender en Mi empresa
@@ -213,7 +215,7 @@ async function enviarEnlace(email, tipo) {
   const u = rows[0]; const tk = nuevoToken(); const horas = tipo === "invitacion" ? 72 : 1;
   await q("insert into enlaces(token_hash,email,tipo,expira) values($1,$2,$3,now()+($4||' hours')::interval)", [sha(tk), email, tipo, String(horas)]);
   const url = `${APP_URL}/#clave=${tk}&tipo=${tipo}`;
-  const destino = DUENO_CUENTAS.has(email) && email !== DUENO_CORREO ? DUENO_CORREO : email; // cuentas del dueño: el enlace llega a su Gmail
+  const destino = aDueno(email) ? DUENO_CORREO : email; // cuentas del dueño: el enlace llega a su Gmail
   const titulo = tipo === "invitacion" ? `Bienvenido a Patent-IA, ${u.nombre.split(" ")[0]}` : "Crear una clave nueva";
   const cuerpo = tipo === "invitacion" ? `<p style="margin:0 0 10px">Lo invitaron a trabajar en <b>${escH(u.info.nombre)}</b> con Patent-IA, la fábrica de patentes de SkyNet Genesis. Cree su clave con el botón (el enlace vence en 3 días).</p><p style="margin:0;font-size:14px;color:#5D6B78">Su usuario es: ${escH(email)}</p>`
     : `<p style="margin:0 0 10px">Recibimos una solicitud para cambiar su clave de Patent-IA. El enlace vence en una hora.</p><p style="margin:0;font-size:14px;color:#5D6B78">Si usted no lo pidió, ignore este correo: su clave sigue igual.</p>`;
@@ -354,7 +356,9 @@ app.post("/api/clave", sesion, sinControl, envolver(async (req, res) => {
 }));
 // Registro de una empresa nueva: prueba gratis de 15 días, sin renovación; el administrador recibe un correo para crear su clave
 const normEmpresa = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(s\.?\s?a\.?\s?s|s\.?\s?a|ltda|sas|e\.?\s?u)\.?$/g, "").replace(/[^a-z0-9]/g, "");
+const REGISTRO_PAUSA = ENV.REGISTRO_PAUSA !== "0"; // en pausa por defecto hasta publicar la v5 completa
 app.post("/api/registro", envolver(async (req, res) => {
+  if (REGISTRO_PAUSA) return err(res, 503, "Patent-IA está en actualización: la creación de cuentas nuevas abre de nuevo en pocos días. Escríbanos al WhatsApp 304 437 5758.");
   if (!limitar("registro:" + ipDe(req), 3, 60)) return err(res, 429, "Ya se crearon cuentas desde esta conexión. Intente más tarde o escríbanos.");
   const empresa = String(req.body.empresa || "").trim().slice(0, 100), nombre = String(req.body.nombre || "").trim().slice(0, 80), email = String(req.body.email || "").trim().toLowerCase();
   if (empresa.length < 3 || nombre.length < 3 || !emailValido(email)) return err(res, 400, "Revise los datos: empresa, nombre y correo.");
@@ -397,6 +401,7 @@ function validarDoc(col, data) { // formas que el servidor exige antes de guarda
     data.firmas = data.firmas.map(f => { if (!f || !FIRMA_OK.test(String(f.img || ""))) throw Object.assign(new Error("La firma debe ser un dibujo de la pantalla (imagen PNG)."), { status: 400 });
       return { nombre: String(f.nombre || "").slice(0, 80), cargo: String(f.cargo || "").slice(0, 80), doc: String(f.doc || "").slice(0, 30), fecha: String(f.fecha || "").slice(0, 30), img: f.img }; });
   }
+  if (col === "dibujos" && data.img !== undefined) { if (!/^data:image\/(jpeg|png);base64,[A-Za-z0-9+/=]{100,200000}$/.test(String(data.img))) throw Object.assign(new Error("La figura debe ser una imagen JPG o PNG de menos de 150 KB."), { status: 400 }); if (data.numeros !== undefined) data.numeros = (Array.isArray(data.numeros) ? data.numeros : []).map(x => String(x).slice(0, 4)).slice(0, 60); }
   if (col === "proyectos" && data.titular !== undefined) data.titular = String(data.titular || "").slice(0, 120);
 }
 function puedeEscribir(req, res) {
@@ -688,6 +693,99 @@ function temaPatentes(pregunta, contexto) {
   return (p.match(/[a-z0-9]{5,}/g) || []).some(w => resto.has(w));
 }
 const SISTEMA_IA = "Trabajas dentro de Patent-IA (SkyNet Genesis), una aplicación para crear, proteger y licenciar inventos, diseños, software y otras creaciones en Colombia. Responde solo sobre propiedad intelectual, innovación, investigación y el proyecto que te muestran; si piden otra cosa, dilo con amabilidad y vuelve al tema. Español latinoamericano neutro.";
+
+/* ===== v5: búsqueda de antecedentes en la base mundial de patentes (EPO Open Patent Services, servicio oficial y gratuito) ===== */
+const OPS_KEY = ENV.EPO_OPS_KEY || "", OPS_SECRETO = ENV.EPO_OPS_SECRET || "";
+const OPS_URL = (ENV.OPS_URL || "https://ops.epo.org/3.2").replace(/\/$/, "");
+let opsTok = { t: "", hasta: 0 };
+async function tokenOPS(forzar) {
+  if (!forzar && opsTok.t && Date.now() < opsTok.hasta - 60000) return opsTok.t;
+  const r = await fetch(OPS_URL + "/auth/accesstoken", { method: "POST", signal: AbortSignal.timeout(20000),
+    headers: { Authorization: "Basic " + Buffer.from(OPS_KEY + ":" + OPS_SECRETO).toString("base64"), "Content-Type": "application/x-www-form-urlencoded" }, body: "grant_type=client_credentials" });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.access_token) throw Object.assign(new Error("ops auth " + r.status), { ops: r.status });
+  opsTok = { t: j.access_token, hasta: Date.now() + (parseInt(j.expires_in, 10) || 1200) * 1000 }; return opsTok.t;
+}
+const listaOPS = v => v == null ? [] : Array.isArray(v) ? v : [v];
+const txtOPS = v => v == null ? "" : typeof v === "string" || typeof v === "number" ? String(v) : Array.isArray(v) ? v.map(txtOPS).join(" ") : typeof v === "object" ? (v.$ != null ? String(v.$) : Object.entries(v).filter(([k]) => !k.startsWith("@")).map(([, x]) => txtOPS(x)).join(" ")) : "";
+const porIdiomaOPS = (L, pref) => { L = listaOPS(L); return L.find(x => x && x["@lang"] === pref) || L[0]; };
+function parsearOPS(j) {
+  let total = 0; const docs = [];
+  (function walk(o) { if (!o || typeof o !== "object") return; if (Array.isArray(o)) return o.forEach(walk);
+    if (o["@total-result-count"] != null) total = +o["@total-result-count"] || total;
+    for (const [k, v] of Object.entries(o)) { if (k === "exchange-document") listaOPS(v).forEach(d => docs.push(d)); else walk(v); } })(j);
+  const vistos = new Set();
+  return { total, docs: docs.map(d => { const b = d["bibliographic-data"] || {};
+    const numero = `${d["@country"] || ""}${d["@doc-number"] || ""}${d["@kind"] || ""}`;
+    const ids = listaOPS((b["publication-reference"] || {})["document-id"]); const f = txtOPS((ids.find(x => x && x.date) || {}).date).trim();
+    const titulos = listaOPS(b["invention-title"]);
+    const aps = listaOPS(((b.parties || {}).applicants || {}).applicant).filter(Boolean); const apsO = aps.filter(a => a["@data-format"] === "original");
+    const solic = [...new Set((apsO.length ? apsO : aps.filter(a => a["@data-format"] !== "docdb")).map(a => txtOPS((a["applicant-name"] || {}).name).replace(/\s*\[[A-Z]{2}\]\s*$/, "").replace(/\s+/g, " ").trim()).filter(Boolean))].slice(0, 3);
+    const cpc = [...new Set(listaOPS((b["patent-classifications"] || {})["patent-classification"]).map(c => { const x = k => txtOPS(c && c[k]).trim(); const base = x("section") + x("class") + x("subclass"); return base.length >= 4 ? base + (x("main-group") ? x("main-group") + "/" + x("subgroup") : "") : ""; }).filter(Boolean))].slice(0, 3);
+    return { numero, titulo: txtOPS(porIdiomaOPS(titulos, "en")).replace(/\s+/g, " ").trim().slice(0, 300), tituloEs: txtOPS(titulos.find(x => x && x["@lang"] === "es")).trim().slice(0, 300),
+      solicitante: solic.join("; ").slice(0, 200), fecha: /^\d{8}$/.test(f) ? `${f.slice(0, 4)}-${f.slice(4, 6)}-${f.slice(6)}` : "",
+      resumen: txtOPS(porIdiomaOPS(d.abstract, "en")).replace(/\s+/g, " ").trim().slice(0, 1500), cpc,
+      enlace: "https://worldwide.espacenet.com/patent/search?q=pn%3D" + encodeURIComponent(numero) };
+  }).filter(x => x.numero && !vistos.has(x.numero) && vistos.add(x.numero)) };
+}
+const terminoOPS = t => String(t || "").toLowerCase().replace(/[^a-z0-9 \-*]/g, " ").replace(/\s+/g, " ").trim().slice(0, 40);
+function consultaOPS(grupos, cpc) {
+  const G = listaOPS(grupos).slice(0, 5).map(g => String(Array.isArray(g) ? g.join(",") : g || "").split(/[,;]/).map(terminoOPS).filter(t => t.length > 1).slice(0, 4)).filter(g => g.length);
+  if (!G.length) return "";
+  return G.map(g => "(" + g.map(t => t.includes(" ") ? `ta="${t}"` : `ta=${t}`).join(" OR ") + ")").join(" AND ") + (cpc ? ` AND cpc=${cpc}` : "");
+}
+app.post("/api/antecedentes/buscar", sesion, envolver(empresaActiva), envolver(async (req, res) => {
+  if (!OPS_KEY || !OPS_SECRETO) return err(res, 503, "La búsqueda automática aún no está activada en el servidor. Mientras tanto use «Abrir en Espacenet»: la búsqueda ya va armada.", { code: "sin_ops" });
+  if (!limitar("ops:" + req.u.org_id, 40, 60) || !limitar("opsd:" + req.u.org_id, 300, 60 * 24)) return err(res, 429, "Muchas búsquedas seguidas. Espere unos minutos.", { code: "rate_limited" });
+  const cpc = String(req.body.cpc || "").toUpperCase().replace(/\s+/g, ""); if (cpc && !/^[A-H]\d{2}[A-Z]?(\d{1,4}\/\d{1,6})?$/.test(cpc)) return err(res, 400, "La clasificación CPC no es válida.");
+  const consulta = consultaOPS(req.body.conceptos, cpc); if (!consulta) return err(res, 400, "Escriba las palabras en inglés de al menos un concepto.");
+  const desde = Math.max(1, Math.min(76, parseInt(req.body.desde, 10) || 1));
+  const url = `${OPS_URL}/rest-services/published-data/search/biblio?q=${encodeURIComponent(consulta)}&Range=${desde}-${desde + 24}`;
+  let r;
+  for (let intento = 0; intento < 2; intento++) {
+    const tok = await tokenOPS(intento > 0).catch(e => { log("OPS token", e.message); return null; });
+    if (!tok) return err(res, 502, "El servicio de patentes no respondió. Intente en un momento.");
+    r = await fetch(url, { headers: { Authorization: "Bearer " + tok, Accept: "application/json" }, signal: AbortSignal.timeout(30000) }).catch(e => { log("OPS", e.message); return null; });
+    if (!r) return err(res, 502, "El servicio de patentes no respondió. Intente en un momento.");
+    if (r.status !== 401) break;
+  }
+  if (r.status === 404) return res.json({ consulta, total: 0, docs: [] });
+  if (r.status === 403 || r.status === 429) return err(res, 429, "El servicio de patentes está ocupado. Intente en unos minutos.", { code: "rate_limited" });
+  if (!r.ok) { log("OPS respondió", r.status, (await r.text().catch(() => "")).slice(0, 200)); return err(res, 502, "El servicio de patentes no pudo hacer esa búsqueda. Simplifique las palabras."); }
+  const j = await r.json().catch(() => null); if (!j) return err(res, 502, "Respuesta inesperada del servicio de patentes.");
+  res.json({ consulta, ...parsearOPS(j) });
+}));
+/* Palabras en inglés y sinónimos para buscar (consulta corta a la IA, la paga la plataforma: no gasta créditos de la empresa) */
+app.post("/api/antecedentes/palabras", sesion, envolver(empresaActiva), envolver(async (req, res) => {
+  if (!ANTHROPIC_KEY) return err(res, 503, "La sugerencia automática no está disponible. Escriba usted las palabras en inglés.");
+  if (!limitar("pal:" + req.u.org_id, 25, 60 * 24) || !limitar("palm:" + req.u.org_id, 5, 1)) return err(res, 429, "Ya pidió muchas sugerencias hoy. Escriba usted las palabras en inglés.", { code: "rate_limited" });
+  const t = k => String(req.body[k] || "").slice(0, 1200);
+  if ((t("titulo") + t("problema") + t("solucion")).trim().length < 15) return err(res, 400, "Complete primero el título, el problema y la solución en la Ficha.");
+  const mes = mesCO(), presupuesto = 0.01; await q("insert into ia_gasto(mes) values($1) on conflict do nothing", [mes]);
+  const cupo = await q("update ia_gasto set usd=usd+$2, llamadas=llamadas+1 where mes=$1 and usd+$2 <= $3 returning usd", [mes, presupuesto, IA_TOPE_USD_MES]);
+  if (!cupo.rows.length) return err(res, 503, "La sugerencia automática está en pausa este mes. Escriba usted las palabras en inglés.");
+  const M = IA_MODELOS.default;
+  const prompt = `Eres un buscador profesional de patentes. Para buscar antecedentes de este invento en bases de patentes (búsqueda en título y resumen, en inglés), propone de 3 a 4 CONCEPTOS clave. Para cada concepto da el nombre corto en español y de 2 a 4 términos técnicos en inglés (sinónimos que usan las patentes; de una o dos palabras; puedes usar * al final para variantes, ej. inflat*). Propón también 1 o 2 códigos CPC probables (solo subclase, ej. A61H).
+Título: ${t("titulo")}
+Problema: ${t("problema")}
+Solución: ${t("solucion")}
+${listaOPS(req.body.conceptos).length ? "Conceptos que ya escribió el inventor: " + listaOPS(req.body.conceptos).map(x => String(x).slice(0, 60)).join(", ") : ""}
+Responde SOLO con JSON: {"conceptos":[{"es":"...","en":"term1, term2, term3"}],"cpc":["A61H"]}`;
+  let costo = presupuesto, j = null;
+  try {
+    const r = await fetch(IA_URL, { method: "POST", signal: AbortSignal.timeout(40000), headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({ model: M.id, max_tokens: 500, messages: [{ role: "user", content: prompt }] }) });
+    const x = await r.json().catch(() => ({}));
+    if (r.ok) { const u = x.usage || {}; costo = (u.input_tokens || 600) * M.entrada / 1e6 + (u.output_tokens || 500) * M.salida / 1e6;
+      const txt = (x.content || []).filter(b => b.type === "text").map(b => b.text).join(""); const a = txt.indexOf("{"), b = txt.lastIndexOf("}"); j = JSON.parse(txt.slice(a, b + 1)); }
+    else log("palabras IA", r.status);
+  } catch (e) { log("palabras IA", e.message); }
+  await q("update ia_gasto set usd=greatest(0,usd+$2) where mes=$1", [mes, costo - presupuesto]).catch(() => {});
+  const C = listaOPS(j && j.conceptos).slice(0, 5).map(c => ({ es: String((c && c.es) || "").slice(0, 60), en: String((c && c.en) || "").split(/[,;]/).map(terminoOPS).filter(Boolean).slice(0, 4).join(", ") })).filter(c => c.en);
+  if (!C.length) return err(res, 502, "No se pudieron sugerir las palabras. Escríbalas usted.");
+  res.json({ conceptos: C, cpc: listaOPS(j.cpc).map(x => String(x).toUpperCase().replace(/\s+/g, "")).filter(x => /^[A-H]\d{2}[A-Z]$/.test(x)).slice(0, 2) });
+}));
+
 app.post("/api/ia", sesion, sinControl, envolver(empresaActiva), envolver(async (req, res) => {
   if (req.u.rol === "consulta") return err(res, 403, "Su usuario es solo de consulta: no puede usar la IA.");
   if (!ANTHROPIC_KEY) return err(res, 503, "La IA no está disponible en este momento.", { ia: "servicio" });
@@ -820,7 +918,7 @@ app.post("/api/super/cuentas/:id/enlace", sesion, soloSuper, envolver(async (req
   if (!limitar("saenlace:" + req.params.id, 3, 60)) return err(res, 429, "Ya se envió varias veces. Espere una hora.");
   const enlace = await enviarEnlace(rows[0].email, rows[0].clave_hash ? "recuperar" : "invitacion");
   avisarSA(`Superadministrador envió un enlace de clave a ${rows[0].email}.`);
-  res.json({ ok: true, destino: DUENO_CUENTAS.has(rows[0].email) && rows[0].email !== DUENO_CORREO ? ocultarCorreo(DUENO_CORREO) : ocultarCorreo(rows[0].email), ...(MODO_PRUEBA && typeof enlace === "string" ? { enlace } : {}) });
+  res.json({ ok: true, destino: aDueno(rows[0].email) ? ocultarCorreo(DUENO_CORREO) : ocultarCorreo(rows[0].email), ...(MODO_PRUEBA && typeof enlace === "string" ? { enlace } : {}) });
 }));
 app.post("/api/super/cuentas/:id/bloquear", sesion, soloSuper, envolver(async (req, res) => {
   const { rows } = await q("select email,org_id from usuarios where id=$1", [req.params.id]); if (!rows.length) return err(res, 404, "Cuenta no encontrada.");
