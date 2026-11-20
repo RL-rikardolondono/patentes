@@ -820,6 +820,57 @@ CPC: A61H, A41D`;
   res.json({ conceptos: C, cpc: listaOPS(j.cpc).map(x => String(x).toUpperCase().replace(/\s+/g, "")).filter(x => /^[A-H]\d{2}[A-Z]$/.test(x)).slice(0, 2) });
 }));
 
+/* Lectura en español de los documentos encontrados: título y qué hace en español, qué tan parecido es al invento y qué características del invento tiene cada uno.
+   La paga la plataforma (Haiku, centavos de dólar por búsqueda) y entra en el tope mensual de IA. Es una ayuda: el inventor confirma. */
+function leerAnalisisIA(txt, nums) {
+  const out = {};
+  for (const linea of String(txt || "").replace(/\*\*/g, "").split(/\r?\n/)) {
+    const m = linea.match(/^\s*[-*\s]*DOC\s*(\d+)\s*\|\s*([0-3])\s*\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|?\s*(.*)$/i);
+    if (!m) continue; const num = nums[+m[1] - 1]; if (!num) continue;
+    const ras = (m[6] || "").replace(/^.*?:/, "").split(/[,;\s]+/).map(x => x.trim()).filter(x => /^[a-z0-9_]{1,12}$/i.test(x)).slice(0, 30);
+    out[num] = { parecido: +m[2], es: m[3].trim().slice(0, 200), que: m[4].trim().slice(0, 260), motivo: m[5].trim().slice(0, 200), ras };
+  }
+  return out;
+}
+app.post("/api/antecedentes/analizar", sesion, envolver(empresaActiva), envolver(async (req, res) => {
+  if (!ANTHROPIC_KEY) return err(res, 503, "La lectura en español no está disponible por ahora.");
+  if (!limitar("ana:" + req.u.org_id, 40, 60 * 24) || !limitar("anam:" + req.u.org_id, 6, 1)) return err(res, 429, "Ya pidió muchas lecturas hoy. Revise los documentos uno por uno.", { code: "rate_limited" });
+  const t = k => String(req.body[k] || "").slice(0, 1200);
+  const docs = (Array.isArray(req.body.docs) ? req.body.docs : []).slice(0, 25).map(d => ({ numero: String(d && d.numero || "").slice(0, 30), titulo: String(d && d.titulo || "").slice(0, 300), resumen: String(d && d.resumen || "").slice(0, 900) })).filter(d => d.numero);
+  if (!docs.length) return err(res, 400, "No hay documentos para leer.");
+  const rasgos = (Array.isArray(req.body.rasgos) ? req.body.rasgos : []).slice(0, 20).map(r => ({ k: String(r && r.k || "").replace(/[^a-z0-9_]/gi, "").slice(0, 12), t: String(r && r.t || "").slice(0, 160) })).filter(r => r.k && r.t);
+  const mes = mesCO(), presupuesto = 0.03; await q("insert into ia_gasto(mes) values($1) on conflict do nothing", [mes]);
+  const cupo = await q("update ia_gasto set usd=usd+$2, llamadas=llamadas+1 where mes=$1 and usd+$2 <= $3 returning usd", [mes, presupuesto, IA_TOPE_USD_MES]);
+  if (!cupo.rows.length) return err(res, 503, "La lectura en español está en pausa este mes. Revise los documentos uno por uno.");
+  const M = IA_MODELOS.default;
+  const prompt = `Eres un examinador de patentes que ayuda a un inventor colombiano que no lee inglés.
+INVENTO
+Título: ${t("titulo")}
+Problema: ${t("problema")}
+Solución: ${t("solucion")}
+${rasgos.length ? "Características del invento (clave: texto):\n" + rasgos.map(r => `${r.k}: ${r.t}`).join("\n") : ""}
+
+DOCUMENTOS ENCONTRADOS
+${docs.map((d, i) => `DOC ${i + 1} (${d.numero}): ${d.titulo}\n${d.resumen}`).join("\n\n")}
+
+Para CADA documento responde UNA línea, en este formato exacto y sin nada más:
+DOC n | parecido | título en español | qué hace, en una frase sencilla en español | por qué se parece o no, en una frase | claves de las características del invento que el documento también tiene, separadas por comas (vacío si ninguna)
+parecido: 3 = resuelve el mismo problema casi de la misma forma; 2 = mismo problema o misma solución técnica; 1 = relacionado de lejos; 0 = nada que ver.
+Juzga solo con lo que dice el título y el resumen; no inventes.`;
+  let costo = presupuesto, out = {};
+  try {
+    const r = await fetch(IA_URL, { method: "POST", signal: AbortSignal.timeout(60000), headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({ model: M.id, max_tokens: 3500, messages: [{ role: "user", content: prompt }] }) });
+    const x = await r.json().catch(() => ({}));
+    if (r.ok) { const u = x.usage || {}; costo = (u.input_tokens || 6000) * M.entrada / 1e6 + (u.output_tokens || 2500) * M.salida / 1e6;
+      out = leerAnalisisIA((x.content || []).filter(b => b.type === "text").map(b => b.text).join(""), docs.map(d => d.numero)); }
+    else log("analizar IA", r.status);
+  } catch (e) { log("analizar IA", e.message); }
+  await q("update ia_gasto set usd=greatest(0,usd+$2) where mes=$1", [mes, costo - presupuesto]).catch(() => {});
+  const claves = new Set(rasgos.map(r => r.k)); for (const v of Object.values(out)) v.ras = v.ras.filter(k => claves.has(k));
+  if (!Object.keys(out).length) return err(res, 502, "No se pudo leer los documentos en español. Revíselos uno por uno.");
+  res.json({ analisis: out });
+}));
 app.post("/api/ia", sesion, sinControl, envolver(empresaActiva), envolver(async (req, res) => {
   if (req.u.rol === "consulta") return err(res, 403, "Su usuario es solo de consulta: no puede usar la IA.");
   if (!ANTHROPIC_KEY) return err(res, 503, "La IA no está disponible en este momento.", { ia: "servicio" });
