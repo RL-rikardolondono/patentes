@@ -2078,8 +2078,9 @@ document.addEventListener("input",ev=>{const el=ev.target;if(el.id==="sa-busca")
 
 /* ===== v5: ayuda real para inventar y radicar ===== */
 /* Gramática básica para armar textos técnicos en español */
+const MASC_EXC=new Set(["chasis","análisis","analisis","énfasis","enfasis","oasis","paréntesis","parentesis","brindis"]),FEM_PAL=new Set(["llave","base","fuente","clave","red","luz","piel","mano","parte","nube","superficie","torre","corriente","serie","calle","flor","pared","sal","miel","vez","imagen","señal","senal","unidad","capacidad","presión","presion","tapa","pantalla"]);
 const FEM_EXC=new Set(["sistema","problema","mapa","día","dia","programa","esquema","tema","diagrama","prisma","clima","idioma","planeta","poema","aroma","cometa"]);
-function genAuto(w){const x=String(w||"").trim().toLowerCase().split(/\s+/)[0]||"";if(FEM_EXC.has(x))return"m";return/(a|ión|ion|dad|tad|tud|umbre|sis)$/.test(x)?"f":"m"}
+function genAuto(w){const x=String(w||"").trim().toLowerCase().split(/\s+/)[0]||"";if(FEM_EXC.has(x)||MASC_EXC.has(x))return"m";if(FEM_PAL.has(x))return"f";return/(a|ión|ion|dad|tad|tud|umbre|sis)$/.test(x)?"f":"m"}
 const artD=g=>g==="f"?"la":"el",artI=g=>g==="f"?"una":"un",unido=g=>g==="f"?"unida":"unido";
 const minI=s=>{s=String(s||"").trim();return s?s.charAt(0).toLowerCase()+s.slice(1):""},mayI=s=>{s=String(s||"").trim();return s?s.charAt(0).toUpperCase()+s.slice(1):""};
 const sinPunto=s=>String(s||"").trim().replace(/[.;,\s]+$/,"");
@@ -2087,6 +2088,8 @@ function enumerar(L){L=L.filter(Boolean);return L.length<2?(L[0]||""):L.slice(0,
 const lineas=t=>String(t||"").split("\n").map(x=>x.trim()).filter(Boolean);
 function artMod(m){return/^(modelo|diseño|derecho|secreto)/i.test(String(m||""))?"el":"la"}
 
+/* «describe …»: si la frase empieza por un verbo («frena las ruedas…»), se vuelve «un dispositivo que frena las ruedas…» */
+function fraseDoc(q){const t=sinPunto(minI(q));if(/^(un|una|el|la|los|las|unos|unas)\s/.test(t))return t;return/^[a-záéíóúñ]+(a|e|an|en)\s/.test(t)&&!/^(prenda|silla|bomba|manga|cama|faja|camisa|chaqueta|ropa|herramienta|máquina|maquina|pieza|estructura|tela|plataforma|rueda|base|llave|válvula|valvula)\s/.test(t)?"un dispositivo que "+t:(/^(un|una|el|la)\s/.test(t)?t:artI(genAuto(t))+" "+t)}
 /* --- Entrevista del invento (base de la redacción y de la comparación) --- */
 const ent=p=>p.entrevista||{};
 const elems=p=>(ent(p).elementos||[]).map((e,i)=>({...e,n:e.n||10*(i+1),gen:e.gen||genAuto(e.nombre)})).filter(e=>String(e.nombre||"").trim());
@@ -2102,7 +2105,7 @@ function armarSolicitud(p){const E=ent(p),k=M.clase(p.modalidad),og=E.gen||genAu
  const Ls=elems(p),es=Ls.filter(e=>e.esencial!==false),R=rasgosNuevos(p);const quien=k==="mu"?"El presente modelo de utilidad":k==="di"?"El presente diseño industrial":"La presente invención";
  const docs=docsParecidos(p);
  const campo=`${quien} se refiere ${E.campo?`al campo de ${sinPunto(minI(E.campo))}, y más particularmente a`:"a"} ${artI(og)} ${objU}.`;
- let ant;if(docs.length){ant=`En el estado de la técnica se conocen soluciones para el problema que aquí se resuelve. `+docs.map(d=>{const r=revis(p,d.numero);return`El documento ${d.numero}${d.solicitante?` (${d.solicitante})`:""} ${r.queHace?`describe ${sinPunto(minI(r.queHace))}`:`se titula «${d.tituloEs||d.titulo}»`}${r.diferencia?`; sin embargo, ${sinPunto(minI(r.diferencia))}`:""}.`}).join(" ")+(R.length?` Ninguno de estos documentos describe ${artI(og)} ${obj} en ${og==="f"?"la":"el"} que ${sinPunto(minI(R[0]))}.`:"")}
+ let ant;if(docs.length){ant=`En el estado de la técnica se conocen soluciones para el problema que aquí se resuelve. `+docs.map(d=>{const r=revis(p,d.numero);return`El documento ${d.numero}${d.solicitante?` (${d.solicitante})`:""} ${r.queHace?`describe ${fraseDoc(r.queHace)}`:`se titula «${d.tituloEs||d.titulo}»`}${r.diferencia?`; sin embargo, ${sinPunto(minI(r.diferencia))}`:""}.`}).join(" ")+(R.length?` Ninguno de estos documentos describe ${artI(og)} ${obj} en ${og==="f"?"la":"el"} que ${sinPunto(minI(R[0]))}.`:"")}
  else ant="";
  const prob=`${sinPunto(p.problema)}.`;
  const figs=dibujosDe(p),figPlan=lineas(E.figuras);const nf=figs.length||figPlan.length;
@@ -2220,7 +2223,7 @@ function pAsistente(p){const E=ent(p),L=(E.elementos&&E.elementos.length?E.eleme
  <label class="c ancho">Figuras que va a presentar (una por línea)<textarea id="en-figuras" placeholder="Vista frontal del chaleco&#10;Vista posterior con las cámaras de aire">${esc(E.figuras||"")}</textarea></label></div>
  <div class="fila" style="margin-top:12px"><button class="btn sec" data-acc="enGuardar" data-id="${p.id}">Guardar respuestas</button><button class="btn acc" data-acc="enArmar" data-id="${p.id}">Armar la solicitud con mis respuestas</button></div></section>`}
 function leerEntrevista(p){const E={...ent(p)};const filas=[...document.querySelectorAll("[data-en-fila]")].map(tr=>tr.dataset.enFila);const v=id=>($("#"+CSS.escape(id))?.value||"").trim();
- E.objeto=v("en-objeto");E.gen=$("#en-gen")?.value||genAuto(E.objeto);E.uso=v("en-uso");E.campo=v("en-campo");
+ E.objeto=v("en-objeto");{const sg=$("#en-gen");if(sg&&sg.dataset.manual){E.gen=sg.value;E.genManual=1}else if(!E.genManual)E.gen=genAuto(E.objeto)}E.uso=v("en-uso");E.campo=v("en-campo");
  E.elementos=filas.map(id=>({id,nombre:v("en-n-"+id).slice(0,80),material:v("en-m-"+id).slice(0,80),funcion:v("en-f-"+id).slice(0,240),unidoA:$("#"+CSS.escape("en-u-"+id))?.value||"",union:v("en-c-"+id).slice(0,160),esencial:!!$("#"+CSS.escape("en-e-"+id))?.checked,nuevo:!!$("#"+CSS.escape("en-v-"+id))?.checked}));
  for(const k of["rasgos","pasos","ventajas","variantes","figuras"])E[k]=v("en-"+k).slice(0,3000);
  /* números fijos por orden: se guardan para que la descripción y las figuras coincidan */
@@ -2315,8 +2318,9 @@ async function buscarOPS(id,desde){const p=proy(id);const C=leerConceptos();cons
  catch(e){toast(e.message||"No se pudo buscar.")}finally{const b2=$("[data-acc=bqBuscar]");if(b2){b2.disabled=false;b2.textContent="Buscar aquí"}}}
 async function analizarDocs(id,docs){const p=proy(id);if(!p||MODO!=="servidor"||!docs.length||!ui.bqRes||ui.bqRes.pid!==id)return;
  ui.bqRes.leyendo=true;render();
- try{const j=await api("POST","/api/antecedentes/analizar",{titulo:p.titulo,problema:p.problema,solucion:p.solucion,rasgos:rasgosComparar(p).map(f=>({k:f.k,t:f.t})),docs:docs.map(d=>({numero:d.numero,titulo:d.titulo,resumen:d.resumen}))});
-  if(ui.bqRes&&ui.bqRes.pid===id)ui.bqRes.ana={...(ui.bqRes.ana||{}),...(j.analisis||{})}}
+ try{const F=rasgosComparar(p);const j=await api("POST","/api/antecedentes/analizar",{titulo:p.titulo,problema:p.problema,solucion:p.solucion,rasgos:F.map((f,i)=>({k:"c"+(i+1),t:f.t})),docs:docs.map(d=>({numero:d.numero,titulo:d.titulo,resumen:d.resumen}))});
+  const A=j.analisis||{};for(const a of Object.values(A))a.ras=(a.ras||[]).map(c=>F[+String(c).replace(/\D/g,"")-1]?.k).filter(Boolean);
+  if(ui.bqRes&&ui.bqRes.pid===id)ui.bqRes.ana={...(ui.bqRes.ana||{}),...A}}
  catch(e){toast(e.message||"No se pudo leer en español. Revise los documentos uno por uno.")}
  finally{if(ui.bqRes&&ui.bqRes.pid===id){ui.bqRes.leyendo=false;render()}}}
 const DEMO_BQ={total:170,desde:1,aviso:"Demostración: así se ve una búsqueda real ya hecha en la base mundial de patentes para un chaleco de presión profunda con cámaras de aire. Con su cuenta, Patent-IA busca sobre su propio invento.",
@@ -2373,7 +2377,7 @@ document.addEventListener("click",async ev=>{const t=ev.target.closest&&ev.targe
    if(x.correo&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.correo)){toast("Escriba un correo válido.");break}if(await parchear("proyectos",id,{petitorio:x}))toast(petitorioListo(proy(id))?"Datos guardados: el petitorio está completo.":"Datos guardados. Faltan datos para el petitorio.");render();break}
   case"paqPDF":{t.disabled=true;try{await pdfSIC(p,t.dataset.parte)}catch(e){toast(e&&e.message||"No se pudo preparar el PDF.")}finally{t.disabled=false}break}
  }});
-document.addEventListener("change",ev=>{const el=ev.target;if(!el.dataset)return;
+document.addEventListener("change",ev=>{const el=ev.target;if(!el.dataset)return;if(el.id==="en-gen")el.dataset.manual="1";
  if(el.dataset.cmp){const[pid,num,fk]=el.dataset.cmp.split("|");const p=proy(pid);const r={...(bq(p).revisados||{})};r[num]={...(r[num]||{}),rasgos:{...((r[num]||{}).rasgos||{}),[fk]:el.checked}};guardarBusqueda(pid,{revisados:r}).then(()=>render());return}
  if(el.dataset.cmpok){const[pid,num]=el.dataset.cmpok.split("|");const p=proy(pid);const r={...(bq(p).revisados||{})};r[num]={...(r[num]||{}),comparado:el.checked};guardarBusqueda(pid,{revisados:r}).then(()=>render());return}
  if(el.dataset.cmpq||el.dataset.cmpd){const[pid,num]=(el.dataset.cmpq||el.dataset.cmpd).split("|");const p=proy(pid);const r={...(bq(p).revisados||{})};r[num]={...(r[num]||{}),[el.dataset.cmpq?"queHace":"diferencia"]:el.value.trim().slice(0,300)};guardarBusqueda(pid,{revisados:r});return}});
