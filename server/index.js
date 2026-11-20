@@ -863,7 +863,7 @@ Juzga solo con lo que dice el título y el resumen; no inventes.`;
       body: JSON.stringify({ model: M.id, max_tokens: 3500, messages: [{ role: "user", content: prompt }] }) });
     const x = await r.json().catch(() => ({}));
     if (r.ok) { const u = x.usage || {}; costo = (u.input_tokens || 6000) * M.entrada / 1e6 + (u.output_tokens || 2500) * M.salida / 1e6;
-      const txt = (x.content || []).filter(b => b.type === "text").map(b => b.text).join(""); out = leerAnalisisIA(txt, docs.map(d => d.numero)); if (!Object.keys(out).length) log("analizar IA formato", txt.slice(0, 300).replace(/\s+/g, " ")); }
+      const txt = (x.content || []).filter(b => b.type === "text").map(b => b.text).join(""); out = leerAnalisisIA(txt, docs.map(d => d.numero)); if (!Object.keys(out).length) log("analizar IA formato", x.stop_reason, JSON.stringify((x.content || []).map(b => b.type)), JSON.stringify(x.usage || {}), txt.slice(0, 300).replace(/\s+/g, " ")); }
     else log("analizar IA", r.status);
   } catch (e) { log("analizar IA", e.message); }
   await q("update ia_gasto set usd=greatest(0,usd+$2) where mes=$1", [mes, costo - presupuesto]).catch(() => {});
