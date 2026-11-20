@@ -720,7 +720,8 @@ function parsearOPS(j) {
     const ids = listaOPS((b["publication-reference"] || {})["document-id"]); const f = txtOPS((ids.find(x => x && x.date) || {}).date).trim();
     const titulos = listaOPS(b["invention-title"]);
     const aps = listaOPS(((b.parties || {}).applicants || {}).applicant).filter(Boolean); const apsO = aps.filter(a => a["@data-format"] === "original");
-    const solic = [...new Set((apsO.length ? apsO : aps.filter(a => a["@data-format"] !== "docdb")).map(a => txtOPS((a["applicant-name"] || {}).name).replace(/\s*\[[A-Z]{2}\]\s*$/, "").replace(/\s+/g, " ").trim()).filter(Boolean))].slice(0, 3);
+    const latino = a => /^[\x00-\x7F\u00C0-\u024F\s.,;&()'’-]+$/.test(txtOPS((a["applicant-name"] || {}).name)); const apsL = apsO.filter(latino);
+    const solic = [...new Set((apsL.length ? apsL : aps.filter(a => a["@data-format"] !== "original" && latino(a)).length ? aps.filter(a => a["@data-format"] !== "original" && latino(a)) : apsO.length ? apsO : aps).map(a => txtOPS((a["applicant-name"] || {}).name).replace(/\s*\[[A-Z]{2}\]\s*$/, "").replace(/\s+/g, " ").trim()).filter(Boolean))].slice(0, 3);
     const cpc = [...new Set(listaOPS((b["patent-classifications"] || {})["patent-classification"]).map(c => { const x = k => txtOPS(c && c[k]).trim(); const base = x("section") + x("class") + x("subclass"); return base.length >= 4 ? base + (x("main-group") ? x("main-group") + "/" + x("subgroup") : "") : ""; }).filter(Boolean))].slice(0, 3);
     return { numero, titulo: txtOPS(porIdiomaOPS(titulos, "en")).replace(/\s+/g, " ").trim().slice(0, 300), tituloEs: txtOPS(titulos.find(x => x && x["@lang"] === "es")).trim().slice(0, 300),
       solicitante: solic.join("; ").slice(0, 200), fecha: /^\d{8}$/.test(f) ? `${f.slice(0, 4)}-${f.slice(4, 6)}-${f.slice(6)}` : "",
@@ -854,7 +855,7 @@ DOCUMENTOS ENCONTRADOS
 ${docs.map((d, i) => `DOC ${i + 1} (${d.numero}): ${d.titulo}\n${d.resumen}`).join("\n\n")}
 
 Para CADA documento responde UNA línea, en este formato exacto y sin nada más:
-DOC n | parecido | título en español | qué hace, en una frase sencilla en español | por qué se parece o no, en una frase | claves de las características del invento que el documento también tiene, separadas por comas (vacío si ninguna)
+DOC n | parecido | título en español | qué es y qué hace, en una frase sencilla en español que empiece por «Un» o «Una» (ej.: Una silla de ruedas con un freno que…) | por qué se parece o no, en una frase | claves de las características del invento que el documento también tiene, separadas por comas (vacío si ninguna)
 parecido: 3 = resuelve el mismo problema casi de la misma forma; 2 = mismo problema o misma solución técnica; 1 = relacionado de lejos; 0 = nada que ver.
 Juzga solo con lo que dice el título y el resumen; no inventes.`;
   let costo = presupuesto, out = {};
