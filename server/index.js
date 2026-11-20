@@ -808,7 +808,7 @@ CPC: A61H, A41D`;
   let costo = presupuesto, j = null;
   try {
     const r = await fetch(IA_URL, { method: "POST", signal: AbortSignal.timeout(40000), headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: M.id, max_tokens: 500, messages: [{ role: "user", content: prompt }] }) });
+      body: JSON.stringify({ model: M.id, max_tokens: 900, thinking: { type: "disabled" }, messages: [{ role: "user", content: prompt }] }) });
     const x = await r.json().catch(() => ({}));
     if (r.ok) { const u = x.usage || {}; costo = (u.input_tokens || 600) * M.entrada / 1e6 + (u.output_tokens || 500) * M.salida / 1e6;
       const txt = (x.content || []).filter(b => b.type === "text").map(b => b.text).join(""); j = leerPalabrasIA(txt); }
@@ -860,7 +860,7 @@ Juzga solo con lo que dice el título y el resumen; no inventes.`;
   let costo = presupuesto, out = {};
   try {
     const r = await fetch(IA_URL, { method: "POST", signal: AbortSignal.timeout(60000), headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: M.id, max_tokens: 3500, messages: [{ role: "user", content: prompt }] }) });
+      body: JSON.stringify({ model: M.id, max_tokens: 6000, thinking: { type: "disabled" }, messages: [{ role: "user", content: prompt }] }) });
     const x = await r.json().catch(() => ({}));
     if (r.ok) { const u = x.usage || {}; costo = (u.input_tokens || 6000) * M.entrada / 1e6 + (u.output_tokens || 2500) * M.salida / 1e6;
       const txt = (x.content || []).filter(b => b.type === "text").map(b => b.text).join(""); out = leerAnalisisIA(txt, docs.map(d => d.numero)); if (!Object.keys(out).length) log("analizar IA formato", x.stop_reason, JSON.stringify((x.content || []).map(b => b.type)), JSON.stringify(x.usage || {}), txt.slice(0, 300).replace(/\s+/g, " ")); }
@@ -899,7 +899,7 @@ app.post("/api/ia", sesion, sinControl, envolver(empresaActiva), envolver(async 
   try {
     const r = await fetch(IA_URL, { method: "POST", signal: AbortSignal.timeout(110000),
       headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: M.id, max_tokens: maxTokens, system: SISTEMA_IA, messages: [{ role: "user", content: prompt }] }) });
+      body: JSON.stringify({ model: M.id, max_tokens: maxTokens, thinking: { type: "disabled" }, system: SISTEMA_IA, messages: [{ role: "user", content: prompt }] }) });
     j = await r.json().catch(() => ({}));
     if (!r.ok) { log("Anthropic respondió", r.status, JSON.stringify(j).slice(0, 300)); await devolver(reservados); await ajustarGasto(-presupuesto); await q("update ia_gasto set llamadas=greatest(0,llamadas-1) where mes=$1", [mes]).catch(() => {}); if (r.status === 401 || r.status === 403 || r.status === 400 && /credit/i.test(JSON.stringify(j))) avisarSA("La llave o el saldo de la API de Anthropic de Patent-IA tiene un problema (" + r.status + ")."); return err(res, r.status === 429 || r.status === 529 ? 429 : 502, "La IA no respondió. Intente de nuevo en un momento; no se descontaron créditos.", { code: r.status === 429 || r.status === 529 ? "rate_limited" : "ia" }); }
   } catch (e) { // tiempo agotado o corte: Anthropic puede cobrar igual, así que se cobra lo reservado (nunca se pierde dinero)
