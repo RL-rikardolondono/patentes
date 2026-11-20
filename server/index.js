@@ -209,7 +209,7 @@ async function enviarCorreo(para, nombre, asunto, html) {
     return true;
   } catch (e) { log("Error enviando correo", e.message); return false; }
 }
-async function enviarEnlace(email, tipo) {
+async function enviarEnlace(email, tipo, propio) {
   const { rows } = await q("select u.*, o.info from usuarios u join orgs o on o.id=u.org_id where u.email=$1", [email]);
   if (!rows.length || !rows[0].activo) return null;
   const u = rows[0]; const tk = nuevoToken(); const horas = tipo === "invitacion" ? 72 : 1;
@@ -217,7 +217,7 @@ async function enviarEnlace(email, tipo) {
   const url = `${APP_URL}/#clave=${tk}&tipo=${tipo}`;
   const destino = aDueno(email) ? DUENO_CORREO : email; // cuentas del dueño: el enlace llega a su Gmail
   const titulo = tipo === "invitacion" ? `Bienvenido a Patent-IA, ${u.nombre.split(" ")[0]}` : "Crear una clave nueva";
-  const cuerpo = tipo === "invitacion" ? `<p style="margin:0 0 10px">Lo invitaron a trabajar en <b>${escH(u.info.nombre)}</b> con Patent-IA, la fábrica de patentes de SkyNet Genesis. Cree su clave con el botón (el enlace vence en 3 días).</p><p style="margin:0;font-size:14px;color:#5D6B78">Su usuario es: ${escH(email)}</p>`
+  const cuerpo = tipo === "invitacion" ? (propio ? `<p style="margin:0 0 10px">La cuenta de <b>${escH(u.info.nombre)}</b> en Patent-IA quedó creada, con 15 días de prueba gratis. Cree su clave con el botón (el enlace vence en 3 días) y empiece por «Nuevo proyecto»: Patent-IA lo guía paso a paso, busca lo que ya existe en la base mundial de patentes y le arma la solicitud para la SIC.</p>` : "") + (propio ? "" : `<p style="margin:0 0 10px">Lo invitaron a trabajar en <b>${escH(u.info.nombre)}</b> con Patent-IA, la fábrica de patentes de SkyNet Genesis. Cree su clave con el botón (el enlace vence en 3 días).</p><p style="margin:0;font-size:14px;color:#5D6B78">Su usuario es: ${escH(email)}</p>`)
     : `<p style="margin:0 0 10px">Recibimos una solicitud para cambiar su clave de Patent-IA. El enlace vence en una hora.</p><p style="margin:0;font-size:14px;color:#5D6B78">Si usted no lo pidió, ignore este correo: su clave sigue igual.</p>`;
   const nota = destino !== email ? `<p style="margin:0 0 12px;padding:10px 12px;background:#E8F1FA;border-radius:8px">Este enlace es para la cuenta <b>${escH(email)}</b> (${escH(u.org_id === "plataforma" ? "Superadministrador de Patent-IA" : u.info.nombre)}).</p>` : "";
   await enviarCorreo(destino, u.nombre, titulo + (destino !== email ? ` · ${email}` : ""), plantillaCorreo(titulo, nota + cuerpo, { url, texto: tipo === "invitacion" ? "Crear mi clave" : "Crear clave nueva" }));
@@ -371,7 +371,7 @@ app.post("/api/registro", envolver(async (req, res) => {
   const info = { nombre: empresa, pais: "CO", prueba: { desde: hoy, hasta }, pagadoHasta: hasta, valor: VALOR_MENSUAL, modulos: {}, compras: [], pagos: [], ia: { creditos: 0, usados: 0 }, creado: Date.now() };
   await q("insert into orgs(id,info) values($1,$2)", [orgId, info]);
   await q("insert into usuarios(id,org_id,email,nombre,rol) values($1,$2,$3,$4,'admin')", [uId, orgId, email, nombre]);
-  const enlace = await enviarEnlace(email, "invitacion");
+  const enlace = await enviarEnlace(email, "invitacion", true);
   avisarSA(`Nueva empresa en Patent-IA: ${empresa} · ${nombre} · ${email}`);
   res.json({ ok: true, ...(MODO_PRUEBA && typeof enlace === "string" ? { enlace } : {}) });
 }));
