@@ -825,7 +825,7 @@ CPC: A61H, A41D`;
 function leerAnalisisIA(txt, nums) {
   const out = {};
   for (const linea of String(txt || "").replace(/\*\*/g, "").split(/\r?\n/)) {
-    const m = linea.match(/^\s*[-*\s]*DOC\s*(\d+)\s*\|\s*([0-3])\s*\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|?\s*(.*)$/i);
+    const m = linea.match(/^\s*[-*#\s]*DOC(?:UMENTO)?\s*(\d+)[^|]*\|\s*(?:parecido\s*[:=]?\s*)?([0-3])[^|]*\|\s*([^|]*)\|\s*([^|]*)\|\s*([^|]*)\|?\s*(.*)$/i);
     if (!m) continue; const num = nums[+m[1] - 1]; if (!num) continue;
     const ras = (m[6] || "").replace(/^.*?:/, "").split(/[,;\s]+/).map(x => x.trim()).filter(x => /^[a-z0-9_]{1,12}$/i.test(x)).slice(0, 30);
     out[num] = { parecido: +m[2], es: m[3].trim().slice(0, 200), que: m[4].trim().slice(0, 260), motivo: m[5].trim().slice(0, 200), ras };
@@ -863,7 +863,7 @@ Juzga solo con lo que dice el título y el resumen; no inventes.`;
       body: JSON.stringify({ model: M.id, max_tokens: 3500, messages: [{ role: "user", content: prompt }] }) });
     const x = await r.json().catch(() => ({}));
     if (r.ok) { const u = x.usage || {}; costo = (u.input_tokens || 6000) * M.entrada / 1e6 + (u.output_tokens || 2500) * M.salida / 1e6;
-      out = leerAnalisisIA((x.content || []).filter(b => b.type === "text").map(b => b.text).join(""), docs.map(d => d.numero)); }
+      const txt = (x.content || []).filter(b => b.type === "text").map(b => b.text).join(""); out = leerAnalisisIA(txt, docs.map(d => d.numero)); if (!Object.keys(out).length) log("analizar IA formato", txt.slice(0, 300).replace(/\s+/g, " ")); }
     else log("analizar IA", r.status);
   } catch (e) { log("analizar IA", e.message); }
   await q("update ia_gasto set usd=greatest(0,usd+$2) where mes=$1", [mes, costo - presupuesto]).catch(() => {});
