@@ -732,7 +732,7 @@ const terminoOPS = t => String(t || "").toLowerCase().replace(/[^a-z0-9 \-*]/g, 
 function consultaOPS(grupos, cpc) {
   const G = listaOPS(grupos).slice(0, 5).map(g => String(Array.isArray(g) ? g.join(",") : g || "").split(/[,;]/).map(terminoOPS).filter(t => t.length > 1).slice(0, 4)).filter(g => g.length);
   if (!G.length) return "";
-  return G.map(g => "(" + g.map(t => t.includes(" ") ? `ta="${t}"` : `ta=${t}`).join(" OR ") + ")").join(" AND ") + (cpc ? ` AND cpc=${cpc}` : "");
+  return G.map(g => "(" + g.map(t => t.includes(" ") ? `ta all "${t}"` : `ta=${t}`).join(" OR ") + ")").join(" AND ") + (cpc ? ` AND cpc=${cpc}` : "");
 }
 app.post("/api/antecedentes/buscar", sesion, envolver(empresaActiva), envolver(async (req, res) => {
   if (!OPS_KEY || !OPS_SECRETO) return err(res, 503, "La búsqueda automática aún no está activada en el servidor. Mientras tanto use «Abrir en Espacenet»: la búsqueda ya va armada.", { code: "sin_ops" });
@@ -740,20 +740,37 @@ app.post("/api/antecedentes/buscar", sesion, envolver(empresaActiva), envolver(a
   const cpc = String(req.body.cpc || "").toUpperCase().replace(/\s+/g, ""); if (cpc && !/^[A-H]\d{2}[A-Z]?(\d{1,4}\/\d{1,6})?$/.test(cpc)) return err(res, 400, "La clasificación CPC no es válida.");
   const consulta = consultaOPS(req.body.conceptos, cpc); if (!consulta) return err(res, 400, "Escriba las palabras en inglés de al menos un concepto.");
   const desde = Math.max(1, Math.min(76, parseInt(req.body.desde, 10) || 1));
-  const url = `${OPS_URL}/rest-services/published-data/search/biblio?q=${encodeURIComponent(consulta)}&Range=${desde}-${desde + 24}`;
-  let r;
-  for (let intento = 0; intento < 2; intento++) {
-    const tok = await tokenOPS(intento > 0).catch(e => { log("OPS token", e.message); return null; });
-    if (!tok) return err(res, 502, "El servicio de patentes no respondió. Intente en un momento.");
-    r = await fetch(url, { headers: { Authorization: "Bearer " + tok, Accept: "application/json" }, signal: AbortSignal.timeout(30000) }).catch(e => { log("OPS", e.message); return null; });
-    if (!r) return err(res, 502, "El servicio de patentes no respondió. Intente en un momento.");
-    if (r.status !== 401) break;
+  const pedir = async cq => {
+    const url = `${OPS_URL}/rest-services/published-data/search/biblio?q=${encodeURIComponent(cq)}&Range=${desde}-${desde + 24}`;
+    let r;
+    for (let intento = 0; intento < 2; intento++) {
+      const tok = await tokenOPS(intento > 0).catch(e => { log("OPS token", e.message); return null; });
+      if (!tok) return { error: [502, "El servicio de patentes no respondió. Intente en un momento."] };
+      r = await fetch(url, { headers: { Authorization: "Bearer " + tok, Accept: "application/json" }, signal: AbortSignal.timeout(30000) }).catch(e => { log("OPS", e.message); return null; });
+      if (!r) return { error: [502, "El servicio de patentes no respondió. Intente en un momento."] };
+      if (r.status !== 401) break;
+    }
+    if (r.status === 404) return { total: 0, docs: [] };
+    if (r.status === 403 || r.status === 429) return { error: [429, "El servicio de patentes está ocupado. Intente en unos minutos."], code: "rate_limited" };
+    if (!r.ok) { log("OPS respondió", r.status, (await r.text().catch(() => "")).slice(0, 200)); return { error: [502, "El servicio de patentes no pudo hacer esa búsqueda. Simplifique las palabras."] }; }
+    const j = await r.json().catch(() => null); if (!j) return { error: [502, "Respuesta inesperada del servicio de patentes."] };
+    return parsearOPS(j);
+  };
+  let usada = consulta, out = await pedir(consulta), aviso = "";
+  // Si no hay nada, amplía sola: quita los conceptos del final (deja al menos 2) y luego la clasificación CPC
+  const grupos = listaOPS(req.body.conceptos);
+  if (!out.error && !out.total && desde === 1) {
+    const intentos = [];
+    for (let n = Math.min(grupos.length, 5) - 1; n >= 2; n--) intentos.push([grupos.slice(0, n), cpc]);
+    if (cpc) intentos.push([grupos.slice(0, Math.max(2, Math.min(grupos.length, 3))), ""]);
+    for (const [g, c] of intentos) {
+      const cq = consultaOPS(g, c); if (!cq || cq === usada) continue;
+      const o = await pedir(cq); if (o.error) break;
+      if (o.total) { out = o; usada = cq; aviso = `Con todos los conceptos juntos no apareció nada; Patent-IA amplió la búsqueda usando ${g.length === 1 ? "el primer concepto" : `los ${g.length} primeros conceptos`}${cpc && !c ? " y sin la clasificación CPC" : ""}. Revise con cuidado: puede haber documentos menos parecidos.`; break; }
+    }
   }
-  if (r.status === 404) return res.json({ consulta, total: 0, docs: [] });
-  if (r.status === 403 || r.status === 429) return err(res, 429, "El servicio de patentes está ocupado. Intente en unos minutos.", { code: "rate_limited" });
-  if (!r.ok) { log("OPS respondió", r.status, (await r.text().catch(() => "")).slice(0, 200)); return err(res, 502, "El servicio de patentes no pudo hacer esa búsqueda. Simplifique las palabras."); }
-  const j = await r.json().catch(() => null); if (!j) return err(res, 502, "Respuesta inesperada del servicio de patentes.");
-  res.json({ consulta, ...parsearOPS(j) });
+  if (out.error) return err(res, out.error[0], out.error[1], out.code ? { code: out.code } : undefined);
+  res.json({ consulta: usada, aviso, ...out });
 }));
 /* Lee la respuesta de la IA en líneas «CONCEPTO: es | en1, en2» y «CPC: A61H»; si llega JSON, también lo entiende */
 function leerPalabrasIA(txt) {
@@ -778,7 +795,7 @@ app.post("/api/antecedentes/palabras", sesion, envolver(empresaActiva), envolver
   const cupo = await q("update ia_gasto set usd=usd+$2, llamadas=llamadas+1 where mes=$1 and usd+$2 <= $3 returning usd", [mes, presupuesto, IA_TOPE_USD_MES]);
   if (!cupo.rows.length) return err(res, 503, "La sugerencia automática está en pausa este mes. Escriba usted las palabras en inglés.");
   const M = IA_MODELOS.default;
-  const prompt = `Eres un buscador profesional de patentes. Para buscar antecedentes de este invento en bases de patentes (búsqueda en título y resumen, en inglés), propone de 3 a 4 CONCEPTOS clave. Para cada concepto da el nombre corto en español y de 2 a 4 términos técnicos en inglés (sinónimos que usan las patentes; de una o dos palabras; puedes usar * al final para variantes, ej. inflat*). Propón también 1 o 2 códigos CPC probables (solo subclase, ej. A61H).
+  const prompt = `Eres un buscador profesional de patentes. Para buscar antecedentes de este invento en bases de patentes (búsqueda en título y resumen, en inglés), propone 3 CONCEPTOS clave en este orden: 1) qué es el objeto (ej. chaleco), 2) el elemento técnico que lo hace funcionar (ej. cámaras de aire), 3) para qué sirve o el efecto (ej. presión, calmar). Para cada concepto da el nombre corto en español y de 3 a 4 términos en inglés que usan las patentes, PREFERIBLEMENTE DE UNA SOLA PALABRA (sinónimos amplios; usa * al final para variantes, ej. inflat*, garment*); evita frases largas y marcas. Propón también 1 o 2 códigos CPC probables (solo subclase, ej. A61H).
 Título: ${t("titulo")}
 Problema: ${t("problema")}
 Solución: ${t("solucion")}
