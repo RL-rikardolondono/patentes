@@ -755,6 +755,19 @@ app.post("/api/antecedentes/buscar", sesion, envolver(empresaActiva), envolver(a
   const j = await r.json().catch(() => null); if (!j) return err(res, 502, "Respuesta inesperada del servicio de patentes.");
   res.json({ consulta, ...parsearOPS(j) });
 }));
+/* Lee la respuesta de la IA en líneas «CONCEPTO: es | en1, en2» y «CPC: A61H»; si llega JSON, también lo entiende */
+function leerPalabrasIA(txt) {
+  const s = String(txt || ""); const conceptos = []; let cpc = [];
+  for (const linea of s.split(/\r?\n/)) {
+    const m = linea.match(/^\s*[-*\d.)\s]*CONCEPTO\s*:\s*(.+?)\s*\|\s*(.+)$/i);
+    if (m) conceptos.push({ es: m[1].replace(/["*]/g, "").trim(), en: m[2].replace(/["]/g, "").trim() });
+    const c = linea.match(/^\s*CPC\s*:\s*(.+)$/i); if (c) cpc = c[1].split(/[,;\s]+/).filter(Boolean);
+  }
+  if (conceptos.length) return { conceptos, cpc };
+  try { const a = s.indexOf("{"), b = s.lastIndexOf("}"); if (a >= 0 && b > a) return JSON.parse(s.slice(a, b + 1)); } catch (e) { log("palabras IA formato", e.message); }
+  const pares = [...s.matchAll(/"es"\s*:\s*"([^"]{1,60})"\s*,\s*"en"\s*:\s*"([^"]{1,200})"/g)].map(x => ({ es: x[1], en: x[2] }));
+  return pares.length ? { conceptos: pares, cpc: (s.match(/\b[A-H]\d{2}[A-Z]\b/g) || []).slice(0, 2) } : null;
+}
 /* Palabras en inglés y sinónimos para buscar (consulta corta a la IA, la paga la plataforma: no gasta créditos de la empresa) */
 app.post("/api/antecedentes/palabras", sesion, envolver(empresaActiva), envolver(async (req, res) => {
   if (!ANTHROPIC_KEY) return err(res, 503, "La sugerencia automática no está disponible. Escriba usted las palabras en inglés.");
@@ -770,14 +783,17 @@ Título: ${t("titulo")}
 Problema: ${t("problema")}
 Solución: ${t("solucion")}
 ${listaOPS(req.body.conceptos).length ? "Conceptos que ya escribió el inventor: " + listaOPS(req.body.conceptos).map(x => String(x).slice(0, 60)).join(", ") : ""}
-Responde SOLO con JSON: {"conceptos":[{"es":"...","en":"term1, term2, term3"}],"cpc":["A61H"]}`;
+Responde SOLO con estas líneas, sin comillas, sin JSON y sin nada más:
+CONCEPTO: nombre en español | term1, term2, term3
+CONCEPTO: nombre en español | term1, term2
+CPC: A61H, A41D`;
   let costo = presupuesto, j = null;
   try {
     const r = await fetch(IA_URL, { method: "POST", signal: AbortSignal.timeout(40000), headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
       body: JSON.stringify({ model: M.id, max_tokens: 500, messages: [{ role: "user", content: prompt }] }) });
     const x = await r.json().catch(() => ({}));
     if (r.ok) { const u = x.usage || {}; costo = (u.input_tokens || 600) * M.entrada / 1e6 + (u.output_tokens || 500) * M.salida / 1e6;
-      const txt = (x.content || []).filter(b => b.type === "text").map(b => b.text).join(""); const a = txt.indexOf("{"), b = txt.lastIndexOf("}"); j = JSON.parse(txt.slice(a, b + 1)); }
+      const txt = (x.content || []).filter(b => b.type === "text").map(b => b.text).join(""); j = leerPalabrasIA(txt); }
     else log("palabras IA", r.status);
   } catch (e) { log("palabras IA", e.message); }
   await q("update ia_gasto set usd=greatest(0,usd+$2) where mes=$1", [mes, costo - presupuesto]).catch(() => {});
