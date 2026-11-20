@@ -776,11 +776,11 @@ app.post("/api/antecedentes/buscar", sesion, envolver(empresaActiva), envolver(a
 function leerPalabrasIA(txt) {
   const s = String(txt || ""); const conceptos = []; let cpc = [];
   for (const linea of s.split(/\r?\n/)) {
-    const m = linea.match(/^\s*[-*\d.)\s]*CONCEPTO\s*:\s*(.+?)\s*\|\s*(.+)$/i);
+    const m = linea.replace(/\*\*/g, "").match(/^\s*[-*\d.)\s]*CONCEPTO[^:|]*:\s*(.+?)\s*\|\s*(.+)$/i);
     if (m) conceptos.push({ es: m[1].replace(/["*]/g, "").trim(), en: m[2].replace(/["]/g, "").trim() });
-    const c = linea.match(/^\s*CPC\s*:\s*(.+)$/i); if (c) cpc = c[1].split(/[,;\s]+/).filter(Boolean);
+    const c = linea.replace(/\*\*/g, "").match(/^\s*[-*\s]*CPC[^:]*:\s*(.+)$/i); if (c) cpc = c[1].match(/[A-H]\d{2}[A-Z]/gi) || [];
   }
-  if (conceptos.length) return { conceptos, cpc };
+  if (conceptos.length) return { conceptos, cpc: cpc.length ? cpc : (s.match(/\b[A-H]\d{2}[A-Z]\b/g) || []).slice(0, 2) };
   try { const a = s.indexOf("{"), b = s.lastIndexOf("}"); if (a >= 0 && b > a) return JSON.parse(s.slice(a, b + 1)); } catch (e) { log("palabras IA formato", e.message); }
   const pares = [...s.matchAll(/"es"\s*:\s*"([^"]{1,60})"\s*,\s*"en"\s*:\s*"([^"]{1,200})"/g)].map(x => ({ es: x[1], en: x[2] }));
   return pares.length ? { conceptos: pares, cpc: (s.match(/\b[A-H]\d{2}[A-Z]\b/g) || []).slice(0, 2) } : null;
@@ -800,9 +800,10 @@ Título: ${t("titulo")}
 Problema: ${t("problema")}
 Solución: ${t("solucion")}
 ${listaOPS(req.body.conceptos).length ? "Conceptos que ya escribió el inventor: " + listaOPS(req.body.conceptos).map(x => String(x).slice(0, 60)).join(", ") : ""}
-Responde SOLO con estas líneas, sin comillas, sin JSON y sin nada más:
+Da SIEMPRE los 3 conceptos y al menos 1 código CPC. Responde SOLO con estas líneas, sin comillas, sin JSON y sin nada más:
 CONCEPTO: nombre en español | term1, term2, term3
-CONCEPTO: nombre en español | term1, term2
+CONCEPTO: nombre en español | term1, term2, term3
+CONCEPTO: nombre en español | term1, term2, term3
 CPC: A61H, A41D`;
   let costo = presupuesto, j = null;
   try {
