@@ -356,7 +356,7 @@ app.post("/api/clave", sesion, sinControl, envolver(async (req, res) => {
 }));
 // Registro de una empresa nueva: prueba gratis de 15 días, sin renovación; el administrador recibe un correo para crear su clave
 const normEmpresa = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(s\.?\s?a\.?\s?s|s\.?\s?a|ltda|sas|e\.?\s?u)\.?$/g, "").replace(/[^a-z0-9]/g, "");
-const REGISTRO_PAUSA = ENV.REGISTRO_PAUSA !== "0"; // en pausa por defecto hasta publicar la v5 completa
+const REGISTRO_PAUSA = ENV.REGISTRO_PAUSA === "1"; // abierto; poner REGISTRO_PAUSA=1 en Render para pausar
 app.post("/api/registro", envolver(async (req, res) => {
   if (REGISTRO_PAUSA) return err(res, 503, "Patent-IA está en actualización: la creación de cuentas nuevas abre de nuevo en pocos días. Escríbanos al WhatsApp 304 437 5758.");
   if (!limitar("registro:" + ipDe(req), 3, 60)) return err(res, 429, "Ya se crearon cuentas desde esta conexión. Intente más tarde o escríbanos.");
